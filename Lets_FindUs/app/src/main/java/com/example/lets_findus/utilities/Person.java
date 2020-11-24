@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.InvalidObjectException;
 
 public class Person {
-    enum Sex{
+    public enum Sex{
         MALE,
         FEMALE,
         OTHER
