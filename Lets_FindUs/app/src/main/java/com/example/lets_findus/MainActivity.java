@@ -19,30 +19,21 @@ import androidx.navigation.ui.NavigationUI;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
-
-    // Instantiates the queue of Runnables as a LinkedBlockingQueue
-    private final BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
-
-    // Sets the amount of time an idle thread waits before terminating
-    private static final int KEEP_ALIVE_TIME = 1;
-    // Sets the Time Unit to seconds
-    private static final TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
-
-    // Creates a thread pool manager
-    ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-            NUMBER_OF_CORES,       // Initial pool size
-            NUMBER_OF_CORES,       // Max pool size
-            KEEP_ALIVE_TIME,
-            KEEP_ALIVE_TIME_UNIT,
-            workQueue
-    );
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private Future<Collection<Meeting<Person>>> allMeetings;
+    private String filename = "incontri";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +49,13 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-        Log.d("PROVA2", "Ehi sto runnando sul thread"+Thread.currentThread().getName());
-        Meeting<Person> firstMeeting = new Meeting<>(new Person("pathProva", "gazz", Person.Sex.MALE, 1999), new Location(""));
-        Context context = MainActivity.this;
-        String filename = "incontri";
+        Meeting<Person> firstMeeting = new Meeting<>(new Person("pathProva", "tomare", Person.Sex.MALE, 1999), new Location(""));
 
         try {
-            FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
-            UtilFunction.storeMeetingAsync(firstMeeting, fos, threadPoolExecutor);
-        } catch (FileNotFoundException e) {
+            allMeetings = UtilFunction.loadMeetingsAsync(MainActivity.this.openFileInput(filename), executor);
+            allMeetings = UtilFunction.addMeetingsAsync(allMeetings, firstMeeting, executor);
+            UtilFunction.storeMeetingsAsync(allMeetings, MainActivity.this, filename, executor);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

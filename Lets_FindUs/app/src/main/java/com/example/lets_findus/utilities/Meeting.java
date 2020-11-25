@@ -28,4 +28,13 @@ public class Meeting<T> {
     public boolean getFavourite(){
         return this.isFavourite;
     }
+
+    @Override
+    public String toString() {
+        return "Meeting{" +
+                "data=" + data +
+                ", meetingLoc=" + meetingLoc +
+                ", isFavourite=" + isFavourite +
+                '}';
+    }
 }
