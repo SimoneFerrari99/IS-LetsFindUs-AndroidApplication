@@ -1,8 +1,13 @@
 package com.example.lets_findus.utilities;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -103,6 +108,32 @@ public class UtilFunction {
                 }
 
                 return meetings;
+            }
+        });
+    }
+
+    public static void setMarkerAsync(final Future<Collection<Meeting<Person>>> meetingsFuture, ExecutorService executor, final GoogleMap map){
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Collection<Meeting<Person>> meetings = meetingsFuture.get();
+                    Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+                    for(Meeting<Person> meeting: meetings){
+                        final LatLng meetLoc = new LatLng(meeting.meetingLoc.getLatitude(), meeting.meetingLoc.getLongitude());
+                        final String markerTitle = meeting.data.nickname;
+                        mainThreadHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                map.addMarker(new MarkerOptions()
+                                        .position(meetLoc)
+                                        .title(markerTitle));
+                            }
+                        });
+                    }
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
