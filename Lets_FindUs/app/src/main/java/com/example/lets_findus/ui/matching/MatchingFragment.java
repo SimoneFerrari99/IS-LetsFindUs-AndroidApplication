@@ -66,7 +66,7 @@ public class MatchingFragment extends Fragment {
                         if (location != null) {
                             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                             googleMap.addMarker(new MarkerOptions().position(latLng)
-                                    .title("DIOCAN"));
+                                    .title("CiaoSimo"));
                             googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                         }
                     }
