@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">Lets_FindUs</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="app_name">Let\'s FindUs</string>
+    <string name="title_matching">Incontri</string>
+    <string name="title_favorites">Preferiti</string>
+    <string name="title_profile">Profilo</string>
+
+
+    <string name="searchHint">Esegui una ricerca</string>
 </resources>
