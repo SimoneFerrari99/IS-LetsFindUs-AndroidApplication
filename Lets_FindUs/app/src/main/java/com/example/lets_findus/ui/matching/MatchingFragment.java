@@ -59,7 +59,6 @@ public class MatchingFragment extends Fragment {
         public void onMapReady(final GoogleMap googleMap) {
             int locationPermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION);
             if (locationPermission == PERMISSION_GRANTED) {
-                System.out.println("CIAO MORE");
                 fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
