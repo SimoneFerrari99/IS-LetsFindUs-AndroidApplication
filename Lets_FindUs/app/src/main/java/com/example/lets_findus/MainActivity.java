@@ -1,15 +1,7 @@
 package com.example.lets_findus;
 
-import android.Manifest;
-import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
-
-import com.example.lets_findus.utilities.Meeting;
-import com.example.lets_findus.utilities.Person;
-import com.example.lets_findus.utilities.UtilFunction;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -17,18 +9,16 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import com.example.lets_findus.utilities.Meeting;
+import com.example.lets_findus.utilities.Person;
+import com.example.lets_findus.utilities.UtilFunction;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
