@@ -1,14 +1,19 @@
 package com.example.lets_findus;
 
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.utilities.Meeting;
 import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.UtilFunction;
@@ -20,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Future<Collection<Meeting<Person>>> allMeetings;
     private String filename = "incontri";
@@ -49,6 +54,24 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package",this.getPackageName(), null);
+        intent.setData(uri);
+        this.startActivity(intent);
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_UNINSTALL_PACKAGE);
+        Uri uri = Uri.fromParts("package",this.getPackageName(), null);
+        intent.setData(uri);
+        this.startActivity(intent);
     }
 
 }
