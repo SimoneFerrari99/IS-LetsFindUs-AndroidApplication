@@ -31,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int ENABLE_BLUETOOTH_REQUEST_CODE = 1;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 2;
-    BluetoothManager mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-    BluetoothAdapter bluetoothAdapter = mBluetoothManager.getAdapter();
-    Button Scan_Button = findViewById(R.id.scan_button);
-    private final Boolean isLocationPermissionGranted = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+    BluetoothManager mBluetoothManager;
+    BluetoothAdapter bluetoothAdapter;
+    Button Scan_Button;
+    /*private final Boolean isLocationPermissionGranted = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
 
+        mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = mBluetoothManager.getAdapter();
+        Scan_Button = findViewById(R.id.scan_button);
 
         Scan_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,15 +62,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-
     }
-
 
     @Override
     public void onResume(){
         super.onResume();
-        if(!bluetoothAdapter.isEnabled()) {
-            promptEnableBluetooth();
+        if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                promptEnableBluetooth();
         }
     }
 
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startBleScan() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !isLocationPermissionGranted) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasPermission( Manifest.permission.ACCESS_FINE_LOCATION)) {
             requestLocationPermission();
         }
         else {
@@ -114,12 +115,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestLocationPermission() {
-        if(isLocationPermissionGranted)
+        if(hasPermission( Manifest.permission.ACCESS_FINE_LOCATION))
             return;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                new AlertDialog.Builder(getApplicationContext())
+                new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Location permission required")
                         .setMessage("Starting from Android M (6.0), the system requires apps to be granted " +
                                 "location access in order to scan for BLE devices.")
@@ -137,12 +138,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Boolean hasPermission(String accessFineLocation) {
-        return ContextCompat.checkSelfPermission(getApplicationContext(), accessFineLocation) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(MainActivity.this, accessFineLocation) == PackageManager.PERMISSION_GRANTED;
     }
-
-
-
-
 }
 
 
