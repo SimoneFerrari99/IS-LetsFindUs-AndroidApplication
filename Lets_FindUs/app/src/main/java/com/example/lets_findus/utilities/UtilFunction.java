@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
@@ -21,6 +22,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -134,6 +136,40 @@ public class UtilFunction {
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+    }
+
+    public static void setMAsync(ExecutorService executor, final GoogleMap map){
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+                final float[] hue = {BitmapDescriptorFactory.HUE_AZURE, BitmapDescriptorFactory.HUE_ORANGE, BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_MAGENTA, BitmapDescriptorFactory.HUE_RED};
+                final Random rnd = new Random();
+                /*try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                final MarkerOptions mark = new MarkerOptions();
+                for(int i = 0; i < 10000; i++) {
+                    mark.position(new LatLng(0,0))
+                            .icon(BitmapDescriptorFactory.defaultMarker(hue[rnd.nextInt(hue.length)]))
+                            .title("prova");
+                    mainThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            map.addMarker(mark);
+                        }
+                    });
+                }
+
             }
         });
     }

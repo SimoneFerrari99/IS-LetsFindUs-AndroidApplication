@@ -10,4 +10,6 @@
     <string name="missing_permission_message">Purtroppo la nostra applicazione non può funzionare senza la localizzazione. Se non vuole garantire i permessi necessari nessun problema, semplicemente disinstalli l\'applicazione. Se invece si è sbagliato, vai alle impostazioni e dai il consenso per la localizzazione.</string>
     <string name="missing_permission_positive_text">Concedi i permessi</string>
     <string name="missing_permission_negative_text">Disinstalla l\'applicazione :(</string>
+    <string name="search_match_button">Cerca incontri in questa area</string>
+    <string name="matching_button_show_meetings">Mostra incontri</string>
 </resources>
