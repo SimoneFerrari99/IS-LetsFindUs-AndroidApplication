@@ -1,9 +1,11 @@
 package com.example.lets_findus.ui.favourites;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -22,11 +24,14 @@ public class FavouritesFragment extends Fragment {
     private static RecyclerView.Adapter adapter; //l'adapter serve per popolare ogni riga
     private RecyclerView.LayoutManager layoutManager;
     private static RecyclerView recyclerView;
+    static View.OnClickListener myOnClickListener;
     private static ArrayList<Meeting<Person>> data;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_favourites, container, false);
+
+        myOnClickListener = new MyOnClickListener(root.getContext());
 
         recyclerView = root.findViewById(R.id.rec_view);
         recyclerView.setHasFixedSize(true);
@@ -47,5 +52,24 @@ public class FavouritesFragment extends Fragment {
         adapter = new FavAdapter(data);
         recyclerView.setAdapter(adapter);
         return root;
+    }
+
+    private static class MyOnClickListener implements View.OnClickListener {
+
+        private final Context context;
+
+        private MyOnClickListener(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onClick(View v) {
+            removeItem(v);
+        }
+
+        private void removeItem(View v) {
+            int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
+            Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -43,6 +43,8 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.cards_layout, parent, false);
 
+        view.setOnClickListener(FavouritesFragment.myOnClickListener);
+
         return new MyViewHolder(view);
     }
 

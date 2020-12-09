@@ -2,6 +2,7 @@ package com.example.lets_findus.ui.matching;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -18,9 +19,15 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lets_findus.R;
 import com.example.lets_findus.ui.MissingPermissionDialog;
+import com.example.lets_findus.ui.favourites.FavAdapter;
+import com.example.lets_findus.utilities.Meeting;
+import com.example.lets_findus.utilities.Person;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -33,6 +40,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
+import java.util.ArrayList;
 
 public class MatchingFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraMoveStartedListener {
 
@@ -41,6 +51,14 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private GoogleMap map;
     private View root;
     private Button show_match;
+
+    private BottomSheetBehavior sheetBehavior;
+    private static RecyclerView.Adapter adapter; //l'adapter serve per popolare ogni riga
+    private RecyclerView.LayoutManager layoutManager;
+    private static RecyclerView recyclerView;
+    static View.OnClickListener myOnClickListener;
+    private static ArrayList<Meeting<Person>> data;
+
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -98,6 +116,26 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             }
         });
 
+        myOnClickListener = new MatchingFragment.MyOnClickListener(root.getContext());
+
+        recyclerView = root.findViewById(R.id.bottom_sheet_rec_view);
+        recyclerView.setHasFixedSize(true);
+
+        layoutManager = new LinearLayoutManager(root.getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        data = new ArrayList<>();
+        data.add(new Meeting<Person>(new Person("", "Gazz", Person.Sex.MALE, 1999), null));
+        data.add(new Meeting<Person>(new Person("", "Scheggia", Person.Sex.MALE, 1999), null));
+        data.add(new Meeting<Person>(new Person("", "Tulio", Person.Sex.MALE, 1999), null));
+        data.add(new Meeting<Person>(new Person("", "Ciullia", Person.Sex.FEMALE, 1999), null));
+        for (int i = 0; i < 10; i++){
+            data.add(new Meeting<Person>(new Person("", "Toso", Person.Sex.MALE, 1999), null));
+        }
+
+        adapter = new FavAdapter(data);
+        recyclerView.setAdapter(adapter);
 
         return root;
     }
@@ -132,5 +170,24 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     public void onCameraMoveStarted(int i) {
         if(i == REASON_GESTURE)
             show_match.setVisibility(View.VISIBLE);
+    }
+
+    private static class MyOnClickListener implements View.OnClickListener {
+
+        private final Context context;
+
+        private MyOnClickListener(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onClick(View v) {
+            removeItem(v);
+        }
+
+        private void removeItem(View v) {
+            int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
+            Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
+        }
     }
 }
