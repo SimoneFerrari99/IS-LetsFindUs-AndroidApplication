@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -59,7 +61,6 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     static View.OnClickListener myOnClickListener;
     private static ArrayList<Meeting<Person>> data;
 
-
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
 
@@ -67,6 +68,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                              ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         root = inflater.inflate(R.layout.fragment_matching, container, false);
+        setHasOptionsMenu(true);
 
         show_match = root.findViewById(R.id.matching_button);
         show_match.setVisibility(View.GONE);
@@ -116,6 +118,9 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             }
         });
 
+        sheetBehavior = BottomSheetBehavior.from(root.findViewById(R.id.bs_card_view));
+        sheetBehavior.setGestureInsetBottomIgnored(true);
+
         myOnClickListener = new MatchingFragment.MyOnClickListener(root.getContext());
 
         recyclerView = root.findViewById(R.id.bottom_sheet_rec_view);
@@ -138,6 +143,11 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         recyclerView.setAdapter(adapter);
 
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.matching_app_bar_menu, menu);
     }
 
     @SuppressLint("MissingPermission")

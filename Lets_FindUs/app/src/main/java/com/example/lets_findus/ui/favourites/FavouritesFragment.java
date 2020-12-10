@@ -3,6 +3,8 @@ package com.example.lets_findus.ui.favourites;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -30,6 +32,7 @@ public class FavouritesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_favourites, container, false);
+        setHasOptionsMenu(true);
 
         myOnClickListener = new MyOnClickListener(root.getContext());
 
@@ -52,6 +55,11 @@ public class FavouritesFragment extends Fragment {
         adapter = new FavAdapter(data);
         recyclerView.setAdapter(adapter);
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.favourite_app_bar_menu, menu);
     }
 
     private static class MyOnClickListener implements View.OnClickListener {

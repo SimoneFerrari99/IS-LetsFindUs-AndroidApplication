@@ -6,17 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.matching.MatchingFragment">
 
+
     <FrameLayout
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView">
-
+        android:padding="0dp">
 
     </FrameLayout>
 
@@ -37,30 +32,38 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="1dp"
-        android:background="#00F80101"
-        android:gravity="start"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.556"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/bottom_sheet_rec_view"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bs_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        android:background="@color/cardview_light_background"
+        android:elevation="5dp"
+        app:cardElevation="20dp"
 
         app:behavior_hideable="false"
-        app:behavior_peekHeight="10dp"
+        app:behavior_peekHeight="20dp"
 
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@color/cardview_light_background">
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_line_1" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bottom_sheet_rec_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/cardview_light_background"
+                android:scrollbars="vertical"
+
+                />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
