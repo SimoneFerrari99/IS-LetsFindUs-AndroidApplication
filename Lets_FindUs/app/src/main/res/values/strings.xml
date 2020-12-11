@@ -4,8 +4,9 @@
     <string name="title_favorites">Preferiti</string>
     <string name="title_profile">Profilo</string>
 
-    <string name="search">Search</string>
-    <string name="filter">Filter</string>
+    <string name="search">Cerca</string>
+    <string name="filter">Filtri</string>
+    <string name="settings">Impostazioni</string>
     <string name="searchHint">Esegui una ricerca</string>
     <string name="missing_permission_title">:(</string>
     <string name="missing_permission_message">Purtroppo la nostra applicazione non può funzionare senza la localizzazione. Se non vuole garantire i permessi necessari nessun problema, semplicemente disinstalli l\'applicazione. Se invece si è sbagliato, vai alle impostazioni e dai il consenso per la localizzazione.</string>
