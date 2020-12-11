@@ -94,8 +94,10 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             mapFragment = SupportMapFragment.newInstance(new GoogleMapOptions().minZoomPreference(0f));
             mapFragment.getMapAsync(this);
         }
+
         // R.id.map is a FrameLayout, not a Fragment
         getChildFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
+
         //prova per bottone di ricerca
         show_match.setOnClickListener(new View.OnClickListener() {
             @Override

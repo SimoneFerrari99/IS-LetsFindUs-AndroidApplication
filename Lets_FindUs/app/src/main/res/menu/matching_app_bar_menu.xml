@@ -10,5 +10,5 @@
         android:id="@+id/filter"
         android:icon="@drawable/ic_round_filter_list_24"
         android:title="@string/filter"
-        app:showAsAction="ifRoom|withText"/>
+        app:showAsAction="ifRoom"/>
 </menu>

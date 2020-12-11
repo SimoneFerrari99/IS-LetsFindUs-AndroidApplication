@@ -9,17 +9,20 @@
         android:id="@+id/navigation_mathcing"
         android:name="com.example.lets_findus.ui.matching.MatchingFragment"
         android:label="@string/title_matching"
-        tools:layout="@layout/fragment_matching" />
+        tools:layout="@layout/fragment_matching" >
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_favouirtes"
         android:name="com.example.lets_findus.ui.favourites.FavouritesFragment"
         android:label="@string/title_favorites"
-        tools:layout="@layout/fragment_favourites" />
+        tools:layout="@layout/fragment_favourites" >
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.lets_findus.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+    </fragment>
 </navigation>
