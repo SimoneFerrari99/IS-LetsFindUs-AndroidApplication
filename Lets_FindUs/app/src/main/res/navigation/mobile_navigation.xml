@@ -3,17 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_mathcing">
+    app:startDestination="@+id/navigation_matching">
 
     <fragment
-        android:id="@+id/navigation_mathcing"
+        android:id="@+id/navigation_matching"
         android:name="com.example.lets_findus.ui.matching.MatchingFragment"
         android:label="@string/title_matching"
         tools:layout="@layout/fragment_matching" >
     </fragment>
 
     <fragment
-        android:id="@+id/navigation_favouirtes"
+        android:id="@+id/navigation_favorites"
         android:name="com.example.lets_findus.ui.favourites.FavouritesFragment"
         android:label="@string/title_favorites"
         tools:layout="@layout/fragment_favourites" >

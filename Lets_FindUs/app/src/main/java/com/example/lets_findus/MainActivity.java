@@ -4,15 +4,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.View;
-import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
@@ -27,28 +27,37 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener {
+public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Future<Collection<Meeting<Person>>> allMeetings;
     private String filename = "incontri";
 
-    private MatchingFragment match_frag;
-    private FavouritesFragment fav_frag;
-    private ProfileFragment prof_frag;
+    private final Fragment match_frag = new MatchingFragment();
+    private final Fragment fav_frag = new FavouritesFragment();
+    private final Fragment prof_frag = new ProfileFragment();
+    private Fragment active = match_frag;
+    private FragmentManager fm = getSupportFragmentManager();
+
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_mathcing, R.id.navigation_favouirtes, R.id.navigation_profile)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(navView, navController);
+
+        navView.setOnNavigationItemSelectedListener(this);
+
+        setTitle(R.string.title_matching);
+
+        fm.beginTransaction().add(R.id.nav_host_fragment, prof_frag, "3").hide(prof_frag).commit();
+        fm.beginTransaction().add(R.id.nav_host_fragment, fav_frag, "2").hide(fav_frag).commit();
+        fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
+
+        boolean isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
+        if (isFromEdit){
+            navView.setSelectedItemId(R.id.navigation_profile);
+        }
 
         /*Meeting<Person> firstMeeting = new Meeting<>(new Person("pathProva", "tomare", Person.Sex.MALE, 1999), new Location(""));
 
@@ -79,4 +88,54 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         intent.setData(uri);
         this.startActivity(intent);
     }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.navigation_matching:
+                if(menu != null){
+                    menu.setGroupVisible(R.id.match_menu, true);
+                    menu.setGroupVisible(R.id.fav_menu, false);
+                    menu.setGroupVisible(R.id.prof_menu, false);
+                }
+                setTitle(R.string.title_matching);
+                fm.beginTransaction().hide(active).show(match_frag).commit();
+                active = match_frag;
+                return true;
+
+            case R.id.navigation_favorites:
+                if(menu != null){
+                    menu.setGroupVisible(R.id.match_menu, false);
+                    menu.setGroupVisible(R.id.fav_menu, true);
+                    menu.setGroupVisible(R.id.prof_menu, false);
+                }
+                setTitle(R.string.title_favorites);
+                fm.beginTransaction().hide(active).show(fav_frag).commit();
+                active = fav_frag;
+                return true;
+
+            case R.id.navigation_profile:
+                if(menu != null){
+                    menu.setGroupVisible(R.id.match_menu, false);
+                    menu.setGroupVisible(R.id.fav_menu, false);
+                    menu.setGroupVisible(R.id.prof_menu, true);
+                }
+                setTitle(R.string.title_profile);
+                fm.beginTransaction().hide(active).show(prof_frag).commit();
+                active = prof_frag;
+                return true;
+        }
+        return false;
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.main_act_menu, menu);
+        menu.setGroupVisible(R.id.match_menu, true);
+        menu.setGroupVisible(R.id.fav_menu, false);
+        menu.setGroupVisible(R.id.prof_menu, false);
+        return super.onCreateOptionsMenu(menu);
+    }
+
 }
