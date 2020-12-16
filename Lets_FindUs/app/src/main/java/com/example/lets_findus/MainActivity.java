@@ -3,12 +3,14 @@ package com.example.lets_findus;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -32,11 +34,13 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     private Future<Collection<Meeting<Person>>> allMeetings;
     private String filename = "incontri";
 
-    private final Fragment match_frag = new MatchingFragment();
+    private Fragment match_frag;
     private final Fragment fav_frag = new FavouritesFragment();
     private final Fragment prof_frag = new ProfileFragment();
-    private Fragment active = match_frag;
+    private Fragment active;
     private FragmentManager fm = getSupportFragmentManager();
+
+    private boolean isFromEdit;
 
     private Menu menu;
 
@@ -50,16 +54,23 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
 
         setTitle(R.string.title_matching);
 
+        match_frag = new MatchingFragment();
+        active = match_frag;
+
+        if(getIntent().hasExtra("FORM_DATA")){
+            prof_frag.setArguments(getIntent().getBundleExtra("FORM_DATA"));
+        }
+
         fm.beginTransaction().add(R.id.nav_host_fragment, prof_frag, "3").hide(prof_frag).commit();
         fm.beginTransaction().add(R.id.nav_host_fragment, fav_frag, "2").hide(fav_frag).commit();
         fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
 
-        boolean isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
+        isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
         if (isFromEdit){
             navView.setSelectedItemId(R.id.navigation_profile);
         }
 
-        /*Meeting<Person> firstMeeting = new Meeting<>(new Person("pathProva", "tomare", Person.Sex.MALE, 1999), new Location(""));
+        /*Meeting<Person> firstMeeting = new Meeting<>(new Person("pathProva", "gazz", Person.Sex.MALE, 1999), new Location(""));
 
         try {
             allMeetings = UtilFunction.loadMeetingsAsync(MainActivity.this.openFileInput(filename), executor);
@@ -69,6 +80,11 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             e.printStackTrace();
         }*/
 
+    }
+
+    @Override
+    public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onPostCreate(savedInstanceState, persistentState);
     }
 
     @Override
@@ -132,10 +148,18 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         this.menu = menu;
         MenuInflater inflater=getMenuInflater();
         inflater.inflate(R.menu.main_act_menu, menu);
-        menu.setGroupVisible(R.id.match_menu, true);
-        menu.setGroupVisible(R.id.fav_menu, false);
-        menu.setGroupVisible(R.id.prof_menu, false);
+        if(isFromEdit){
+            menu.setGroupVisible(R.id.match_menu, false);
+            menu.setGroupVisible(R.id.fav_menu, false);
+            menu.setGroupVisible(R.id.prof_menu, true);
+        }
+        else {
+            menu.setGroupVisible(R.id.match_menu, true);
+            menu.setGroupVisible(R.id.fav_menu, false);
+            menu.setGroupVisible(R.id.prof_menu, false);
+        }
         return super.onCreateOptionsMenu(menu);
+
     }
 
 }

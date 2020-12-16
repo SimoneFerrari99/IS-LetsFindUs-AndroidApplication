@@ -19,14 +19,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/matching_button"
-            style="@android:style/Widget.Material.Button"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/cardview_light_background"
             android:text="@string/matching_button_show_meetings"
             android:textAlignment="center"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="12sp"
+            app:elevation="5dp"
+            app:cornerRadius="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

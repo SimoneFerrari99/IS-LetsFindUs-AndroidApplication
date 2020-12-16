@@ -1,6 +1,8 @@
 package com.example.lets_findus.ui.matching;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -9,7 +11,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -41,6 +42,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -50,7 +52,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private FusedLocationProviderClient fusedLocationClient;
     private GoogleMap map;
     private View root;
-    private Button show_match;
+    private MaterialButton show_match;
 
     private BottomSheetBehavior sheetBehavior;
     private static RecyclerView.Adapter adapter; //l'adapter serve per popolare ogni riga
@@ -99,8 +101,8 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         show_match.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateHide(show_match);
                 Toast.makeText(v.getContext(), "Ciao more", Toast.LENGTH_SHORT).show();
-                show_match.setVisibility(View.GONE);
                 VisibleRegion vr = map.getProjection().getVisibleRegion();
                 map.addMarker(new MarkerOptions()
                         .position(vr.farLeft)
@@ -171,8 +173,8 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
 
     @Override
     public void onCameraMoveStarted(int i) {
-        if(i == REASON_GESTURE)
-            show_match.setVisibility(View.VISIBLE);
+        if(i == REASON_GESTURE && show_match.getVisibility() == View.GONE)
+            animateShow(show_match);
     }
 
     private static class MyOnClickListener implements View.OnClickListener {
@@ -192,5 +194,27 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
             Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void animateShow(View v){
+        v.setAlpha(0f);
+        v.setVisibility(View.VISIBLE);
+
+        v.animate()
+                .alpha(1f)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime))
+                .setListener(null);
+    }
+
+    private void animateHide(final View v){
+        v.animate()
+                .alpha(0f)
+                .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime))
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        v.setVisibility(View.GONE);
+                    }
+                });
     }
 }

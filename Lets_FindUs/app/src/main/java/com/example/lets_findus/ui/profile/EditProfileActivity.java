@@ -17,9 +17,8 @@ import com.example.lets_findus.MainActivity;
 import com.example.lets_findus.R;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.util.Set;
-
 public class EditProfileActivity extends AppCompatActivity {
+
     private ConstraintLayout obbligatory;
     private ConstraintLayout other;
 
@@ -44,35 +43,42 @@ public class EditProfileActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private Bundle getFormValues(ConstraintLayout container){
-        Bundle out = new Bundle();
+    private Bundle getFormValues(ConstraintLayout container, Bundle attachBundle){
+        Bundle out;
+        if(attachBundle == null){
+            out = new Bundle();
+        }
+        else{
+            out = new Bundle(attachBundle);
+        }
         for(int i = 0; i < container.getChildCount(); i++){
             View v = container.getChildAt(i);
             if(v instanceof TextInputLayout){
-                System.out.println(i);
                 Editable text = ((TextInputLayout) v).getEditText().getText();
                 out.putString(((TextInputLayout) v).getHint().toString(), text.toString());
             }
-        }
-
-        Set<String> keySet = out.keySet();
-        for (String key : keySet){
-            System.out.println(key+": "+out.getString(key));
         }
         return out;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent mIntent;
         switch (item.getItemId()) {
             // This is the up button
             case android.R.id.home:
-                Intent mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
+                mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 startActivity(mIntent);
                 return true;
             case R.id.confirm:
-                Bundle data = getFormValues(obbligatory);
+                Bundle obbForm = getFormValues(obbligatory, null);
+                Bundle data = getFormValues(other, obbForm);
+                mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
+                mIntent.putExtra("IS_FROM_EDIT",true);
+                mIntent.putExtra("FORM_DATA", data);
+                startActivity(mIntent);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
