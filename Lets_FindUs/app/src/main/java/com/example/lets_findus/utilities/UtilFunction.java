@@ -89,7 +89,6 @@ public class UtilFunction {
                 String contents;
                 try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
                     String line = reader.readLine();
-                    Log.d("loadMeetingAsync", "Linea = " + line);
                     while (line != null) {
                         stringBuilder.append(line);
                         line = reader.readLine();

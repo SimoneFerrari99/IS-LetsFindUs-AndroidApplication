@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_mathcing"
+        android:id="@+id/navigation_matching"
         android:icon="@drawable/ic_matching_black_24dp"
         android:title="@string/title_matching" />
 
     <item
-        android:id="@+id/navigation_favouirtes"
+        android:id="@+id/navigation_favorites"
         android:icon="@drawable/ic_favourites_black_24dp"
         android:title="@string/title_favorites" />
 

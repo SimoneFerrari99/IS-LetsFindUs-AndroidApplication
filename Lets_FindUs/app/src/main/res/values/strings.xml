@@ -14,5 +14,23 @@
     <string name="missing_permission_negative_text">Disinstalla l\'applicazione :(</string>
     <string name="search_match_button">Cerca incontri in questa area</string>
     <string name="matching_button_show_meetings">Mostra incontri</string>
+    <string name="obbligatory_data_label">Dati obbligatori</string>
+    <string name="sex_tv_label">Sesso</string>
+    <string name="nickname_tv_label">Nickname</string>
+    <string name="year_birth_label">Anno di nascita</string>
+    <string name="facebook_tv_label">Facebook</string>
+    <string name="instagram_tv_label">Instagram</string>
+    <string name="linkedin_tv_label">Linkedin</string>
+    <string name="email_tv_label">Email</string>
+    <string name="phone_number_tv_label">Telefono</string>
+    <string name="birth_date_tv_label">Data di nascita</string>
+    <string name="other_tv_label">Altro</string>
+    <string name="description_tv_label">Descrizione</string>
+    <string name="edit_mode">Edit mode</string>
+    <string name="settings">Settings</string>
+    <string name="confirm">Confirm</string>
+    <string name="nickname">Nickname</string>
+    <string name="social_hint">Nome profilo o link profilo</string>
+    <string name="mail_hint">nome@gmail.com</string>
 
 </resources>
