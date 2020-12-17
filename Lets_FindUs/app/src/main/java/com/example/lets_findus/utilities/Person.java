@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InvalidObjectException;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,9 +40,9 @@ public class Person {
     public int yearOfBirth;
 
     public String description;
-    public URL facebook;
-    public URL instagram;
-    public URL linkedin;
+    public String facebook;
+    public String instagram;
+    public String linkedin;
     public String email;
     public int phoneNumber;
     public Date birthDate;
@@ -129,14 +128,14 @@ public class Person {
                 break;
         }
         dumper.put("Anno di nascita", String.valueOf(yearOfBirth));
-        dumper.put("Descrizione", (description != null) ? description : "null");
-        dumper.put("Facebook", (facebook != null) ? facebook.toString() : "null");
-        dumper.put("Instagram", (instagram != null) ? instagram.toString() : "null");
-        dumper.put("Linkedin", (linkedin != null) ? linkedin.toString() : "null");
-        dumper.put("Email", (email != null) ? email : "null");
-        dumper.put("Telefono", (phoneNumber != 0) ? String.valueOf(phoneNumber) : "null");
-        dumper.put("Data di nascita", (birthDate != null) ? birthDate.toString() : "null");
-        dumper.put("Altro", (other != null) ? other : "null");
+        dumper.put("Descrizione", description);
+        dumper.put("Facebook", facebook);
+        dumper.put("Instagram", instagram);
+        dumper.put("Linkedin", linkedin);
+        dumper.put("Email", email);
+        dumper.put("Telefono", (phoneNumber != 0) ? String.valueOf(phoneNumber) : null);
+        dumper.put("Data di nascita", (birthDate != null) ? birthDate.toString() : null);
+        dumper.put("Altro", other);
 
         return dumper;
     }

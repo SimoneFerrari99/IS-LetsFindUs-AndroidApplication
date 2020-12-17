@@ -1,5 +1,6 @@
 package com.example.lets_findus.ui.profile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,8 +19,11 @@ import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.Person;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,22 +35,36 @@ import uk.co.onemandan.materialtextview.MaterialTextView;
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private Future<Person> profile;
-    private Person myProfile;
+    private String myProfileFilename = "myProfile";
+    private ConstraintLayout obbligatory;
+    private ConstraintLayout other;
+    private View root;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Bundle formData = getArguments();
-        View root = inflater.inflate(R.layout.fragment_profile, container, false);
+        root = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        // TODO: 17/12/2020 questo pezzo è solo provvisorio finchè non verrà creata la pagina di creazione guidata del profilo 
+        File provvisorio = new File(getContext().getFilesDir(), myProfileFilename);
+        if(!provvisorio.exists()){
+            Person dummy = new Person("", "Dummy", Person.Sex.MALE, 1999);
+            try {
+                dummy.storePersonAsync(requireContext().openFileOutput(myProfileFilename, Context.MODE_PRIVATE));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
         try {
-            FileInputStream fis = requireContext().openFileInput("myProfile");
+            FileInputStream fis = requireContext().openFileInput(myProfileFilename);
             profile = Person.loadPersonAsync(fis);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        ConstraintLayout obbligatory = root.findViewById(R.id.obbligatory_data);
-        ConstraintLayout other = root.findViewById(R.id.other_data);
+        obbligatory = root.findViewById(R.id.obbligatory_data);
+        other = root.findViewById(R.id.other_data);
 
         if(formData != null) {
             if(formData.containsKey("Nickname")){
@@ -76,18 +94,18 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             public void run() {
                 Handler mainThreadHandler = new Handler(Looper.getMainLooper());
                 try {
-                    while(!profile.isDone());
-                    myProfile = profile.get();
+                    final Person myProfile = profile.get();
                     final Map<String, String> profileDump = myProfile.dumpToString();
 
                     mainThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            ((TextView)root.findViewById(R.id.nickname_card)).setText(myProfile.nickname);
                             for(int i = 0; i < container.getChildCount(); i++){
                                 final View v = container.getChildAt(i);
                                 if(v instanceof MaterialTextView){
                                     final String label = ((MaterialTextView) v).getLabelText().toString();
-                                    if(profileDump.get(label).equals("null")){
+                                    if(profileDump.get(label) == null){
                                         v.setVisibility(View.GONE);
                                     }
                                     else{
@@ -111,19 +129,120 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             View v = container.getChildAt(i);
             if(v instanceof MaterialTextView){
                 String label = ((MaterialTextView) v).getLabelText().toString();
-                if(data.getString(label).equals("")){
+                String value = data.getString(label);
+                if(value.equals("")){
                     v.setVisibility(View.GONE);
                 }
                 else{
-                    ((MaterialTextView) v).setContentText(data.getString(label), null);
+                    ((MaterialTextView) v).setContentText(value, null);
+                }
+                storeModifiedData(v.getId(), value);
+            }
+        }
+        try {
+            profile.get().storePersonAsync(requireContext().openFileOutput(myProfileFilename, Context.MODE_PRIVATE));
+        } catch (ExecutionException | InterruptedException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void storeModifiedData(int fieldId, String value){
+        try {
+            Person myProfile = profile.get();
+            if(value.equals("")){
+                value = null;
+            }
+            switch (fieldId){
+                case R.id.nickname_tv:
+                    assert value != null;
+                    myProfile.nickname = value;
+                    break;
+                case R.id.sex_tv:
+                    assert value != null;
+                    switch (value){
+                        case "Maschio":
+                            myProfile.sex = Person.Sex.MALE;
+                            break;
+                        case "Femmina":
+                            myProfile.sex = Person.Sex.FEMALE;
+                            break;
+                        case "Altro":
+                            myProfile.sex = Person.Sex.OTHER;
+                            break;
+                    }
+                    break;
+                case R.id.year_birth_tv:
+                    assert value != null;
+                    myProfile.yearOfBirth = Integer.parseInt(value);
+                    break;
+                case R.id.description_tv:
+                    myProfile.description = value;
+                    break;
+                case R.id.facebook_tv:
+                    myProfile.facebook = value;
+                    break;
+                case R.id.instagram_tv:
+                    myProfile.instagram = value;
+                    break;
+                case R.id.linkedin_tv:
+                    myProfile.linkedin = value;
+                    break;
+                case R.id.email_tv:
+                    myProfile.email = value;
+                    break;
+                case R.id.phone_number_tv:
+                    if(value == null) {
+                        myProfile.phoneNumber = 0;
+                    }
+                    else {
+                        myProfile.phoneNumber = Integer.parseInt(value);
+                    }
+                    break;
+                case R.id.birth_date_tv:
+                    if(value == null) {
+                        myProfile.phoneNumber = 0;
+                    }
+                    else {
+                        myProfile.birthDate = DateFormat.getInstance().parse(value);
+                    }
+                    break;
+                case R.id.other_tv:
+                    myProfile.other = value;
+                    break;
+            }
+        } catch (ExecutionException | InterruptedException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Bundle getFieldValueBundle(ConstraintLayout container, Bundle data){
+        Bundle out;
+        if(data == null){
+            out = new Bundle();
+        }
+        else{
+            out = new Bundle(data);
+        }
+        for(int i = 0; i < container.getChildCount(); i++){
+            View v = container.getChildAt(i);
+            if(v instanceof MaterialTextView){
+                if(v.getVisibility() == View.VISIBLE) {
+                    out.putString(((MaterialTextView) v).getLabelText().toString(), ((MaterialTextView) v).getContentText().toString());
+                }
+                else {
+                    out.putString(((MaterialTextView) v).getLabelText().toString(), "");
                 }
             }
         }
+        return out;
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent(getActivity(), EditProfileActivity.class);
+        Bundle obbData = getFieldValueBundle(obbligatory, null);
+        Bundle send = getFieldValueBundle(other, obbData);
+        intent.putExtra("FIELD_VALUES", send);
         startActivity(intent);
     }
 }
