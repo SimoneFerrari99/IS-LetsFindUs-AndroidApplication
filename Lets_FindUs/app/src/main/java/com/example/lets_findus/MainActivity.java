@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bleScanner;
     ScanSettings scanSettings;
+    boolean isScanning = false;
+
 
     Button Scan_Button;
 
@@ -63,9 +65,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         BluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = BluetoothManager.getAdapter();
         if(bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
             bleScanner = bluetoothAdapter.getBluetoothLeScanner();
-            bluetoothAdapter = BluetoothManager.getAdapter();
+            System.out.println("---------------------------SONO DENTRO ALL'IF-------------------------");
         }
 
         scanSettings = new ScanSettings.Builder()
@@ -77,11 +80,23 @@ public class MainActivity extends AppCompatActivity {
         Scan_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startBleScan();
+                if(isScanning) {
+                    stopBleScan();
+                }
+                else {
+                    startBleScan();
+                }
             }
 
         });
+        if(isScanning) {
+            Scan_Button.setText("Stop Scan");
+        }
+        else {
+            Scan_Button.setText("Start Scan");
+        }
     }
+
 
     ScanCallback scanCallback = new ScanCallback() {
         @Override
@@ -154,11 +169,19 @@ public class MainActivity extends AppCompatActivity {
         else {
             if(bleScanner != null) {
                 bleScanner.startScan(null, scanSettings, scanCallback);
+                System.out.println("--------------------> bleScanner: SONO ENTRATO NELL'IF <--------------------");
+                isScanning = true;
+                Scan_Button.setText("Stop Scan");
+                System.out.println("--------------------> isScanning: <--------------------" + isScanning);
             }
-            else {
-                System.out.println("--------------------> bleScanner: null <--------------------");
+        }
+    }
 
-            }
+    private void stopBleScan() {
+        if(bleScanner != null) {
+            bleScanner.stopScan(scanCallback);
+            isScanning = false;
+            Scan_Button.setText("Start Scan");
         }
     }
 
