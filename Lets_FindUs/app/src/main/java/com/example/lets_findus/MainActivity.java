@@ -21,7 +21,6 @@ import com.example.lets_findus.ui.favourites.FavouritesFragment;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
 import com.example.lets_findus.utilities.Meeting;
-import com.example.lets_findus.utilities.Person;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Collection;
@@ -31,7 +30,7 @@ import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
-    private Future<Collection<Meeting<Person>>> allMeetings;
+    private Future<Collection<Meeting>> allMeetings;
     private String filename = "incontri";
 
     private Fragment match_frag;
@@ -70,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             navView.setSelectedItemId(R.id.navigation_profile);
         }
 
-        /*Meeting<Person> firstMeeting = new Meeting<>(new Person("pathProva", "gazz", Person.Sex.MALE, 1999), new Location(""));
+        /*Meeting firstMeeting = new Meeting(new Person("pathProva", "gazz", Person.Sex.MALE, 1999), new Location(""));
 
         try {
             allMeetings = UtilFunction.loadMeetingsAsync(MainActivity.this.openFileInput(filename), executor);

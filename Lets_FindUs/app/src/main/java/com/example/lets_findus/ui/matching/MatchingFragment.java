@@ -59,7 +59,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private RecyclerView.LayoutManager layoutManager;
     private static RecyclerView recyclerView;
     static View.OnClickListener myOnClickListener;
-    private static ArrayList<Meeting<Person>> data;
+    private static ArrayList<Meeting> data;
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -132,12 +132,12 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         data = new ArrayList<>();
-        data.add(new Meeting<Person>(new Person("", "Gazz", Person.Sex.MALE, 1999), null));
-        data.add(new Meeting<Person>(new Person("", "Scheggia", Person.Sex.MALE, 1999), null));
-        data.add(new Meeting<Person>(new Person("", "Tulio", Person.Sex.MALE, 1999), null));
-        data.add(new Meeting<Person>(new Person("", "Ciullia", Person.Sex.FEMALE, 1999), null));
+        data.add(new Meeting(new Person("", "Gazz", Person.Sex.MALE, 1999), 0, 0, null));
+        data.add(new Meeting(new Person("", "Scheggia", Person.Sex.MALE, 1999), 0, 0, null));
+        data.add(new Meeting(new Person("", "Tulio", Person.Sex.MALE, 1999), 0, 0, null));
+        data.add(new Meeting(new Person("", "Ciullia", Person.Sex.FEMALE, 1999), 0, 0, null));
         for (int i = 0; i < 10; i++){
-            data.add(new Meeting<Person>(new Person("", "Toso", Person.Sex.MALE, 1999), null));
+            data.add(new Meeting(new Person("", "Toso", Person.Sex.MALE, 1999), 0, 0, null));
         }
 
         adapter = new FavAdapter(data);

@@ -11,13 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.Meeting;
-import com.example.lets_findus.utilities.Person;
 
 import java.util.ArrayList;
 
 public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
 
-    private ArrayList<Meeting<Person>> dataSet;
+    private ArrayList<Meeting> dataSet;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -33,7 +32,7 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
         }
     }
 
-    public FavAdapter(ArrayList<Meeting<Person>> data) {
+    public FavAdapter(ArrayList<Meeting> data) {
         this.dataSet = data;
     }
 

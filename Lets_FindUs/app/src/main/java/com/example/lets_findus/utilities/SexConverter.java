@@ -1,0 +1,33 @@
+package com.example.lets_findus.utilities;
+
+import androidx.room.TypeConverter;
+
+public class SexConverter {
+    @TypeConverter
+    public static Person.Sex fromTimestamp(String value) {
+        switch (value){
+            case "male":
+                return Person.Sex.MALE;
+            case "female":
+                return Person.Sex.FEMALE;
+            case "other":
+                return Person.Sex.OTHER;
+            default:
+                return null;
+        }
+    }
+
+    @TypeConverter
+    public static String sexToString(Person.Sex sex) {
+        switch (sex){
+            case MALE:
+                return "male";
+            case FEMALE:
+                return "female";
+            case OTHER:
+                return "other";
+            default:
+                return null;
+        }
+    }
+}

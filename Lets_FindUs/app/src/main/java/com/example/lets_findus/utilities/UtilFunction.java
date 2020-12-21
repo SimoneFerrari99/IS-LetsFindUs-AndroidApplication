@@ -32,13 +32,13 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class UtilFunction {
 
-    public static Future<Collection<Meeting<Person>>> addMeetingsAsync(final Future<Collection<Meeting<Person>>> meetingsFuture, final Meeting<Person> meeting, ExecutorService executor){
-        return executor.submit(new Callable<Collection<Meeting<Person>>>() {
+    public static Future<Collection<Meeting>> addMeetingsAsync(final Future<Collection<Meeting>> meetingsFuture, final Meeting meeting, ExecutorService executor){
+        return executor.submit(new Callable<Collection<Meeting>>() {
             @Override
-            public Collection<Meeting<Person>> call() throws Exception {
-                Collection<Meeting<Person>> meetings = meetingsFuture.get();
+            public Collection<Meeting> call() throws Exception {
+                Collection<Meeting> meetings = meetingsFuture.get();
                 meetings.add(meeting);
-                for(Meeting<Person> meet : meetings) {
+                for(Meeting meet : meetings) {
                     Log.d("addMeetingAsync", "Collection = " + meet.data.nickname);
                 }
                 return meetings;
@@ -46,21 +46,21 @@ public class UtilFunction {
         });
     }
 
-    public static Future<Collection<Meeting<Person>>> storeMeetingsAsync(final Future<Collection<Meeting<Person>>> meetingsFuture, final Context context, final String filename, ExecutorService executor){
+    public static Future<Collection<Meeting>> storeMeetingsAsync(final Future<Collection<Meeting>> meetingsFuture, final Context context, final String filename, ExecutorService executor){
         final Gson gson = new Gson();
 
-        return executor.submit(new Callable<Collection<Meeting<Person>>>() {
+        return executor.submit(new Callable<Collection<Meeting>>() {
             @Override
-            public Collection<Meeting<Person>> call() {
-                Collection<Meeting<Person>> meetings = null;
+            public Collection<Meeting> call() {
+                Collection<Meeting> meetings = null;
                 FileOutputStream fos;
                 try {
                     meetings = meetingsFuture.get();
                     fos = context.openFileOutput(filename, MODE_PRIVATE);
-                    for(Meeting<Person> meet : meetings) {
+                    for(Meeting meet : meetings) {
                         Log.d("StoreMeetingAsync", "Collection = " + meet.data.nickname);
                     }
-                    Type meetingType = new TypeToken<Collection<Meeting<Person>>>() {}.getType(); //used because meeting has a generic type in it
+                    Type meetingType = new TypeToken<Collection<Meeting>>() {}.getType(); //used because meeting has a generic type in it
                     String meetingJSON = gson.toJson(meetings, meetingType);
                     try {
                         fos.write(meetingJSON.getBytes()); //using getBytes the string is encoded using platform's default charset
@@ -77,13 +77,13 @@ public class UtilFunction {
         });
     }
 
-    public static Future<Collection<Meeting<Person>>> loadMeetingsAsync(final FileInputStream fis, ExecutorService executor){
+    public static Future<Collection<Meeting>> loadMeetingsAsync(final FileInputStream fis, ExecutorService executor){
         final Gson gson = new Gson();
 
-        return executor.submit(new Callable<Collection<Meeting<Person>>>() {
+        return executor.submit(new Callable<Collection<Meeting>>() {
             @Override
-            public Collection<Meeting<Person>> call(){
-                Type meetingType = new TypeToken<Collection<Meeting<Person>>>() {}.getType(); //used because meeting has a generic type in it
+            public Collection<Meeting> call(){
+                Type meetingType = new TypeToken<Collection<Meeting>>() {}.getType(); //used because meeting has a generic type in it
                 InputStreamReader inputStreamReader = new InputStreamReader(fis);
                 StringBuilder stringBuilder = new StringBuilder();
                 String contents;
@@ -100,7 +100,7 @@ public class UtilFunction {
                     contents = stringBuilder.toString();
                     Log.d("loadMeetingAsync", "Stringa = " + contents);
                 }
-                Collection<Meeting<Person>> meetings = gson.fromJson(contents, meetingType);
+                Collection<Meeting> meetings = gson.fromJson(contents, meetingType);
 
                 Log.d("loadMeetingAsync", "Collection = " + meetings);
 
@@ -113,15 +113,15 @@ public class UtilFunction {
         });
     }
 
-    public static void setMarkerAsync(final Future<Collection<Meeting<Person>>> meetingsFuture, ExecutorService executor, final GoogleMap map){
+    public static void setMarkerAsync(final Future<Collection<Meeting>> meetingsFuture, ExecutorService executor, final GoogleMap map){
         executor.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Collection<Meeting<Person>> meetings = meetingsFuture.get();
+                    Collection<Meeting> meetings = meetingsFuture.get();
                     Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-                    for(Meeting<Person> meeting: meetings){
-                        final LatLng meetLoc = new LatLng(meeting.meetingLoc.getLatitude(), meeting.meetingLoc.getLongitude());
+                    for(Meeting meeting: meetings){
+                        final LatLng meetLoc = new LatLng(meeting.latitude, meeting.longitude);
                         final String markerTitle = meeting.data.nickname;
                         mainThreadHandler.post(new Runnable() {
                             @Override
