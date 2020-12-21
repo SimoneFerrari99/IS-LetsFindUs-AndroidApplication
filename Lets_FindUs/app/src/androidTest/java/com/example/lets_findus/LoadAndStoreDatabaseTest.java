@@ -43,27 +43,13 @@ public class LoadAndStoreDatabaseTest {
     }
 
     @Test
-    public void writeUserAndReadInList() throws Exception {
+    public void storeAndUpdatePerson() throws Exception {
         final Person p = new Person("", "Gazz", Person.Sex.MALE, 1999);
         Log.d("PersonId", String.valueOf(p.id));
         ListenableFuture<Long> ins = pd.insert(p);
         Futures.addCallback(ins, new FutureCallback<Long>() {
             @Override
             public void onSuccess(@NullableDecl Long result) {
-                /*Log.d("TestSuccess", "Insert success");
-                ListenableFuture<Person> getPerson = pd.getPersonById(1);
-                Futures.addCallback(getPerson, new FutureCallback<Person>() {
-                    @Override
-                    public void onSuccess(@NullableDecl Person result) {
-                        Log.d("TestSuccess", "Nickname: "+result.nickname);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        Log.d("TestFailure", "Select failure");
-                    }
-
-                }, Executors.newSingleThreadExecutor());*/
                 p.id = 1;
                 p.nickname = "tuamadre";
                 pd.update(p);
@@ -73,6 +59,24 @@ public class LoadAndStoreDatabaseTest {
             public void onFailure(Throwable t) {
                 Log.d("TestFailure", "Insert failure");
             }
+        }, Executors.newSingleThreadExecutor());
+    }
+
+    @Test
+    public void loadPersonFromId() throws Exception{
+        ListenableFuture<Person> getPerson = pd.getPersonById(1);
+        Futures.addCallback(getPerson, new FutureCallback<Person>() {
+            @Override
+            public void onSuccess(@NullableDecl Person result) {
+                assert result != null;
+                Log.d("TestSuccess", "Nickname: "+result.nickname);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("TestFailure", "Select failure");
+            }
+
         }, Executors.newSingleThreadExecutor());
     }
 }
