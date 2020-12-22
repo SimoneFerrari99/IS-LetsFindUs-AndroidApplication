@@ -33,6 +33,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -47,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<ScanResult> scanResults;
     private ScanResultAdapter scanResultAdapter;
     private BluetoothGatt mGatt;
+    private static RecyclerView.Adapter adapter;
+    private static RecyclerView.LayoutManager layoutManager;
+    private static RecyclerView recyclerView;
 
     BluetoothManager BluetoothManager;
     BluetoothAdapter bluetoothAdapter;
@@ -64,16 +70,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(navView, navController);
 
+
+        recyclerView = findViewById(R.id.scan_results_recycler_view);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        scanResults = new ArrayList<>();
+        adapter = new ScanResultAdapter(scanResults);
+        recyclerView.setAdapter(adapter);
 
 
         BluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -85,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
         scanSettings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
-
 
 
         Scan_Button = findViewById(R.id.scan_button);
@@ -109,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    
 
     ScanCallback scanCallback = new ScanCallback() {
 
