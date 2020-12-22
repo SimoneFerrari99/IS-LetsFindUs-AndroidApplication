@@ -8,7 +8,6 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.lets_findus.utilities.AppDatabase;
-import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.PersonDao;
 import com.google.common.util.concurrent.FutureCallback;
@@ -25,9 +24,8 @@ import java.io.IOException;
 import java.util.concurrent.Executors;
 
 @RunWith(AndroidJUnit4.class)
-public class LoadAndStoreDatabaseTest {
+public class PersonDaoTest {
     private PersonDao pd;
-    private MeetingDao md;
     private AppDatabase db;
 
     @Before
@@ -50,8 +48,7 @@ public class LoadAndStoreDatabaseTest {
         Futures.addCallback(ins, new FutureCallback<Long>() {
             @Override
             public void onSuccess(@NullableDecl Long result) {
-                p.id = 1;
-                p.nickname = "tuamadre";
+                p.nickname = "franco";
                 pd.update(p);
             }
 
@@ -77,6 +74,52 @@ public class LoadAndStoreDatabaseTest {
                 Log.d("TestFailure", "Select failure");
             }
 
+        }, Executors.newSingleThreadExecutor());
+    }
+
+    @Test
+    public void deletePerson() throws Exception{
+        ListenableFuture<Person> getPerson = pd.getPersonById(1);
+        Futures.addCallback(getPerson, new FutureCallback<Person>() {
+            @Override
+            public void onSuccess(@NullableDecl Person result) {
+                pd.deleteAll(result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("TestFailure", "Select failure");
+            }
+
+        }, Executors.newSingleThreadExecutor());
+        pd.deletePersonById(3);
+    }
+
+    @Test
+    public void selectLastPerson() throws Exception{
+        Person p = new Person("", "Ciccio", Person.Sex.OTHER, 1999);
+        ListenableFuture<Long> ins = pd.insert(p);
+        Futures.addCallback(ins, new FutureCallback<Long>() {
+            @Override
+            public void onSuccess(@NullableDecl Long result) {
+                ListenableFuture<Person> lastIns = pd.getLastPersonInserted();
+                Futures.addCallback(lastIns, new FutureCallback<Person>() {
+                    @Override
+                    public void onSuccess(@NullableDecl Person result) {
+                        Log.d("TestSuccess", "Nickname: " + result.nickname);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        Log.d("TestFailure", "Select failure");
+                    }
+                }, Executors.newSingleThreadExecutor());
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("TestFailure", "Insert failure");
+            }
         }, Executors.newSingleThreadExecutor());
     }
 }
