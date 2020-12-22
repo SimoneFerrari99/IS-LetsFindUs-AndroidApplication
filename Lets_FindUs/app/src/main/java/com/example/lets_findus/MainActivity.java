@@ -5,7 +5,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -32,18 +37,25 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int ENABLE_BLUETOOTH_REQUEST_CODE = 1;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 2;
+    private ArrayList<ScanResult> scanResults;
+    private ScanResultAdapter scanResultAdapter;
+    private BluetoothGatt mGatt;
 
     BluetoothManager BluetoothManager;
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bleScanner;
     ScanSettings scanSettings;
     boolean isScanning = false;
+
+
+
 
 
     Button Scan_Button;
@@ -99,12 +111,22 @@ public class MainActivity extends AppCompatActivity {
 
 
     ScanCallback scanCallback = new ScanCallback() {
+
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            BluetoothDevice btDevice = result.getDevice();
-            Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress());
-
+            int indexQuery = scanResults.indexOf(result);
+            if(indexQuery != -1) {
+                scanResults.add(result);
+                scanResultAdapter.notifyItemChanged(scanResults.size() - 1);
+            }
+            else {
+                BluetoothDevice btDevice = result.getDevice();
+                Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress());
+            }
+            scanResults.add(result);
+            scanResultAdapter.notifyItemInserted(scanResults.size() - 1);
         }
+
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             for(ScanResult sr : results) {
@@ -115,6 +137,51 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanFailed(int errorCode) {
             Log.e("Scan Failed", "Error Code: " + errorCode);
+        }
+    };
+
+    public void connectToDevice(BluetoothDevice device) {
+        System.out.println("BLE// connectToDevice()");
+        if (mGatt == null) {
+            mGatt = device.connectGatt(this, false, gattCallback); //Connect to a GATT Server
+            //scanLeDevice(false);// will stop after first device detection
+        }
+    }
+
+    private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            System.out.println("BLE// BluetoothGattCallback");
+            Log.i("onConnectionStateChange", "Status: " + status);
+            switch (newState) {
+                case BluetoothProfile.STATE_CONNECTED:
+                    Log.i("gattCallback", "STATE_CONNECTED");
+                    gatt.discoverServices();
+                    break;
+                case BluetoothProfile.STATE_CONNECTING:
+                    Log.i("gattCallback", "STATE_CONNECTING");
+                    break;
+                case BluetoothProfile.STATE_DISCONNECTED:
+                    Log.e("gattCallback", "STATE_DISCONNECTED");
+                    break;
+                default:
+                    Log.e("gattCallback", "STATE_OTHER");
+            }
+        }
+
+        @Override
+        //New services discovered
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            List<BluetoothGattService> services = gatt.getServices();
+            Log.i("onServicesDiscovered", services.toString());
+            gatt.readCharacteristic(services.get(1).getCharacteristics().get(0));
+        }
+
+        @Override
+        //Result of a characteristic read operation
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.i("onCharacteristicRead", characteristic.toString());
+            gatt.disconnect();
         }
     };
 
@@ -167,7 +234,9 @@ public class MainActivity extends AppCompatActivity {
             requestLocationPermission();
         }
         else {
-            if(bleScanner != null) {
+            if(bleScanner != null && scanResults != null && scanResultAdapter != null) {
+                scanResults.clear();
+                scanResultAdapter.notifyDataSetChanged();
                 bleScanner.startScan(null, scanSettings, scanCallback);
                 System.out.println("--------------------> bleScanner: SONO ENTRATO NELL'IF <--------------------");
                 isScanning = true;
