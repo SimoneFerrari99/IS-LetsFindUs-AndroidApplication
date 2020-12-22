@@ -53,12 +53,13 @@ public class MainActivity extends AppCompatActivity {
     private static RecyclerView.Adapter adapter;
     private static RecyclerView.LayoutManager layoutManager;
     private static RecyclerView recyclerView;
+    final String NameBLE = "lets_findus";
 
     BluetoothManager BluetoothManager;
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bleScanner;
     ScanSettings scanSettings;
-    boolean isScanning = false;
+    boolean isScanning;
 
 
 
@@ -72,12 +73,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        isScanning = false;
+
+
         recyclerView = findViewById(R.id.scan_results_recycler_view);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         scanResults = new ArrayList<>();
+        scanResultAdapter = new ScanResultAdapter(scanResults);
         adapter = new ScanResultAdapter(scanResults);
         recyclerView.setAdapter(adapter);
 
@@ -86,11 +91,15 @@ public class MainActivity extends AppCompatActivity {
         bluetoothAdapter = BluetoothManager.getAdapter();
         if(bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
             bleScanner = bluetoothAdapter.getBluetoothLeScanner();
-            System.out.println("---------------------------SONO DENTRO ALL'IF-------------------------");
+            bluetoothAdapter.setName(NameBLE);
+            System.out.println("---------------------------SONO DENTRO ALL'IF(bluetoothAdapter != null && bluetoothAdapter.isEnabled())-------------------------");
         }
 
+
         scanSettings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                .build();
 
 
         Scan_Button = findViewById(R.id.scan_button);
@@ -99,52 +108,25 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(isScanning) {
                     stopBleScan();
+                    System.out.println("---------------------------SONO DENTRO ALL'IF(isScanning) 1°-------------------------" + isScanning);
                 }
                 else {
                     startBleScan();
+                    System.out.println("---------------------------SONO DENTRO ALL'IF(isScanning) 2°-------------------------" + isScanning);
                 }
             }
 
         });
         if(isScanning) {
             Scan_Button.setText("Stop Scan");
+            System.out.println("---------------------------SONO DENTRO ALL'IF(Scan_Button.setText(Stop Scan))-------------------------");
         }
         else {
             Scan_Button.setText("Start Scan");
+            System.out.println("---------------------------SONO DENTRO ALL'IF(Scan_Button.setText(Start Scan))-------------------------");
         }
     }
 
-    
-
-    ScanCallback scanCallback = new ScanCallback() {
-
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            int indexQuery = scanResults.indexOf(result);
-            if(indexQuery != -1) {
-                scanResults.add(result);
-                scanResultAdapter.notifyItemChanged(scanResults.size() - 1);
-            }
-            else {
-                BluetoothDevice btDevice = result.getDevice();
-                Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress());
-            }
-            scanResults.add(result);
-            scanResultAdapter.notifyItemInserted(scanResults.size() - 1);
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            for(ScanResult sr : results) {
-                Log.i("ScanResult", sr.toString());
-            }
-        }
-
-        @Override
-        public void onScanFailed(int errorCode) {
-            Log.e("Scan Failed", "Error Code: " + errorCode);
-        }
-    };
 
     public void connectToDevice(BluetoothDevice device) {
         System.out.println("BLE// connectToDevice()");
@@ -153,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
             //scanLeDevice(false);// will stop after first device detection
         }
     }
+
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
@@ -200,7 +183,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -210,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
 
     @Override
@@ -234,23 +215,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void startBleScan() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasPermission( Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             requestLocationPermission();
         }
         else {
+            System.out.println("---------------------------scanResults-------------------------" + scanResults);
+            System.out.println("---------------------------scanResultAdapter-------------------------" + scanResultAdapter);
             if(bleScanner != null && scanResults != null && scanResultAdapter != null) {
                 scanResults.clear();
                 scanResultAdapter.notifyDataSetChanged();
                 bleScanner.startScan(null, scanSettings, scanCallback);
-                System.out.println("--------------------> bleScanner: SONO ENTRATO NELL'IF <--------------------");
+                System.out.println("--------------------> startBleScan(ricerca) <--------------------");
                 isScanning = true;
                 Scan_Button.setText("Stop Scan");
-                System.out.println("--------------------> isScanning: <--------------------" + isScanning);
             }
         }
     }
+
 
     private void stopBleScan() {
         if(bleScanner != null) {
@@ -259,6 +241,39 @@ public class MainActivity extends AppCompatActivity {
             Scan_Button.setText("Start Scan");
         }
     }
+
+
+    ScanCallback scanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            int indexQuery = scanResults.indexOf(result);
+            if(indexQuery != -1) {
+                scanResults.add(result);
+                System.out.println("---------------------------scanResults 1°-------------------------" + scanResults);
+                scanResultAdapter.notifyItemChanged(scanResults.size() - 1);
+            }
+            else {
+                BluetoothDevice btDevice = result.getDevice();
+                Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress());
+                scanResults.add(result);
+                System.out.println("---------------------------scanResults 2°-------------------------" + scanResults);
+                scanResultAdapter.notifyItemInserted(scanResults.size() - 1);
+            }
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for(ScanResult sr : results) {
+                Log.i("ScanResult", sr.toString());
+            }
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            Log.e("Scan Failed", "Error Code: " + errorCode);
+        }
+    };
+
 
     private void requestLocationPermission() {
         if(hasPermission( Manifest.permission.ACCESS_FINE_LOCATION))
