@@ -41,20 +41,37 @@ public class PersonDaoTest {
     }
 
     @Test
+    public void storePerson() throws Exception {
+        Person p = new Person("", "Gazz", Person.Sex.MALE, 1999);
+        pd.insert(p).get();
+    }
+
+
+    @Test
     public void storeAndUpdatePerson() throws Exception {
-        final Person p = new Person("", "Gazz", Person.Sex.MALE, 1999);
-        Log.d("PersonId", String.valueOf(p.id));
-        ListenableFuture<Long> ins = pd.insert(p);
-        Futures.addCallback(ins, new FutureCallback<Long>() {
+        Person p = new Person("", "Gazz", Person.Sex.MALE, 1999);
+        ListenableFuture<Long> inserted = pd.insert(p);
+        Futures.addCallback(inserted, new FutureCallback<Long>() {
             @Override
             public void onSuccess(@NullableDecl Long result) {
-                p.nickname = "franco";
-                pd.update(p);
+                ListenableFuture<Person> lastIns = pd.getLastPersonInserted();
+                Futures.addCallback(lastIns, new FutureCallback<Person>() {
+                    @Override
+                    public void onSuccess(@NullableDecl Person result) {
+                        result.nickname = "Pluto";
+                        pd.update(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        Log.d("storeAndUpdatePerson", "Select failed");
+                    }
+                }, Executors.newSingleThreadExecutor());
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Log.d("TestFailure", "Insert failure");
+                Log.d("storeAndUpdatePerson", "Insert failed");
             }
         }, Executors.newSingleThreadExecutor());
     }

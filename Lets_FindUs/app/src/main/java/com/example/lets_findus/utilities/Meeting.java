@@ -25,6 +25,7 @@ public class Meeting {
         this.latitude = latitude;
         this.longitude = longitude;
         this.date = date;
+        this.personId = data.id;
     }
 
     public Meeting(int personId, double latitude, double longitude, Date date) {

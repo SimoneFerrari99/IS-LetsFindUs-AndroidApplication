@@ -8,28 +8,31 @@ import androidx.room.Update;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Dao
-public interface PersonDao {
+public abstract class PersonDao {
     @Insert
-    ListenableFuture<Long> insert(Person p);
+    public abstract ListenableFuture<Long> insert(Person p);
 
     @Insert
-    ListenableFuture<ArrayList<Long>> insertAll(Person... p);
+    public abstract ListenableFuture<Long[]> insertAll(Person... p);
 
     @Update
-    void update(Person p);
+    public abstract void update(Person p);
 
     @Delete
-    void deleteAll(Person... p);
+    public abstract void deleteAll(Person... p);
 
     @Query("DELETE FROM Person WHERE Person.id = :id")
-    void deletePersonById(int id);
+    public abstract void deletePersonById(int id);
 
     @Query("SELECT * FROM Person WHERE Person.id = :id")
-    ListenableFuture<Person> getPersonById(int id);
+    public abstract ListenableFuture<Person> getPersonById(int id);
 
     @Query("SELECT * FROM Person WHERE Person.id IN (SELECT MAX(id) FROM Person)")
-    ListenableFuture<Person> getLastPersonInserted();
+    public abstract ListenableFuture<Person> getLastPersonInserted();
+
+    @Query("SELECT * FROM Person")
+    public abstract ListenableFuture<List<Person>> getAllPerson();
 }
