@@ -4,7 +4,7 @@ import androidx.room.TypeConverter;
 
 public class SexConverter {
     @TypeConverter
-    public static Person.Sex fromTimestamp(String value) {
+    public static Person.Sex fromString(String value) {
         switch (value){
             case "male":
                 return Person.Sex.MALE;

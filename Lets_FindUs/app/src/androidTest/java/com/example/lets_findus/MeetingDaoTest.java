@@ -10,7 +10,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.Meeting;
 import com.example.lets_findus.utilities.MeetingDao;
-import com.example.lets_findus.utilities.MeetingPerson;
 import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.PersonDao;
 import com.google.common.util.concurrent.FutureCallback;
@@ -24,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -81,7 +79,8 @@ public class MeetingDaoTest {
 
     }
 
-    @Test
+
+    /*@Test
     public void getMeetingRegion() throws Exception{
         List<MeetingPerson> sel = md.getMeetingsBetweenRegion(50, 40, 10, 12);
         Log.d("getMeetingRegion", String.valueOf(sel.size()));
@@ -101,5 +100,5 @@ public class MeetingDaoTest {
     public void deleteMeeting() throws Exception{
         List<MeetingPerson> sel = md.getMeetingsBetweenRegion(50, 40, 10, 12);
         md.delete(sel.get(0).meeting);
-    }
+    }*/
 }

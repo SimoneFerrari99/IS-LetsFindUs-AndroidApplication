@@ -37,12 +37,15 @@ public abstract class MeetingDao {
 
     @Transaction
     @Query("SELECT * FROM Meeting INNER JOIN Person ON Meeting.personId = Person.id WHERE (Meeting.latitude BETWEEN :latDown AND :latUp) AND (Meeting.longitude BETWEEN :longLeft AND :longRight)")
-    public abstract List<MeetingPerson> getMeetingsBetweenRegion(double latUp, double latDown, double longLeft, double longRight);
+    public abstract ListenableFuture<List<MeetingPerson>> getMeetingsBetweenRegion(double latUp, double latDown, double longLeft, double longRight);
 
     // TODO: 23/12/2020 test
-    @Transaction
-    public List<MeetingPerson> getMeetingsBetweenVisibleRegion(VisibleRegion vr){
+    public ListenableFuture<List<MeetingPerson>> getMeetingsBetweenVisibleRegion(VisibleRegion vr){
         return getMeetingsBetweenRegion(vr.farLeft.latitude, vr.nearLeft.latitude, vr.farLeft.longitude, vr.farRight.longitude);
     }
+
+    @Transaction
+    @Query("SELECT * FROM Meeting INNER JOIN Person ON Meeting.personId = Person.id WHERE Meeting.isFavourite = 1")
+    public abstract ListenableFuture<List<MeetingPerson>> getFavouriteMeetings();
 
 }

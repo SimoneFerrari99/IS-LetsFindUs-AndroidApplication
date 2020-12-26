@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,12 +26,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import com.example.lets_findus.R;
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavAdapter;
-import com.example.lets_findus.utilities.Meeting;
-import com.example.lets_findus.utilities.Person;
+import com.example.lets_findus.utilities.AppDatabase;
+import com.example.lets_findus.utilities.MeetingDao;
+import com.example.lets_findus.utilities.MeetingPerson;
+import com.example.lets_findus.utilities.PersonDao;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -37,14 +43,22 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 public class MatchingFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraMoveStartedListener {
 
@@ -59,7 +73,13 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private RecyclerView.LayoutManager layoutManager;
     private static RecyclerView recyclerView;
     static View.OnClickListener myOnClickListener;
-    private static ArrayList<Meeting> data;
+
+    private static AppDatabase db;
+    private static MeetingDao md;
+    private static PersonDao pd;
+
+    private static List<MeetingPerson> meetings;
+    private List<Marker> visibleMarkers;
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -71,6 +91,28 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
 
         show_match = root.findViewById(R.id.matching_button);
         show_match.setVisibility(View.GONE);
+        show_match.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(map.getCameraPosition().target)
+                        .zoom(map.getCameraPosition().zoom)
+                        .bearing(0)                // Sets the orientation of the camera to east
+                        .build();                   // Creates a CameraPosition from the builder
+                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
+                        setupMarkers(map);
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+                animateHide(v);
+            }
+        });
 
         requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
@@ -97,27 +139,11 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         // R.id.map is a FrameLayout, not a Fragment
         getChildFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
 
-        //prova per bottone di ricerca
-        show_match.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animateHide(show_match);
-                Toast.makeText(v.getContext(), "Ciao more", Toast.LENGTH_SHORT).show();
-                VisibleRegion vr = map.getProjection().getVisibleRegion();
-                map.addMarker(new MarkerOptions()
-                        .position(vr.farLeft)
-                        .title("far left"));
-                map.addMarker(new MarkerOptions()
-                        .position(vr.farRight)
-                        .title("far right"));
-                map.addMarker(new MarkerOptions()
-                        .position(vr.nearLeft)
-                        .title("near left"));
-                map.addMarker(new MarkerOptions()
-                        .position(vr.nearRight)
-                        .title("near right"));
-            }
-        });
+        if(db == null){
+            db = Room.databaseBuilder(getContext(), AppDatabase.class, "meeting_db").build();
+            md = db.meetingDao();
+            pd = db.personDao();
+        }
 
         sheetBehavior = BottomSheetBehavior.from(root.findViewById(R.id.bs_card_view));
         sheetBehavior.setGestureInsetBottomIgnored(true);
@@ -131,16 +157,10 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        data = new ArrayList<>();
-        data.add(new Meeting(new Person("", "Gazz", Person.Sex.MALE, 1999), 0, 0, null));
-        data.add(new Meeting(new Person("", "Scheggia", Person.Sex.MALE, 1999), 0, 0, null));
-        data.add(new Meeting(new Person("", "Tulio", Person.Sex.MALE, 1999), 0, 0, null));
-        data.add(new Meeting(new Person("", "Ciullia", Person.Sex.FEMALE, 1999), 0, 0, null));
-        for (int i = 0; i < 10; i++){
-            data.add(new Meeting(new Person("", "Toso", Person.Sex.MALE, 1999), 0, 0, null));
-        }
+        meetings = new ArrayList<>();
+        visibleMarkers = new ArrayList<>();
 
-        adapter = new FavAdapter(data);
+        adapter = new FavAdapter(meetings);
         recyclerView.setAdapter(adapter);
 
         return root;
@@ -154,9 +174,10 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f));
+                        LatLng currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 17f));
                     }
+                    setupMarkers(googleMap);
                 }
             });
         } else {
@@ -192,8 +213,54 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
 
         private void removeItem(View v) {
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
-            Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Ciao "+meetings.get(selectedItemPosition).person.nickname, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private ListenableFuture<List<MeetingPerson>> loadVisibleMeeting(GoogleMap map){
+        return md.getMeetingsBetweenVisibleRegion(map.getProjection().getVisibleRegion());
+    }
+
+    private List<Marker> setVisibleMeetingsMarker(List<MeetingPerson> meetings, GoogleMap map){
+        List<Marker> markers = new ArrayList<>();
+        for(MeetingPerson mp : meetings){
+            Log.d("setMarker", String.valueOf(mp.meeting.id));
+            markers.add(map.addMarker(new MarkerOptions()
+                    .position(new LatLng(mp.meeting.latitude, mp.meeting.longitude))
+                    .title(mp.person.nickname)));
+        }
+        return markers;
+    }
+
+    private void removeVisibleMarker(List<Marker> markers){
+        for(Marker m : markers){
+            m.remove();
+        }
+    }
+
+    private void setupMarkers(final GoogleMap map){
+        final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+        Futures.addCallback(loadVisibleMeeting(map), new FutureCallback<List<MeetingPerson>>() {
+            @Override
+            public void onSuccess(@NullableDecl final List<MeetingPerson> result) {
+                mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        MatchingFragment.meetings.clear();
+                        MatchingFragment.meetings.addAll(result);
+                        adapter.notifyDataSetChanged();
+                        removeVisibleMarker(visibleMarkers);
+                        visibleMarkers = setVisibleMeetingsMarker(MatchingFragment.meetings, map);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        }, Executors.newSingleThreadExecutor());
+
     }
 
     private void animateShow(View v){

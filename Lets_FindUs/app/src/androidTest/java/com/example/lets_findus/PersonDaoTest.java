@@ -42,7 +42,7 @@ public class PersonDaoTest {
 
     @Test
     public void storePerson() throws Exception {
-        Person p = new Person("", "Gazz", Person.Sex.MALE, 1999);
+        Person p = new Person("", "Franco", Person.Sex.MALE, 1999);
         pd.insert(p).get();
     }
 
