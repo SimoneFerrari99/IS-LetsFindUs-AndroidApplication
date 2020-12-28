@@ -47,6 +47,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +68,19 @@ public class MainActivity extends AppCompatActivity {
     ScanSettings scanSettings;
     boolean isScanning;
 
-
+    private final static String TAG = MainActivity.class.getSimpleName();
+    public final static UUID UUID_HEART_RATE_MEASUREMENT =
+            UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+    public final static String ACTION_DATA_AVAILABLE =
+            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String EXTRA_DATA =
+            "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String ACTION_GATT_CONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED =
+            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
 
 
 
@@ -92,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ScanResultAdapter(scanResults);
         recyclerView.setAdapter(adapter);
 
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, "No LE Support.", Toast.LENGTH_LONG).show();
+            finish();
+        }
+
 
         BluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = BluetoothManager.getAdapter();
@@ -106,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
                 .build();
+
 
 
         Scan_Button = findViewById(R.id.scan_button);
@@ -134,6 +153,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        if (bluetoothAdapter == null || mGatt == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+            return;
+        }
+        mGatt.readCharacteristic(characteristic);
+    }
+
+    private void broadcastUpdate(final String action) {
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
+
+    private void broadcastUpdate(final String action,
+                                 final BluetoothGattCharacteristic characteristic) {
+        final Intent intent = new Intent(action);
+
+        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
+            int flag = characteristic.getProperties();
+            int format = -1;
+            if ((flag & 0x01) != 0) {
+                format = BluetoothGattCharacteristic.FORMAT_UINT16;
+                Log.d(TAG, "Heart rate format UINT16.");
+            } else {
+                format = BluetoothGattCharacteristic.FORMAT_UINT8;
+                Log.d(TAG, "Heart rate format UINT8.");
+            }
+            final int heartRate = characteristic.getIntValue(format, 1);
+            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
+            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+        } else {
+            // For all other profiles, writes the data formatted in HEX.
+            final byte[] data = characteristic.getValue();
+            System.out.println("SONO DENTRO---------------------------------------------------------------------------------------------------");
+            if (data != null && data.length > 0) {
+                final StringBuilder stringBuilder = new StringBuilder(data.length);
+                for(byte byteChar : data)
+                    stringBuilder.append(String.format("%02X ", byteChar));
+                intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+            }
+        }
+        sendBroadcast(intent);
+    }
+
+
+
     public void connectToDevice(BluetoothDevice device) {
         System.out.println("BLE// connectToDevice()");
         Toast.makeText(this, "Connecting to " + device.getAddress(), Toast.LENGTH_LONG).show();
@@ -141,10 +206,13 @@ public class MainActivity extends AppCompatActivity {
             mGatt = device.connectGatt(this, false, gattCallback); //Connect to a GATT Server
             //scanLeDevice(false);// will stop after first device detection
         }
+        else {
+            disconnectGattServer();
+            mGatt = device.connectGatt(this, false, gattCallback); //Connect to a GATT Server
+        }
     }
 
     public void disconnectGattServer() {
-        Toast.makeText(getBaseContext(), "Closing Gatt connection", Toast.LENGTH_LONG).show();
         if (mGatt != null) {
             mGatt.disconnect();
             mGatt.close();
@@ -153,13 +221,14 @@ public class MainActivity extends AppCompatActivity {
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+        public void onConnectionStateChange(BluetoothGatt gatt, final int status, int newState) {
+            String intentAction;
             System.out.println("BLE// BluetoothGattCallback");
-            Log.i("onConnectionStateChange", "Status: " + status);
+            Log.e("onConnectionStateChange", "Status: " + status);
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
-                    Log.i("gattCallback", "STATE_CONNECTED");
-                    Toast.makeText(getBaseContext(), "Connected ", Toast.LENGTH_LONG).show();
+                    intentAction = ACTION_GATT_CONNECTED;
+                    Log.e("gattCallback", "STATE_CONNECTED");
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
@@ -169,13 +238,15 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+                    broadcastUpdate(intentAction);
                     break;
                 case BluetoothProfile.STATE_CONNECTING:
-                    Log.i("gattCallback", "STATE_CONNECTING");
-                    gatt.discoverServices();
+                    Log.e("gattCallback", "STATE_CONNECTING");
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
+                    intentAction = ACTION_GATT_DISCONNECTED;
                     Log.e("gattCallback", "STATE_DISCONNECTED");
+                    broadcastUpdate(intentAction);
                     disconnectGattServer();
                     break;
                 default:
@@ -188,15 +259,26 @@ public class MainActivity extends AppCompatActivity {
         //New services discovered
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             List<BluetoothGattService> services = gatt.getServices();
-            Log.i("onServicesDiscovered", services.toString());
-            gatt.readCharacteristic(services.get(1).getCharacteristics().get(0));
+            Log.e("onServicesDiscovered", services.toString());
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+            } else {
+                Log.w(TAG, "onServicesDiscovered received: " + status);
+            }
         }
 
         @Override
         //Result of a characteristic read operation
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.i("onCharacteristicRead", characteristic.toString());
-            gatt.disconnect();
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            }
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
     };
 
@@ -206,10 +288,7 @@ public class MainActivity extends AppCompatActivity {
         if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
                 promptEnableBluetooth();
         }
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "No LE Support.", Toast.LENGTH_LONG).show();
-            finish();
-        }
+        requestLocationPermission();
     }
 
 
@@ -277,16 +356,7 @@ public class MainActivity extends AppCompatActivity {
     ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-
-            BluetoothDevice btDevice = result.getDevice();
-            Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress() + ", RSSI: " + result.getRssi());
-
-            scanResults.add(result);
-            System.out.println("---------------------------scanResults 2°-------------------------" + scanResults);
-            scanResultAdapter.notifyDataSetChanged();
-            connectToDevice(btDevice);
-            return;
-            /*
+            onBatchScanResults(scanResults);
             int indexQuery = scanResults.indexOf(result);
             if(indexQuery != -1) {
                 scanResults.add(result);
@@ -298,12 +368,10 @@ public class MainActivity extends AppCompatActivity {
             else {
                 BluetoothDevice btDevice = result.getDevice();
                 Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress() + ", RSSI: " + result.getRssi());
-
-                scanResults.add(result);
                 System.out.println("---------------------------scanResults 2°-------------------------" + scanResults);
-                scanResultAdapter.notifyDataSetChanged();
+                stopBleScan();
                 connectToDevice(btDevice);
-            }*/
+            }
         }
 
         @Override
