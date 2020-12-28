@@ -31,5 +31,6 @@
     <string name="nickname">Nickname</string>
     <string name="social_hint">Nome profilo o link profilo</string>
     <string name="mail_hint">nome@gmail.com</string>
+    <string name="image_transition">imageTransition</string>
 
 </resources>

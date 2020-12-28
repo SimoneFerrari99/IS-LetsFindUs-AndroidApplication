@@ -1,5 +1,6 @@
 package com.example.lets_findus.ui.profile;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,8 +17,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.lets_findus.R;
+import com.example.lets_findus.ui.ViewPictureActivity;
 import com.example.lets_findus.utilities.Person;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -83,6 +86,20 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         CardView cardView = root.findViewById(R.id.profile_card_view);
         cardView.setBackgroundResource(R.drawable.card_bottom_corner);
+
+        final CircularImageView circularImageView = root.findViewById(R.id.circularImageView);
+        circularImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), ViewPictureActivity.class);
+
+                View sharedView = circularImageView;
+                String transitionName = getString(R.string.image_transition);
+
+                ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(), sharedView, transitionName);
+                startActivity(i, transitionActivityOptions.toBundle());
+            }
+        });
         return root;
     }
 

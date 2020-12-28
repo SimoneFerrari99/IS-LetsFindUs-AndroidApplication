@@ -1,7 +1,11 @@
 package com.example.lets_findus.ui.profile;
 
+import android.app.ActivityOptions;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -13,6 +17,11 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -22,6 +31,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.mikhaellopez.circularimageview.CircularImageView;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;
@@ -39,9 +49,15 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private MonthPickerDialog.Builder materialYearBuilder;
 
+    private CircularImageView image;
+
     private Menu menu;
 
+    private ActivityResultLauncher<Intent> takePhoto;
+    private ActivityResultLauncher<Intent> pickPhoto;
+
     private String[] sex = {"Maschio", "Femmina", "Altro"};
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +134,53 @@ public class EditProfileActivity extends AppCompatActivity {
         fillFormValue(other, getIntent().getBundleExtra("FIELD_VALUES"));
 
         setObbligatoryFieldsError(obbligatory);
+
+        image = findViewById(R.id.circularImageView);
+        image.setOnClickListener(imageSelector);
+
+        takePhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                    Bitmap selectedImage = (Bitmap) result.getData().getExtras().get("data");
+                    image.setImageBitmap(selectedImage);
+                }
+            }
+        });
+
+        pickPhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                    image.setImageURI(result.getData().getData());
+                }
+            }
+        });
     }
 
+    private final View.OnClickListener imageSelector = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final CharSequence[] options = { "Fai una foto", "Scegli dalla galleria"};
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
+            builder.setTitle("Scegli la tua foto profilo");
+
+            builder.setItems(options, new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+                    if (options[item].equals("Fai una foto")) {
+                        takePhoto.launch(new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE));
+                    }
+                    else {
+                        pickPhoto.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI));
+                    }
+                }
+            });
+            builder.show();
+        }
+    };
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater=getMenuInflater();
@@ -239,7 +300,7 @@ public class EditProfileActivity extends AppCompatActivity {
             case android.R.id.home:
                 mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
-                startActivity(mIntent);
+                startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
                 return true;
             case R.id.confirm:
                 Bundle obbForm = getFormValues(obbligatory, null);
@@ -247,7 +308,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 mIntent.putExtra("FORM_DATA", data);
-                startActivity(mIntent);
+                startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
