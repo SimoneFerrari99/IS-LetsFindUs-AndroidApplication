@@ -19,11 +19,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private static RecyclerView.LayoutManager layoutManager;
     private static RecyclerView recyclerView;
     final String NameBLE = "lets_findus";
+    private static final int GATT_MAX_MTU_SIZE = 517;
 
     BluetoothManager BluetoothManager;
     BluetoothAdapter bluetoothAdapter;
@@ -130,12 +136,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectToDevice(BluetoothDevice device) {
         System.out.println("BLE// connectToDevice()");
+        Toast.makeText(this, "Connecting to " + device.getAddress(), Toast.LENGTH_LONG).show();
         if (mGatt == null) {
             mGatt = device.connectGatt(this, false, gattCallback); //Connect to a GATT Server
             //scanLeDevice(false);// will stop after first device detection
         }
     }
 
+    public void disconnectGattServer() {
+        Toast.makeText(getBaseContext(), "Closing Gatt connection", Toast.LENGTH_LONG).show();
+        if (mGatt != null) {
+            mGatt.disconnect();
+            mGatt.close();
+        }
+    }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
@@ -145,16 +159,28 @@ public class MainActivity extends AppCompatActivity {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.i("gattCallback", "STATE_CONNECTED");
-                    gatt.discoverServices();
+                    Toast.makeText(getBaseContext(), "Connected ", Toast.LENGTH_LONG).show();
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            boolean ans = mGatt.discoverServices();
+                            Log.d("onConnectionStateChange", "Discover Services started: " + ans);
+                            mGatt.requestMtu(GATT_MAX_MTU_SIZE);
+
+                        }
+                    });
                     break;
                 case BluetoothProfile.STATE_CONNECTING:
                     Log.i("gattCallback", "STATE_CONNECTING");
+                    gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e("gattCallback", "STATE_DISCONNECTED");
+                    disconnectGattServer();
                     break;
                 default:
                     Log.e("gattCallback", "STATE_OTHER");
+                    disconnectGattServer();
             }
         }
 
@@ -179,6 +205,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
                 promptEnableBluetooth();
+        }
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, "No LE Support.", Toast.LENGTH_LONG).show();
+            finish();
         }
     }
 
@@ -215,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     private void startBleScan() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             requestLocationPermission();
@@ -246,19 +277,33 @@ public class MainActivity extends AppCompatActivity {
     ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
+
+            BluetoothDevice btDevice = result.getDevice();
+            Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress() + ", RSSI: " + result.getRssi());
+
+            scanResults.add(result);
+            System.out.println("---------------------------scanResults 2°-------------------------" + scanResults);
+            scanResultAdapter.notifyDataSetChanged();
+            connectToDevice(btDevice);
+            return;
+            /*
             int indexQuery = scanResults.indexOf(result);
             if(indexQuery != -1) {
                 scanResults.add(result);
                 System.out.println("---------------------------scanResults 1°-------------------------" + scanResults);
-                scanResultAdapter.notifyItemChanged(scanResults.size() - 1);
+                scanResultAdapter.notifyDataSetChanged();
+                BluetoothDevice btDevice = result.getDevice();
+                connectToDevice(btDevice);
             }
             else {
                 BluetoothDevice btDevice = result.getDevice();
-                Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress());
+                Log.i("ScanCallback", "Found BLE device! Name: " + btDevice.getName() + ", Address: " + btDevice.getAddress() + ", RSSI: " + result.getRssi());
+
                 scanResults.add(result);
                 System.out.println("---------------------------scanResults 2°-------------------------" + scanResults);
-                scanResultAdapter.notifyItemInserted(scanResults.size() - 1);
-            }
+                scanResultAdapter.notifyDataSetChanged();
+                connectToDevice(btDevice);
+            }*/
         }
 
         @Override
@@ -276,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void requestLocationPermission() {
-        if(hasPermission( Manifest.permission.ACCESS_FINE_LOCATION))
+        if(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION))
             return;
         runOnUiThread(new Runnable() {
             @Override
@@ -292,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
                                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
                             }
                         }).show();
-                /* TODO: Implements .setNegativeButton */
+
             }
         });
     }
