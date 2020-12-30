@@ -3,8 +3,9 @@ package com.example.lets_findus.ui.profile;
 import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
@@ -24,6 +25,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.lets_findus.MainActivity;
 import com.example.lets_findus.R;
@@ -33,7 +36,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
+import com.yalantis.ucrop.UCrop;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -55,6 +61,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> takePhoto;
     private ActivityResultLauncher<Intent> pickPhoto;
+    private String currentPhotoPath;
 
     private String[] sex = {"Maschio", "Femmina", "Altro"};
 
@@ -142,8 +149,8 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onActivityResult(ActivityResult result) {
                 if(result.getResultCode() == RESULT_OK && result.getData() != null){
-                    Bitmap selectedImage = (Bitmap) result.getData().getExtras().get("data");
-                    image.setImageBitmap(selectedImage);
+                    Uri uri = Uri.parse(currentPhotoPath);
+                    launchUCrop(uri);
                 }
             }
         });
@@ -152,7 +159,15 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onActivityResult(ActivityResult result) {
                 if(result.getResultCode() == RESULT_OK && result.getData() != null){
-                    image.setImageURI(result.getData().getData());
+                    Uri sourceUri = result.getData().getData(); // 1
+                    File file = null; // 2
+                    try {
+                        file = createImageFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Uri destinationUri = Uri.fromFile(file);  // 3
+                    launchUCrop(sourceUri);
                 }
             }
         });
@@ -170,12 +185,25 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 @Override
                 public void onClick(DialogInterface dialog, int item) {
-                    if (options[item].equals("Fai una foto")) {
-                        takePhoto.launch(new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE));
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
-                    else {
-                        pickPhoto.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI));
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                                "com.example.android.fileprovider",
+                                photoFile);
+                        if (options[item].equals("Fai una foto")) {
+                            takePhoto.launch(new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT, photoURI));
+                        }
+                        else {
+                            pickPhoto.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI));
+                        }
                     }
+
                 }
             });
             builder.show();
@@ -205,6 +233,32 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         }
         return out;
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+    private void launchUCrop(Uri uri){
+        UCrop.Options options = new UCrop.Options();
+        options.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        options.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        UCrop.of(uri, uri)
+                .withOptions(options)
+                .withAspectRatio(1, 1)
+                .start(this);
     }
 
 
