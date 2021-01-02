@@ -10,14 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lets_findus.R;
-import com.example.lets_findus.utilities.Meeting;
-import com.example.lets_findus.utilities.Person;
+import com.example.lets_findus.utilities.MeetingPerson;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
 
-    private ArrayList<Meeting<Person>> dataSet;
+    private List<MeetingPerson> dataSet;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -33,7 +32,7 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
         }
     }
 
-    public FavAdapter(ArrayList<Meeting<Person>> data) {
+    public FavAdapter(List<MeetingPerson> data) {
         this.dataSet = data;
     }
 
@@ -53,8 +52,8 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
         TextView textViewName = holder.textViewName;
         TextView textViewVersion = holder.textViewVersion;
         ImageView imageView = holder.imageViewIcon;
-        textViewName.setText("Nickname: "+dataSet.get(position).data.nickname);
-        textViewVersion.setText("Anno di nascita: "+String.valueOf(dataSet.get(position).data.yearOfBirth));
+        textViewName.setText("Nickname: "+dataSet.get(position).person.nickname);
+        textViewVersion.setText("Anno di nascita: "+String.valueOf(dataSet.get(position).person.yearOfBirth));
         //imageView.setImageResource(dataSet.get(position).getImage());
     }
 

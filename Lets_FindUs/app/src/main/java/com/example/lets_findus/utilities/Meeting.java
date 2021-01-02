@@ -1,24 +1,38 @@
 package com.example.lets_findus.utilities;
 
-import android.location.Location;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
 
 import java.util.Date;
 
 //T is the object of the meeting
-public class Meeting<T> {
-    public static int id = 0; //identifier for the meeting
-    public final T data; //the object of the meeting
-    public final Location meetingLoc; //the location (including timestamp) of the meeting
+@Entity(indices = @Index({"latitude", "longitude"}))
+public class Meeting {
+    @PrimaryKey(autoGenerate = true)
+    public int id; //identifier for the meeting
+    public int personId;
+    @Ignore
+    public Person data; //the object of the meeting
+    public double latitude;
+    public double longitude;
+    public Date date;
     private boolean isFavourite = false; //if the meeting is set to favourite or not (default is not)
 
-    public Meeting(T data, Location meetingLoc) {
+    public Meeting(Person data, double latitude, double longitude, Date date) {
         this.data = data;
-        this.meetingLoc = meetingLoc;
-        id++;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.date = date;
+        this.personId = data.id;
+    }
+
+    public Meeting(int personId, double latitude, double longitude, Date date) {
+        this.personId = personId;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.date = date;
     }
 
     public void setFavourite(boolean favourite) {
@@ -29,12 +43,4 @@ public class Meeting<T> {
         return this.isFavourite;
     }
 
-    @Override
-    public String toString() {
-        return "Meeting{" +
-                "data=" + data +
-                ", meetingLoc=" + meetingLoc +
-                ", isFavourite=" + isFavourite +
-                '}';
-    }
 }

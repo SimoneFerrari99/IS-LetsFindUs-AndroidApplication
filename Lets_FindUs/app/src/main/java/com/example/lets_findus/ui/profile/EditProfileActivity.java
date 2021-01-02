@@ -1,7 +1,12 @@
 package com.example.lets_findus.ui.profile;
 
+import android.app.ActivityOptions;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -13,8 +18,16 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.lets_findus.MainActivity;
 import com.example.lets_findus.R;
@@ -22,8 +35,12 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.mikhaellopez.circularimageview.CircularImageView;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
+import com.yalantis.ucrop.UCrop;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,9 +56,16 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private MonthPickerDialog.Builder materialYearBuilder;
 
+    private CircularImageView image;
+
     private Menu menu;
 
+    private ActivityResultLauncher<Intent> takePhoto;
+    private ActivityResultLauncher<Intent> pickPhoto;
+    private String currentPhotoPath;
+
     private String[] sex = {"Maschio", "Femmina", "Altro"};
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +142,85 @@ public class EditProfileActivity extends AppCompatActivity {
         fillFormValue(other, getIntent().getBundleExtra("FIELD_VALUES"));
 
         setObbligatoryFieldsError(obbligatory);
+
+        image = findViewById(R.id.circularImageView);
+        image.setOnClickListener(imageSelector);
+
+        takePhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                    Uri uri = Uri.parse(currentPhotoPath);
+                    launchUCrop(uri, uri);
+                }
+            }
+        });
+
+        pickPhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                    Uri sourceUri = result.getData().getData(); // 1
+                    File file = null; // 2
+                    try {
+                        file = createImageFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Uri destinationUri = Uri.fromFile(file);  // 3
+                    launchUCrop(sourceUri, destinationUri);
+                }
+            }
+        });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            final Uri resultUri = UCrop.getOutput(data);
+            image.setImageURI(resultUri);
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(data);
+        }
+    }
+
+    private final View.OnClickListener imageSelector = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final CharSequence[] options = { "Fai una foto", "Scegli dalla galleria"};
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
+            builder.setTitle("Scegli la tua foto profilo");
+
+            builder.setItems(options, new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                                "com.example.android.fileprovider",
+                                photoFile);
+                        if (options[item].equals("Fai una foto")) {
+                            takePhoto.launch(new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT, photoURI));
+                        }
+                        else {
+                            pickPhoto.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI));
+                        }
+                    }
+
+                }
+            });
+            builder.show();
+        }
+    };
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater=getMenuInflater();
@@ -144,6 +245,32 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         }
         return out;
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+    private void launchUCrop(Uri source, Uri destination){
+        UCrop.Options options = new UCrop.Options();
+        options.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        options.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        UCrop.of(source, destination)
+                .withOptions(options)
+                .withAspectRatio(1, 1)
+                .start(this);
     }
 
 
@@ -239,7 +366,7 @@ public class EditProfileActivity extends AppCompatActivity {
             case android.R.id.home:
                 mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
-                startActivity(mIntent);
+                startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
                 return true;
             case R.id.confirm:
                 Bundle obbForm = getFormValues(obbligatory, null);
@@ -247,7 +374,10 @@ public class EditProfileActivity extends AppCompatActivity {
                 mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 mIntent.putExtra("FORM_DATA", data);
-                startActivity(mIntent);
+                if(currentPhotoPath != null){
+                    mIntent.putExtra("PROPIC_CHANGED", currentPhotoPath);
+                }
+                startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

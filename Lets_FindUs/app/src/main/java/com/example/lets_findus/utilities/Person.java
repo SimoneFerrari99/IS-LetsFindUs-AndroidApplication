@@ -3,6 +3,9 @@ package com.example.lets_findus.utilities;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -23,7 +26,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+@Entity
 public class Person {
+    @PrimaryKey(autoGenerate = true)
+    public int id;
     public enum Sex{
         MALE,
         FEMALE,
@@ -37,21 +43,19 @@ public class Person {
     @NotNull
     public Sex sex;
     @NotNull
-    public int yearOfBirth;
+    public Integer yearOfBirth;
 
     public String description;
     public String facebook;
     public String instagram;
     public String linkedin;
     public String email;
-    public int phoneNumber;
+    public Integer phoneNumber;
     public Date birthDate;
     public String other;
 
-    // TODO: 24/11/2020 aggiungere un'implementazione comoda per tutti i campi non obbligatori
-
-    public Person(@NotNull String pathName, @NotNull String nickname, @NotNull Sex sex, @NotNull int yearOfBirth) {
-        this.profilePath = pathName;
+    public Person(@NotNull String profilePath, @NotNull String nickname, @NotNull Sex sex, @NotNull Integer yearOfBirth) {
+        this.profilePath = profilePath;
         this.nickname = nickname;
         this.sex = sex;
         this.yearOfBirth = yearOfBirth;

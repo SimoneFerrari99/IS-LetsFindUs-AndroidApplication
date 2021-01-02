@@ -5,19 +5,27 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import com.example.lets_findus.R;
-import com.example.lets_findus.utilities.Meeting;
-import com.example.lets_findus.utilities.Person;
+import com.example.lets_findus.utilities.AppDatabase;
+import com.example.lets_findus.utilities.MeetingDao;
+import com.example.lets_findus.utilities.MeetingPerson;
+import com.example.lets_findus.utilities.PersonDao;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 public class FavouritesFragment extends Fragment {
 
@@ -25,7 +33,11 @@ public class FavouritesFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private static RecyclerView recyclerView;
     static View.OnClickListener myOnClickListener;
-    private static ArrayList<Meeting<Person>> data;
+    private static List<MeetingPerson> favouriteMeetings;
+
+    private static AppDatabase db;
+    private static MeetingDao md;
+    private static PersonDao pd;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -40,17 +52,28 @@ public class FavouritesFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        data = new ArrayList<>();
-        data.add(new Meeting<Person>(new Person("", "Gazz", Person.Sex.MALE, 1999), null));
-        data.add(new Meeting<Person>(new Person("", "Scheggia", Person.Sex.MALE, 1999), null));
-        data.add(new Meeting<Person>(new Person("", "Tulio", Person.Sex.MALE, 1999), null));
-        data.add(new Meeting<Person>(new Person("", "Ciullia", Person.Sex.FEMALE, 1999), null));
-        for (int i = 0; i < 10; i++){
-            data.add(new Meeting<Person>(new Person("", "Toso", Person.Sex.MALE, 1999), null));
+        if(db == null){
+            db = Room.databaseBuilder(getContext(), AppDatabase.class, "meeting_db").build();
+            md = db.meetingDao();
+            pd = db.personDao();
         }
 
-        adapter = new FavAdapter(data);
-        recyclerView.setAdapter(adapter);
+        Futures.addCallback(md.getFavouriteMeetings(), new FutureCallback<List<MeetingPerson>>() {
+            @Override
+            public void onSuccess(@NullableDecl List<MeetingPerson> result) {
+                favouriteMeetings = result;
+                adapter = new FavAdapter(favouriteMeetings);
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                favouriteMeetings = new ArrayList<>();
+                adapter = new FavAdapter(favouriteMeetings);
+                recyclerView.setAdapter(adapter);
+            }
+        }, Executors.newSingleThreadExecutor());
+
         return root;
     }
 
@@ -69,7 +92,7 @@ public class FavouritesFragment extends Fragment {
 
         private void removeItem(View v) {
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
-            Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
         }
     }
 }
