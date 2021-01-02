@@ -1,7 +1,6 @@
 package com.example.lets_findus.ui;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -22,9 +21,8 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         if(getIntent().hasExtra("PIC_PATH")){
             String picPath = getIntent().getStringExtra("PIC_PATH");
-            Bitmap image = BitmapFactory.decodeFile(picPath);
             ImageView iv = findViewById(R.id.imageView2);
-            iv.setImageBitmap(image);
+            iv.setImageURI(Uri.parse(picPath));
         }
     }
 

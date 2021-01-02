@@ -57,7 +57,11 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         active = match_frag;
 
         if(getIntent().hasExtra("FORM_DATA")){
-            prof_frag.setArguments(getIntent().getBundleExtra("FORM_DATA"));
+            Bundle data = getIntent().getBundleExtra("FORM_DATA");
+            if(getIntent().hasExtra("PROPIC_CHANGED")){
+                data.putString("propicFilePath", getIntent().getStringExtra("PROPIC_CHANGED"));
+            }
+            prof_frag.setArguments(data);
         }
 
         fm.beginTransaction().add(R.id.nav_host_fragment, prof_frag, "3").hide(prof_frag).commit();

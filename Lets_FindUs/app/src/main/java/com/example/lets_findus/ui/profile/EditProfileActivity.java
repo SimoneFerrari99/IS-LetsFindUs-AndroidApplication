@@ -22,6 +22,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -150,7 +151,7 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onActivityResult(ActivityResult result) {
                 if(result.getResultCode() == RESULT_OK && result.getData() != null){
                     Uri uri = Uri.parse(currentPhotoPath);
-                    launchUCrop(uri);
+                    launchUCrop(uri, uri);
                 }
             }
         });
@@ -167,10 +168,21 @@ public class EditProfileActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     Uri destinationUri = Uri.fromFile(file);  // 3
-                    launchUCrop(sourceUri);
+                    launchUCrop(sourceUri, destinationUri);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            final Uri resultUri = UCrop.getOutput(data);
+            image.setImageURI(resultUri);
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(data);
+        }
     }
 
     private final View.OnClickListener imageSelector = new View.OnClickListener() {
@@ -250,12 +262,12 @@ public class EditProfileActivity extends AppCompatActivity {
         return image;
     }
 
-    private void launchUCrop(Uri uri){
+    private void launchUCrop(Uri source, Uri destination){
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         options.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-        UCrop.of(uri, uri)
+        UCrop.of(source, destination)
                 .withOptions(options)
                 .withAspectRatio(1, 1)
                 .start(this);
@@ -362,6 +374,9 @@ public class EditProfileActivity extends AppCompatActivity {
                 mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 mIntent.putExtra("FORM_DATA", data);
+                if(currentPhotoPath != null){
+                    mIntent.putExtra("PROPIC_CHANGED", currentPhotoPath);
+                }
                 startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
                 return true;
             default:

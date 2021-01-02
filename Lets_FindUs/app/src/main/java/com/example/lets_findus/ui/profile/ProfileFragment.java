@@ -3,6 +3,7 @@ package com.example.lets_findus.ui.profile;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -42,6 +43,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private ConstraintLayout obbligatory;
     private ConstraintLayout other;
     private View root;
+    private String picPath;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,6 +75,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             if(formData.containsKey("Nickname")){
                 ((TextView)root.findViewById(R.id.nickname_card)).setText(formData.getString("Nickname"));
             }
+            if(formData.containsKey("propicFilePath")){
+                String propicPath = formData.getString("propicFilePath");
+                ((CircularImageView)root.findViewById(R.id.circularImageView)).setImageURI(Uri.parse(propicPath));
+                substituteProfilePicture(propicPath);
+            }
             setFieldsValue(obbligatory, formData);
             setFieldsValue(other, formData);
         }
@@ -92,7 +99,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), ViewPictureActivity.class);
-
+                i.putExtra("PIC_PATH", picPath);
                 View sharedView = circularImageView;
                 String transitionName = getString(R.string.image_transition);
 
@@ -101,6 +108,22 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             }
         });
         return root;
+    }
+
+    private void substituteProfilePicture(String newProfilePicturePath){
+        try {
+            Person myProfile = profile.get();
+            if(myProfile.profilePath != null){
+                File current = new File(Uri.parse(myProfile.profilePath).getPath());
+                if(current.exists()){
+                    current.delete();
+                }
+            }
+            picPath = newProfilePicturePath;
+            myProfile.profilePath = newProfilePicturePath;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void fillFieldsValueOnLoad(final ConstraintLayout container, final Future<Person> profile){
@@ -113,10 +136,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 try {
                     final Person myProfile = profile.get();
                     final Map<String, String> profileDump = myProfile.dumpToString();
+                    picPath = myProfile.profilePath;
 
                     mainThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            ((CircularImageView)root.findViewById(R.id.circularImageView)).setImageURI(Uri.parse(myProfile.profilePath));
                             ((TextView)root.findViewById(R.id.nickname_card)).setText(myProfile.nickname);
                             for(int i = 0; i < container.getChildCount(); i++){
                                 final View v = container.getChildAt(i);
