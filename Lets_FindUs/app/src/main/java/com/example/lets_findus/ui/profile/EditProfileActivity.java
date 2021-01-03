@@ -149,7 +149,7 @@ public class EditProfileActivity extends AppCompatActivity {
         takePhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
-                if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                if(result.getResultCode() == RESULT_OK){
                     Uri uri = Uri.parse(currentPhotoPath);
                     launchUCrop(uri, uri);
                 }
@@ -197,25 +197,23 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 @Override
                 public void onClick(DialogInterface dialog, int item) {
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                    // Continue only if the File was successfully created
-                    if (photoFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
-                                "com.example.android.fileprovider",
-                                photoFile);
-                        if (options[item].equals("Fai una foto")) {
+                    if (options[item].equals("Fai una foto")) {
+                        File photoFile = null;
+                        try {
+                            photoFile = createImageFile();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                        // Continue only if the File was successfully created
+                        if (photoFile != null) {
+                            Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                                    "com.example.android.fileprovider",
+                                    photoFile);
                             takePhoto.launch(new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT, photoURI));
                         }
-                        else {
-                            pickPhoto.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI));
-                        }
+                    } else {
+                        pickPhoto.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI));
                     }
-
                 }
             });
             builder.show();
@@ -256,7 +254,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
