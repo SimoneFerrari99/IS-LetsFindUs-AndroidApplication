@@ -40,7 +40,8 @@
                         android:layout_width="140dp"
                         android:layout_height="140dp"
                         android:layout_marginTop="8dp"
-                        android:src="@drawable/ic_favourites_black_24dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_round_camera_alt_24"
                         app:civ_border_color="@color/colorPrimary"
                         app:civ_border_width="3dp"
                         app:civ_shadow="true"
@@ -65,6 +66,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/circularImageView" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
