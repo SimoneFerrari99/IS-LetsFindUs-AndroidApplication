@@ -1,30 +1,29 @@
 package com.example.lets_findus;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import com.github.appintro.AppIntro;
+import com.github.appintro.AppIntroCustomLayoutFragment;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-public class FirstOpening extends AppCompatActivity {
+public class FirstOpening extends AppIntro {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_first_opening);
-
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment2);
-        final NavController navController = navHostFragment.getNavController();
-
-        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navController.navigate(R.id.action_firstFragment_to_infoFirstPage);
-            }
-        });
+        addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_first));
+        addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_information_one));
+        addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_information_two));
+        addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_information_three));
+        addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_security_warning));
+        showStatusBar(true);
+        setStatusBarColorRes(R.color.colorPrimaryDark);
+        setBarColor(getColor(R.color.colorSecondary));
+        setSeparatorColor(getColor(R.color.colorSecondary));
+        setDoneText("Ho capito");
+        setColorDoneText(Color.BLACK);
+        setIndicatorColor(getColor(R.color.selectedDot), getColor(R.color.unselectedDot));
+        setNextArrowColor(Color.BLACK);
+        setSkipButtonEnabled(false);
     }
 }
