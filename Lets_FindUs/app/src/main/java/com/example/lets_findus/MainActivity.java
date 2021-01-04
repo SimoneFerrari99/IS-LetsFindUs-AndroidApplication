@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_opening);
-
-        setTitle("tutorial");
+        Intent startFirstOpening = new Intent(this, FirstOpening.class);
+        startActivity(startFirstOpening);
     }
 
     protected void onCreate2(Bundle savedInstanceState) {
