@@ -9,7 +9,7 @@
     <string name="settings">Impostazioni</string>
     <string name="searchHint">Esegui una ricerca</string>
     <string name="missing_permission_title">:(</string>
-    <string name="missing_permission_message">Purtroppo la nostra applicazione non può funzionare senza la localizzazione. Se non vuole garantire i permessi necessari nessun problema, semplicemente disinstalli l\'applicazione. Se invece si è sbagliato, vai alle impostazioni e dai il consenso per la localizzazione.</string>
+    <string name="missing_permission_message">La nostra applicazione non può funzionare senza la localizzazione. Se non si vogliono garantire i permessi necessari, nessun problema: semplicemente disinstalla l\'applicazione. Se ti sei sbagliato, vai nelle impostazioni di Android e dai il consenso per la localizzazione.</string>
     <string name="missing_permission_positive_text">Concedi i permessi</string>
     <string name="missing_permission_negative_text">Disinstalla l\'applicazione :(</string>
     <string name="search_match_button">Cerca incontri in questa area</string>
