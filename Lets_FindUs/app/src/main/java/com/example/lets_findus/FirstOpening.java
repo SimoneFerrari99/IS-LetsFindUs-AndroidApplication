@@ -23,7 +23,7 @@ public class FirstOpening extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                navController.navigateUp();
+                navController.navigate(R.id.action_firstFragment_to_infoFirstPage);
             }
         });
     }
