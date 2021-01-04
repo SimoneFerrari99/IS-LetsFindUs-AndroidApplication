@@ -24,7 +24,7 @@
         </provider>
         <activity android:name=".ui.ViewPictureActivity" />
         <activity android:name=".ProfileCreationActivity"></activity>
-        <activity android:name=".FirstOpening" />
+        <activity android:name=".FirstOpeningInformations" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">

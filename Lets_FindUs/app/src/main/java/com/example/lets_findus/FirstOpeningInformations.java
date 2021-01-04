@@ -6,7 +6,7 @@ import android.os.Bundle;
 import com.github.appintro.AppIntro;
 import com.github.appintro.AppIntroCustomLayoutFragment;
 
-public class FirstOpening extends AppIntro {
+public class FirstOpeningInformations extends AppIntro {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
