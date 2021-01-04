@@ -54,6 +54,10 @@ public class Person {
     public Date birthDate;
     public String other;
 
+    public Person(){
+        super();
+    }
+
     public Person(@NotNull String profilePath, @NotNull String nickname, @NotNull Sex sex, @NotNull Integer yearOfBirth) {
         this.profilePath = profilePath;
         this.nickname = nickname;

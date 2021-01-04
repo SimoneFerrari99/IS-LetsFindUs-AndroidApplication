@@ -1,8 +1,9 @@
-package com.example.lets_findus;
+package com.example.lets_findus.ui.first_boot;
 
 import android.graphics.Color;
 import android.os.Bundle;
 
+import com.example.lets_findus.R;
 import com.github.appintro.AppIntro;
 import com.github.appintro.AppIntroCustomLayoutFragment;
 

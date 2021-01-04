@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/profile_creation_navigation">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_creation_navigation"
+    app:startDestination="@id/profilePictureFragment">
 
+    <fragment
+        android:id="@+id/profilePictureFragment"
+        android:name="com.example.lets_findus.ui.first_boot.ProfilePictureFragment"
+        android:label="fragment_profile_picture"
+        tools:layout="@layout/fragment_profile_picture" >
+        <action
+            android:id="@+id/action_profilePictureFragment_to_insertObbligatoryDataFragment"
+            app:destination="@id/insertObbligatoryDataFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/insertObbligatoryDataFragment"
+        android:name="com.example.lets_findus.ui.first_boot.InsertObbligatoryDataFragment"
+        android:label="fragment_insert_obbligatory_data"
+        tools:layout="@layout/fragment_insert_obbligatory_data" >
+        <action
+            android:id="@+id/action_insertObbligatoryDataFragment_to_insertNonObbligatoryDataFragment"
+            app:destination="@id/insertNonObbligatoryDataFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/insertNonObbligatoryDataFragment"
+        android:name="com.example.lets_findus.ui.first_boot.InsertNonObbligatoryDataFragment"
+        android:label="fragment_insert_non_obbligatory_data"
+        tools:layout="@layout/fragment_insert_non_obbligatory_data" />
 </navigation>

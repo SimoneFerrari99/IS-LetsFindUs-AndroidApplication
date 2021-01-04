@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
+import com.example.lets_findus.ui.first_boot.ProfileCreationActivity;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
 import com.example.lets_findus.utilities.Meeting;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
+        Intent startFirstOpening = new Intent(this, ProfileCreationActivity.class);
         startActivity(startFirstOpening);
     }
 

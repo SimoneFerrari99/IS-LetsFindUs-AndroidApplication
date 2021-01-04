@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.first_boot.ProfilePictureFragment">
 
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="0dp"
@@ -23,6 +22,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/profile_picture_holder"
         android:layout_width="wrap_content"
         android:layout_height="180dp"
         android:scaleType="centerInside"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
+        android:id="@+id/profile_picture_next_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"

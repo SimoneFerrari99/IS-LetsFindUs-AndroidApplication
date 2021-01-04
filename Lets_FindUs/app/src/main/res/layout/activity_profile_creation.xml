@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileCreationActivity">
+    tools:context=".ui.first_boot.ProfileCreationActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/profile_creation_fragment"
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/mobile_navigation"
+        app:navGraph="@navigation/profile_creation_navigation"
         tools:layout_editor_absoluteX="95dp"
         tools:layout_editor_absoluteY="127dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
