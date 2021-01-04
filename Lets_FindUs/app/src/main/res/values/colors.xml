@@ -9,6 +9,8 @@
     <color name="colorSecondaryLight">#ffffb0</color>
 
     <color name="black">#000000</color>
+    <color name="selectedDot">#212121</color>
+    <color name="unselectedDot">#484848</color>
 
     <!-- <color name="colorAccent">#03DAC5</color> -->
 </resources>
