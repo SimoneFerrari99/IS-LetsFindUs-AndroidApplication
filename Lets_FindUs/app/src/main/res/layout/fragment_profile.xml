@@ -100,7 +100,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/obbligatory_data_label"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/nickname_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -115,7 +114,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/nickname_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/sex_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -130,7 +128,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/sex_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/year_birth_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -168,7 +165,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/non_obbligatory_data_label"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/description_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -183,7 +179,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/description_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/facebook_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -198,7 +193,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/facebook_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/instagram_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -213,7 +207,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/instagram_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/linkedin_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -228,7 +221,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/linkedin_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/email_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -243,7 +235,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/email_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/phone_number_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -258,7 +249,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/phone_number_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/birth_date_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />
@@ -274,7 +264,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/birth_date_tv"
-                        app:mtv_contentText="content"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/other_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />

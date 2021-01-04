@@ -32,5 +32,6 @@
     <string name="social_hint">Nome profilo o link profilo</string>
     <string name="mail_hint">nome@gmail.com</string>
     <string name="image_transition">imageTransition</string>
+    <string name="add_to_favourite">Add to favourite</string>
 
 </resources>
