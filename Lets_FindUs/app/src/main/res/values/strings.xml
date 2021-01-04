@@ -31,5 +31,8 @@
     <string name="nickname">Nickname</string>
     <string name="social_hint">Nome profilo o link profilo</string>
     <string name="mail_hint">nome@gmail.com</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="profile_photo_intro_string">Inserisci una foto profilo, ti raccomandiamo di scegliere una foto in cui tu possa essere riconosciuto!</string>
 
 </resources>
