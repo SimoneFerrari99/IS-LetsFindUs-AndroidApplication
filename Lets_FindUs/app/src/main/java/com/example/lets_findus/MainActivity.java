@@ -47,6 +47,13 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_first_opening);
+
+        setTitle("tutorial");
+    }
+
+    protected void onCreate2(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
 
