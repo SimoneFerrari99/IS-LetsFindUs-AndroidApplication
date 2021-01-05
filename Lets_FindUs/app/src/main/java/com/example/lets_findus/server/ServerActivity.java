@@ -306,7 +306,7 @@ public class ServerActivity extends AppCompatActivity {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     mLogHandler.post(() -> {
-                        log.append("\nDevice added: " + device.getAddress() + ", name: " + device.getName());
+                        log.append("\nDevice added: " + device.getAddress());
                     });
                     mDevices.add(device);
                     break;

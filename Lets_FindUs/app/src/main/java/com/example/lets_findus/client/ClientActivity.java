@@ -17,11 +17,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +43,8 @@ import static com.example.lets_findus.Utilis.findCharacteristics;
 public class ClientActivity extends AppCompatActivity {
 
     EditText mEdit;
+    private Handler mLogHandler;
+    private TextView log;
 
     private boolean mConnected;
     private boolean mTimeInitialized;
@@ -74,6 +78,8 @@ public class ClientActivity extends AppCompatActivity {
         bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
+        log = findViewById(R.id.log_text_view);
+        mLogHandler = new Handler(Looper.getMainLooper());
         mEdit = findViewById(R.id.message_edit_text);
         start = findViewById(R.id.start_scanning_button);
         stop = findViewById(R.id.stop_scanning_button);
@@ -152,7 +158,9 @@ public class ClientActivity extends AppCompatActivity {
         mHandler.postDelayed(this::stopScan, SCAN_PERIOD);
 
         mScanning = true;
-        Toast.makeText(this, "Started scanning", Toast.LENGTH_LONG).show();
+        mLogHandler.post(() -> {
+            log.append("\nStarted scanning");
+        });
     }
 
     private void stopScan() {
@@ -164,7 +172,9 @@ public class ClientActivity extends AppCompatActivity {
         mScanCallback = null;
         mScanning = false;
         mHandler = null;
-        Toast.makeText(this, "Stopped scanning", Toast.LENGTH_LONG).show();
+        mLogHandler.post(() -> {
+            log.append("\nStopped scanning after 5000ms");
+        });
     }
 
     private void scanComplete() {
@@ -200,13 +210,17 @@ public class ClientActivity extends AppCompatActivity {
 
     private void requestLocationPermission() {
         requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
-        Toast.makeText(this, "Requested user enable Location. Try starting the scan again", Toast.LENGTH_LONG).show();
+        mLogHandler.post(() -> {
+            log.append("\nRequested user enable Location. Try starting the scan again");
+        });
     }
 
     private void requestBluetoothEnable() {
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        Toast.makeText(this, "Requested user enables Bluetooth. Try starting the scan again", Toast.LENGTH_LONG).show();
+        mLogHandler.post(() -> {
+            log.append("\nRequested user enable Bluetooth. Try starting the scan again");
+        });
     }
 
 /* ------------------------------------------------------------------------------ */
@@ -214,7 +228,9 @@ public class ClientActivity extends AppCompatActivity {
 /* ----------------------------- CONNESSIONE AL DEVICE ----------------------------- */
 
     private void connectDevice(BluetoothDevice device) {
-        Toast.makeText(this, "Connecting to " + device.getName(), Toast.LENGTH_LONG).show();
+        mLogHandler.post(() -> {
+            log.append("\nConnecting to " + device.getName());
+        });
         mGatt = device.connectGatt(this, false, gattCallback);
     }
 
@@ -228,28 +244,40 @@ public class ClientActivity extends AppCompatActivity {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
 
-            Log.i("onConnectionStateChange", "Status: " + status);
+            mLogHandler.post(() -> {
+                log.append("\nonConnectionStateChange --> Status: " + status);
+            });
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
-                    Log.i("onConnectionStateChange", "STATE_CONNECTED");
-                    Log.i("onConnectionStateChange", "Connected to device " + gatt.getDevice().getName());
+                    mLogHandler.post(() -> {
+                        log.append("\nonConnectionStateChange --> STATE_CONNECTED");
+                        log.append("\nonConnectionStateChange --> Connected to device " + gatt.getDevice().getName());
+                    });
                     setConnected(true);
                     gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
-                    Log.i("onConnectionStateChange", "STATE_DISCONNECTED");
+                    mLogHandler.post(() -> {
+                        log.append("\nonConnectionStateChange --> STATE_DISCONNECTED");
+                    });
                     break;
                 default:
-                    Log.i("onConnectionStateChange", "newState = " + newState);
+                    mLogHandler.post(() -> {
+                        log.append("\nonConnectionStateChange --> newState = " + newState);
+                    });
                     disconnectGattServer();
                     break;
             }
             switch (status) {
                 case BluetoothGatt.GATT_FAILURE:
-                    Log.i("onConnectionStateChange", "Connection Gatt failure status " + status);
+                    mLogHandler.post(() -> {
+                        log.append("\nonConnectionStateChange --> Connection Gatt failure status " + status);
+                    });
                     break;
                 default:
-                    Log.i("onConnectionStateChange", "Connection not GATT sucess status " + status);
+                    mLogHandler.post(() -> {
+                        log.append("\nonConnectionStateChange --> Connection not GATT sucess status " + status);
+                    });
                     break;
 
             }
@@ -261,39 +289,55 @@ public class ClientActivity extends AppCompatActivity {
             List<BluetoothGattCharacteristic> matchingCharacteristics = findCharacteristics(gatt);
 
             if (matchingCharacteristics.isEmpty()) {
-                Log.i("onServicesDiscovered", "Unable to find characteristics");
+                mLogHandler.post(() -> {
+                    log.append("\nonServicesDiscovered --> Unable to find characteristics");
+                });
                 return;
             }
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                Log.i("onServicesDiscovered", "Device service discovery unsuccessful, status " + status);
+                mLogHandler.post(() -> {
+                    log.append("\nonServicesDiscovered --> Device service discovery unsuccessful, status " + status);
+                });
                 return;
             }
-            Log.i("onServicesDiscovered", "Initializing: setting write type and enabling notification");
+            mLogHandler.post(() -> {
+                log.append("\nonServicesDiscovered --> Initializing: setting write type and enabling notification");
+            });
             for (BluetoothGattCharacteristic characteristic : matchingCharacteristics) {
                 characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
                 boolean characteristicWriteSuccess = gatt.setCharacteristicNotification(characteristic, true);
                 if (characteristicWriteSuccess) {
-                    Log.i("onServicesDiscovered", "Characteristic notification set successfully for " + characteristic.getUuid().toString());
+                    mLogHandler.post(() -> {
+                        log.append("\nonServicesDiscovered --> Characteristic notification set successfully for " + characteristic.getUuid().toString());
+                    });
                     if (Utilis.isEchoCharacteristic(characteristic)) {
                         initializeEcho();
                     } else if (Utilis.isTimeCharacteristic(characteristic)) {
                         List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
                         BluetoothGattDescriptor descriptor = Utilis.findClientConfigurationDescriptor(descriptorList);
                         if (descriptor == null) {
-                            Log.i("onServicesDiscovered", "Unable to find Characteristic Configuration Descriptor");
+                            mLogHandler.post(() -> {
+                                log.append("\nonServicesDiscovered --> Unable to find Characteristic Configuration Descriptor");
+                            });
                             return;
                         }
 
                         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                         boolean descriptorWriteInitiated = gatt.writeDescriptor(descriptor);
                         if (descriptorWriteInitiated) {
-                            Log.i("onServicesDiscovered", "Characteristic Configuration Descriptor write initiated: " + descriptor.getUuid().toString());
+                            mLogHandler.post(() -> {
+                                log.append("\nonServicesDiscovered --> Characteristic Configuration Descriptor write initiated: " + descriptor.getUuid().toString());
+                            });
                         } else {
-                            Log.e("onServicesDiscovered", "Characteristic Configuration Descriptor write failed to initiate: " + descriptor.getUuid().toString());
+                            mLogHandler.post(() -> {
+                                log.append("\nonServicesDiscovered --> Characteristic Configuration Descriptor write failed to initiate: " + descriptor.getUuid().toString());
+                            });
                         }
                     }
                 } else {
-                    Log.i("onServicesDiscovered", "Characteristic notification set failure for " + characteristic.getUuid().toString());
+                    mLogHandler.post(() -> {
+                        log.append("\nonServicesDiscovered --> Characteristic notification set failure for " + characteristic.getUuid().toString());
+                    });
                 }
             }
         }
@@ -302,16 +346,23 @@ public class ClientActivity extends AppCompatActivity {
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.i("onCharacteristicRead", "Characteristic read successfully");
+                mLogHandler.post(() -> {
+                    log.append("\nonCharacteristicRead --> Characteristic read successfully");
+                });
                 byte[] messageBytes = characteristic.getValue();
-                Log.i("onCharacteristicRead", "Read: " + Utilis.byteArrayInHexFormat(messageBytes));
+                mLogHandler.post(() -> {
+                    log.append("\nonCharacteristicRead --> Read: " + Utilis.byteArrayInHexFormat(messageBytes));
+                });
                 String message = Utilis.stringFromBytes(messageBytes);
                 if (message == null) {
-                    Log.e("onCharacteristicRead", "Unable to convert bytes to string");
+                    mLogHandler.post(() -> {
+                        log.append("\nonCharacteristicRead --> Unable to convert bytes to string");
+                    });
                     return;
                 }
-
-                Log.e("onCharacteristicRead", "Received message: " + message);
+                mLogHandler.post(() -> {
+                    log.append("\nonCharacteristicRead --> Received message: " + message);
+                });
             }
         }
 
@@ -319,9 +370,13 @@ public class ClientActivity extends AppCompatActivity {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.i("onCharacteristicWrite", "Characteristic written successfully");
+                mLogHandler.post(() -> {
+                    log.append("\nonCharacteristicWrite --> Characteristic written successfully");
+                });
             } else {
-                Log.i("onCharacteristicWrite", "Characteristic write unsuccessful, status: " + status);
+                mLogHandler.post(() -> {
+                    log.append("\nonCharacteristicWrite --> Characteristic write unsuccessful, status: " + status);
+                });
                 disconnectGattServer();
             }
         }
@@ -329,24 +384,35 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-            Log.i("onCharacteristicChanged", "Characteristic changed, " + characteristic.getUuid().toString());
+            mLogHandler.post(() -> {
+                log.append("\nonCharacteristicChanged --> Characteristic changed, " + characteristic.getUuid().toString());
+            });
             byte[] messageBytes = characteristic.getValue();
-            Log.i("onCharacteristicChanged", "Read: " + Utilis.byteArrayInHexFormat(messageBytes));
+            mLogHandler.post(() -> {
+                log.append("\nonCharacteristicChanged --> Read " + Utilis.byteArrayInHexFormat(messageBytes));
+            });
             String message = Utilis.stringFromBytes(messageBytes);
             if (message == null) {
-                Log.e("onCharacteristicChanged", "Unable to convert bytes to string");
+                mLogHandler.post(() -> {
+                    log.append("\nonCharacteristicChanged --> Unable to convert bytes to string");
+                });
                 return;
             }
-
-            Log.e("onCharacteristicChanged", "Received message: " + message);
+            mLogHandler.post(() -> {
+                log.append("\nonCharacteristicChanged --> Received message: " + message);
+            });
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.i("onDescriptorWrite", "Descriptor written successfully: " + descriptor.getUuid().toString());
+                mLogHandler.post(() -> {
+                    log.append("\nonDescriptorWrite --> Descriptor written successfully: " + descriptor.getUuid().toString());
+                });
             } else {
-                Log.i("onDescriptorWrite", "Descriptor write unsuccessful: " + descriptor.getUuid().toString());
+                mLogHandler.post(() -> {
+                    log.append("\nonDescriptorWrite --> Descriptor write unsuccessful: " + descriptor.getUuid().toString());
+                });
             }
         }
 
@@ -363,26 +429,36 @@ public class ClientActivity extends AppCompatActivity {
 
         BluetoothGattCharacteristic characteristic = Utilis.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
-            Log.e("sendMessage", "Unable to find echo characteristic");
+            mLogHandler.post(() -> {
+                log.append("\nsendMessage --> Unable to find echo characteristic");
+            });
             disconnectGattServer();
             return;
         }
 
         String message = mEdit.getText().toString();
-        Log.i("sendMessage", "Sending message: " + message);
+        mLogHandler.post(() -> {
+            log.append("\nsendMessage --> Sending message: " + message);
+        });
 
         byte[] messageBytes = Utilis.bytesFromString(message);
         if (messageBytes.length == 0) {
-            Log.e("sendMessage", "Unable to convert message to bytes");
+            mLogHandler.post(() -> {
+                log.append("\nsendMessage --> Unable to convert message to bytes");
+            });
             return;
         }
 
         characteristic.setValue(messageBytes);
         boolean success = mGatt.writeCharacteristic(characteristic);
         if (success) {
-            Log.i("sendMessage", "Wrote: " + Utilis.byteArrayInHexFormat(messageBytes));
+            mLogHandler.post(() -> {
+                log.append("\nsendMessage --> Wrote: " + Utilis.byteArrayInHexFormat(messageBytes));
+            });
         } else {
-            Log.e("sendMessage", "Failed to write data");
+            mLogHandler.post(() -> {
+                log.append("\nsendMessage --> Failed to write data");
+            });
         }
     }
 
