@@ -1,8 +1,5 @@
 package com.example.lets_findus.utilities;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -16,10 +13,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.InvalidObjectException;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -46,11 +44,13 @@ public class Person {
     public Integer yearOfBirth;
 
     public String description;
+    public String name;
+    public String surname;
     public String facebook;
     public String instagram;
     public String linkedin;
     public String email;
-    public Integer phoneNumber;
+    public Long phoneNumber;
     public Date birthDate;
     public String other;
 
@@ -65,15 +65,6 @@ public class Person {
         this.yearOfBirth = yearOfBirth;
     }
 
-    //return the Bitmap loaded from the path, if the path is valid, an exception if not
-    @NotNull
-    public Bitmap getProfilePicture() throws InvalidObjectException {
-        Bitmap image = BitmapFactory.decodeFile(this.profilePath);
-        if (image != null)
-            return image;
-        else
-            throw new InvalidObjectException("The specified file name cannot be decoded into a bitmap");
-    }
 
     public void storePersonAsync(final FileOutputStream fos){
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -137,12 +128,20 @@ public class Person {
         }
         dumper.put("Anno di nascita", String.valueOf(yearOfBirth));
         dumper.put("Descrizione", description);
+        dumper.put("Nome", name);
+        dumper.put("Cognome", surname);
         dumper.put("Facebook", facebook);
         dumper.put("Instagram", instagram);
         dumper.put("Linkedin", linkedin);
         dumper.put("Email", email);
         dumper.put("Telefono", (phoneNumber != 0) ? String.valueOf(phoneNumber) : null);
-        dumper.put("Data di nascita", (birthDate != null) ? birthDate.toString() : null);
+        if(birthDate != null){
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
+            dumper.put("Data di nascita", sdf.format(birthDate));
+        }
+        else{
+            dumper.put("Data di nascita", null);
+        }
         dumper.put("Altro", other);
 
         return dumper;

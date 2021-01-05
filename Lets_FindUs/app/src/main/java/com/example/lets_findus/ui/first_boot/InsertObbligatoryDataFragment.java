@@ -1,5 +1,6 @@
 package com.example.lets_findus.ui.first_boot;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -8,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
@@ -42,7 +44,7 @@ public class InsertObbligatoryDataFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_insert_obbligatory_data, container, false);
+        final View root = inflater.inflate(R.layout.fragment_insert_obbligatory_data, container, false);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.sex_dropdown_menu_popup_item, sex);
 
@@ -67,6 +69,12 @@ public class InsertObbligatoryDataFragment extends Fragment {
         yearBirth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                View view = getActivity().getCurrentFocus();
+                if (view == null) {
+                    view = new View(getActivity());
+                }
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 yearPicker.show();
             }
         });
@@ -74,6 +82,12 @@ public class InsertObbligatoryDataFragment extends Fragment {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    View view = getActivity().getCurrentFocus();
+                    if (view == null) {
+                        view = new View(getActivity());
+                    }
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     yearPicker.show();
                 }
             }

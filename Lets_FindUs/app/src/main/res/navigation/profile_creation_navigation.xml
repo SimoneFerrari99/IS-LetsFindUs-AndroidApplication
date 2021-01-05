@@ -27,5 +27,13 @@
         android:id="@+id/insertNonObbligatoryDataFragment"
         android:name="com.example.lets_findus.ui.first_boot.InsertNonObbligatoryDataFragment"
         android:label="fragment_insert_non_obbligatory_data"
-        tools:layout="@layout/fragment_insert_non_obbligatory_data" />
+        tools:layout="@layout/fragment_insert_non_obbligatory_data" >
+        <action
+            android:id="@+id/action_insertNonObbligatoryDataFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.lets_findus.ui.profile.ProfileFragment"
+        android:label="ProfileFragment" />
 </navigation>

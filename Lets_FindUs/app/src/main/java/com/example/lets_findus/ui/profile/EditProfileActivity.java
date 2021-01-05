@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -59,6 +60,8 @@ public class EditProfileActivity extends AppCompatActivity {
     private CircularImageView image;
 
     private Menu menu;
+
+    private boolean modifiedPhoto = false;
 
     private ActivityResultLauncher<Intent> takePhoto;
     private ActivityResultLauncher<Intent> pickPhoto;
@@ -180,6 +183,7 @@ public class EditProfileActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             final Uri resultUri = UCrop.getOutput(data);
             image.setImageURI(resultUri);
+            modifiedPhoto = true;
         } else if (resultCode == UCrop.RESULT_ERROR) {
             final Throwable cropError = UCrop.getError(data);
         }
@@ -371,7 +375,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 mIntent.putExtra("FORM_DATA", data);
-                if(currentPhotoPath != null){
+                if(modifiedPhoto){
+                    Log.d("Modified photo", "ciao");
                     mIntent.putExtra("PROPIC_CHANGED", currentPhotoPath);
                 }
                 startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());

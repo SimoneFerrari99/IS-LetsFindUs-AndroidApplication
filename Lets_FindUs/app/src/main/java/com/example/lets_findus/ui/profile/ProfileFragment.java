@@ -26,8 +26,9 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -50,17 +51,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         Bundle formData = getArguments();
         root = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        // TODO: 17/12/2020 questo pezzo è solo provvisorio finchè non verrà creata la pagina di creazione guidata del profilo 
-        File provvisorio = new File(getContext().getFilesDir(), myProfileFilename);
-        if(!provvisorio.exists()){
-            Person dummy = new Person("", "Dummy", Person.Sex.MALE, 1999);
-            try {
-                dummy.storePersonAsync(requireContext().openFileOutput(myProfileFilename, Context.MODE_PRIVATE));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
         try {
             FileInputStream fis = requireContext().openFileInput(myProfileFilename);
             profile = Person.loadPersonAsync(fis);
@@ -80,12 +70,16 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 ((CircularImageView)root.findViewById(R.id.circularImageView)).setImageURI(Uri.parse(propicPath));
                 substituteProfilePicture(propicPath);
             }
+            else {
+                setProfilePicture(profile);
+            }
             setFieldsValue(obbligatory, formData);
             setFieldsValue(other, formData);
         }
         else{
             fillFieldsValueOnLoad(obbligatory, profile);
             fillFieldsValueOnLoad(other, profile);
+            setProfilePicture(profile);
         }
 
         FloatingActionButton fab = root.findViewById(R.id.floating_modify);
@@ -126,6 +120,17 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void setProfilePicture(Future<Person> person){
+        final Person myProfile;
+        try {
+            myProfile = profile.get();
+            picPath = myProfile.profilePath;
+            ((CircularImageView)root.findViewById(R.id.circularImageView)).setImageURI(Uri.parse(myProfile.profilePath));
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void fillFieldsValueOnLoad(final ConstraintLayout container, final Future<Person> profile){
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -136,12 +141,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 try {
                     final Person myProfile = profile.get();
                     final Map<String, String> profileDump = myProfile.dumpToString();
-                    picPath = myProfile.profilePath;
 
                     mainThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            ((CircularImageView)root.findViewById(R.id.circularImageView)).setImageURI(Uri.parse(myProfile.profilePath));
                             ((TextView)root.findViewById(R.id.nickname_card)).setText(myProfile.nickname);
                             for(int i = 0; i < container.getChildCount(); i++){
                                 final View v = container.getChildAt(i);
@@ -234,18 +237,19 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     break;
                 case R.id.phone_number_tv:
                     if(value == null) {
-                        myProfile.phoneNumber = 0;
+                        myProfile.phoneNumber = 0L;
                     }
                     else {
-                        myProfile.phoneNumber = Integer.parseInt(value);
+                        myProfile.phoneNumber = Long.parseLong(value);
                     }
                     break;
                 case R.id.birth_date_tv:
                     if(value == null) {
-                        myProfile.phoneNumber = 0;
+                        myProfile.birthDate = null;
                     }
                     else {
-                        myProfile.birthDate = DateFormat.getInstance().parse(value);
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
+                        myProfile.birthDate = sdf.parse(value);
                     }
                     break;
                 case R.id.other_tv:

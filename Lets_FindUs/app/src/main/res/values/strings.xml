@@ -38,5 +38,8 @@
     <string name="profile_photo_intro_string">Inserisci una foto profilo, ti raccomandiamo di scegliere una foto in cui tu possa essere riconosciuto!</string>
     <string name="insert_obbligatory_data_string">Ora inserisci alcuni dati. Questi dati sono obbligatori per il funzionamento della nostra app!</string>
     <string name="maschio">Maschio</string>
+    <string name="name_tv_label">Nome</string>
+    <string name="surname_tv_label">Cognome</string>
+    <string name="insert_nonobbligatory_data_string">Ora se vuoi puoi inserire alcuni di questi dati facoltativi.</string>
 
 </resources>
