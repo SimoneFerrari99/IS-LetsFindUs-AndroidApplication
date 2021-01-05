@@ -58,6 +58,8 @@ public class ServerActivity extends AppCompatActivity {
     private Button stop;
     private Button restart;
 
+/* ----------------------------- LIFECYCLE ----------------------------- */
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
@@ -142,6 +144,8 @@ public class ServerActivity extends AppCompatActivity {
         stopAdvertising();
         stopServer();
     }
+
+/* ------------------------------------------------------------------------------ */
 
 /* ----------------------------- SETUP SERVER ----------------------------- */
 

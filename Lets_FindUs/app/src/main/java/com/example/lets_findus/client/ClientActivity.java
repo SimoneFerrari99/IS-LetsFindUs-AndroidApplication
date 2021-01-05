@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -51,7 +52,6 @@ public class ClientActivity extends AppCompatActivity {
     private boolean mEchoInitialized;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
-    private ScanCallback mScanCallback;
     private BluetoothGatt mGatt;
     private static final long SCAN_PERIOD = 5000;
     private static BluetoothManager bluetoothManager;
@@ -70,6 +70,8 @@ public class ClientActivity extends AppCompatActivity {
     Button stop;
     Button disconnect;
     Button send;
+
+/* ----------------------------- LIFECYCLE ----------------------------- */
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,6 +129,8 @@ public class ClientActivity extends AppCompatActivity {
         }
     }
 
+/* ------------------------------------------------------------------------------ */
+
 /* ----------------------------- SEZIONE SCANSIONE ----------------------------- */
 
     private void startScan() {
@@ -138,7 +142,6 @@ public class ClientActivity extends AppCompatActivity {
 
 
         mScanResults = new HashMap<>();
-        mScanCallback = new FirstScanCallback(mScanResults);
 
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
 
@@ -152,7 +155,7 @@ public class ClientActivity extends AppCompatActivity {
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
                 .build();
 
-        mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
+        mBluetoothLeScanner.startScan(filters, settings, scanCallback);
 
         mHandler = new Handler();
         mHandler.postDelayed(this::stopScan, SCAN_PERIOD);
@@ -165,11 +168,11 @@ public class ClientActivity extends AppCompatActivity {
 
     private void stopScan() {
         if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
-            mBluetoothLeScanner.stopScan(mScanCallback);
+            mBluetoothLeScanner.stopScan(scanCallback);
             scanComplete();
         }
 
-        mScanCallback = null;
+        scanCallback = null;
         mScanning = false;
         mHandler = null;
         mLogHandler.post(() -> {
@@ -233,6 +236,41 @@ public class ClientActivity extends AppCompatActivity {
         });
         mGatt = device.connectGatt(this, false, gattCallback);
     }
+
+/* ------------------------------------------------------------------------------ */
+
+/* ----------------------------- SCAN CALLBACK ----------------------------- */
+
+    ScanCallback scanCallback = new ScanCallback() {
+
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            BluetoothDevice device = result.getDevice();
+            String deviceAddress = device.getAddress();
+            mScanResults.put(deviceAddress, device);
+            System.out.println(result.getDevice());
+
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for (ScanResult result : results) {
+                mLogHandler.post(() -> {
+                    log.append("\nScanResult: " + result.toString());
+                });
+                BluetoothDevice device = result.getDevice();
+                String deviceAddress = device.getAddress();
+                mScanResults.put(deviceAddress, device);
+            }
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            mLogHandler.post(() -> {
+                log.append("\nScan Failed --> Error Code: " + errorCode);
+            });
+        }
+    };
 
 /* ------------------------------------------------------------------------------ */
 
