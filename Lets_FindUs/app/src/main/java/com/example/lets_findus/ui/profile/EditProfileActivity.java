@@ -3,6 +3,7 @@ package com.example.lets_findus.ui.profile;
 import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,6 +33,7 @@ import androidx.core.content.FileProvider;
 
 import com.example.lets_findus.MainActivity;
 import com.example.lets_findus.R;
+import com.example.lets_findus.ui.first_boot.ProfileCreationActivity;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -362,17 +364,29 @@ public class EditProfileActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent mIntent;
+        SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
+        int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
         switch (item.getItemId()) {
             // This is the up button
             case android.R.id.home:
-                mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
-                mIntent.putExtra("IS_FROM_EDIT",true);
+                if(isFirstBoot == 1) {
+                    mIntent = new Intent(EditProfileActivity.this, MainActivity.class);
+                }
+                else{
+                    mIntent = new Intent(EditProfileActivity.this, ProfileCreationActivity.class);
+                }
+                mIntent.putExtra("IS_FROM_EDIT", true);
                 startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
                 return true;
             case R.id.confirm:
                 Bundle obbForm = getFormValues(obbligatory, null);
                 Bundle data = getFormValues(other, obbForm);
-                mIntent=new Intent(EditProfileActivity.this, MainActivity.class);
+                if(isFirstBoot == 1) {
+                    mIntent = new Intent(EditProfileActivity.this, MainActivity.class);
+                }
+                else{
+                    mIntent = new Intent(EditProfileActivity.this, ProfileCreationActivity.class);
+                }
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 mIntent.putExtra("FORM_DATA", data);
                 if(modifiedPhoto){

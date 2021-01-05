@@ -41,5 +41,9 @@
     <string name="name_tv_label">Nome</string>
     <string name="surname_tv_label">Cognome</string>
     <string name="insert_nonobbligatory_data_string">Ora se vuoi puoi inserire alcuni di questi dati facoltativi.</string>
+    <string name="checkbox_1_text">CheckBox</string>
+    <string name="checkbox_2_text">CheckBox</string>
+    <string name="checkbox_3_text">CheckBox</string>
+    <string name="responsibility_end_button_text">Fine</string>
 
 </resources>

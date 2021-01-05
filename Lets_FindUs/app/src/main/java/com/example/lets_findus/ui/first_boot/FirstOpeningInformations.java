@@ -1,11 +1,16 @@
 package com.example.lets_findus.ui.first_boot;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
 
 import com.example.lets_findus.R;
 import com.github.appintro.AppIntro;
 import com.github.appintro.AppIntroCustomLayoutFragment;
+
+import org.jetbrains.annotations.Nullable;
 
 public class FirstOpeningInformations extends AppIntro {
 
@@ -26,5 +31,12 @@ public class FirstOpeningInformations extends AppIntro {
         setIndicatorColor(getColor(R.color.selectedDot), getColor(R.color.unselectedDot));
         setNextArrowColor(Color.BLACK);
         setSkipButtonEnabled(false);
+    }
+
+    @Override
+    protected void onDonePressed(@Nullable Fragment currentFragment) {
+        super.onDonePressed(currentFragment);
+        startActivity(new Intent(this, ProfileCreationActivity.class));
+        finish();
     }
 }

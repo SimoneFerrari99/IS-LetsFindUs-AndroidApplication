@@ -1,6 +1,7 @@
 package com.example.lets_findus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -18,22 +19,12 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
-import com.example.lets_findus.ui.first_boot.ProfileCreationActivity;
+import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
-import com.example.lets_findus.utilities.Meeting;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
-    private Future<Collection<Meeting>> allMeetings;
-    private String filename = "incontri";
-
     private Fragment match_frag;
     private final Fragment fav_frag = new FavouritesFragment();
     private final Fragment prof_frag = new ProfileFragment();
@@ -45,13 +36,45 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     private Menu menu;
 
     //@Override
-    protected void onCreate2(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent startFirstOpening = new Intent(this, ProfileCreationActivity.class);
-        startActivity(startFirstOpening);
+        SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
+        int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
+        if(isFirstBoot == 0) {
+            Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
+            startActivity(startFirstOpening);
+        }
+        else {
+            setContentView(R.layout.activity_main);
+            BottomNavigationView navView = findViewById(R.id.nav_view);
+
+            navView.setOnNavigationItemSelectedListener(this);
+
+            setTitle(R.string.title_matching);
+
+            match_frag = new MatchingFragment();
+            active = match_frag;
+
+            if(getIntent().hasExtra("FORM_DATA")){
+                Bundle data = getIntent().getBundleExtra("FORM_DATA");
+                if(getIntent().hasExtra("PROPIC_CHANGED")){
+                    data.putString("propicFilePath", getIntent().getStringExtra("PROPIC_CHANGED"));
+                }
+                prof_frag.setArguments(data);
+            }
+
+            fm.beginTransaction().add(R.id.nav_host_fragment, prof_frag, "3").hide(prof_frag).commit();
+            fm.beginTransaction().add(R.id.nav_host_fragment, fav_frag, "2").hide(fav_frag).commit();
+            fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
+
+            isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
+            if (isFromEdit){
+                navView.setSelectedItemId(R.id.navigation_profile);
+            }
+        }
     }
 
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate2(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -79,17 +102,6 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         if (isFromEdit){
             navView.setSelectedItemId(R.id.navigation_profile);
         }
-
-        /*Meeting firstMeeting = new Meeting(new Person("pathProva", "gazz", Person.Sex.MALE, 1999), new Location(""));
-
-        try {
-            allMeetings = UtilFunction.loadMeetingsAsync(MainActivity.this.openFileInput(filename), executor);
-            allMeetings = UtilFunction.addMeetingsAsync(allMeetings, firstMeeting, executor);
-            UtilFunction.storeMeetingsAsync(allMeetings, MainActivity.this, filename, executor);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
     }
 
 
@@ -170,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             menu.setGroupVisible(R.id.prof_menu, false);
         }
         return super.onCreateOptionsMenu(menu);
-
     }
 
 }

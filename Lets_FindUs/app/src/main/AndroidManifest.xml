@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PersonProfileActivity"></activity>
+        <activity android:name=".ui.first_boot.ResponsibilityActivity"></activity>
+        <activity android:name=".PersonProfileActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -26,7 +27,7 @@
         </provider>
 
         <activity android:name=".ui.ViewPictureActivity" />
-        <activity android:name=".ui.first_boot.ProfileCreationActivity"></activity>
+        <activity android:name=".ui.first_boot.ProfileCreationActivity" />
         <activity android:name=".ui.first_boot.FirstOpeningInformations" />
         <activity
             android:name=".MainActivity"

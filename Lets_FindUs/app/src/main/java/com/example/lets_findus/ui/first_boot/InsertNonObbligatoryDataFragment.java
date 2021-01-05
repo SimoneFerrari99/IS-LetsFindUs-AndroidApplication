@@ -85,7 +85,7 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 storeFormValues(nonobbContainer, profile);
-                Navigation.findNavController(v).navigate(R.id.action_insertNonObbligatoryDataFragment_to_profileFragment);
+                Navigation.findNavController(v).navigate(R.id.action_insertNonObbligatoryDataFragment_to_profileFragment, null);
             }
         });
 
