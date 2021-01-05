@@ -22,7 +22,15 @@ import com.example.lets_findus.ui.favourites.FavouritesFragment;
 import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private Fragment match_frag;
@@ -31,6 +39,10 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     private Fragment active;
     private FragmentManager fm = getSupportFragmentManager();
 
+    private static int AUTOCOMPLETE_REQUEST_CODE = 92;
+
+    private PlacesClient placesClient;
+
     private boolean isFromEdit;
 
     private Menu menu;
@@ -38,6 +50,10 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     //@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyAFjB2Yk9GGgLqzgVMGOBlxNvSDnDUKy5w");
+        }
+        placesClient = Places.createClient(this);
         SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
         int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
         if(isFirstBoot == 0) {
@@ -73,37 +89,6 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             }
         }
     }
-
-    protected void onCreate2(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-
-        navView.setOnNavigationItemSelectedListener(this);
-
-        setTitle(R.string.title_matching);
-
-        match_frag = new MatchingFragment();
-        active = match_frag;
-
-        if(getIntent().hasExtra("FORM_DATA")){
-            Bundle data = getIntent().getBundleExtra("FORM_DATA");
-            if(getIntent().hasExtra("PROPIC_CHANGED")){
-                data.putString("propicFilePath", getIntent().getStringExtra("PROPIC_CHANGED"));
-            }
-            prof_frag.setArguments(data);
-        }
-
-        fm.beginTransaction().add(R.id.nav_host_fragment, prof_frag, "3").hide(prof_frag).commit();
-        fm.beginTransaction().add(R.id.nav_host_fragment, fav_frag, "2").hide(fav_frag).commit();
-        fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
-
-        isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
-        if (isFromEdit){
-            navView.setSelectedItemId(R.id.navigation_profile);
-        }
-    }
-
 
     @Override
     public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
@@ -184,4 +169,15 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getTitle().toString().compareTo("Cerca") == 0){
+            List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG);
+
+            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                    .build(this);
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

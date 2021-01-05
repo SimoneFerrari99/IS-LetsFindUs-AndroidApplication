@@ -67,4 +67,7 @@ dependencies {
 
     implementation 'com.github.yalantis:ucrop:2.2.6'
     implementation 'com.github.AppIntro:AppIntro:6.0.0'
+
+    implementation 'com.google.android.libraries.places:places:2.4.0'
+    implementation 'com.google.android.gms:play-services-places:17.0.0'
 }
