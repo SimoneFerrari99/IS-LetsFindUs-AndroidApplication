@@ -1,4 +1,4 @@
-package com.example.lets_findus;
+package com.example.lets_findus.client;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanCallback;

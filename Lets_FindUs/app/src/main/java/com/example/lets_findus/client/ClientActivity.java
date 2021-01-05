@@ -1,4 +1,4 @@
-package com.example.lets_findus;
+package com.example.lets_findus.client;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -17,7 +17,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +25,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.lets_findus.R;
+import com.example.lets_findus.Utilis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +59,6 @@ public class ClientActivity extends AppCompatActivity {
 
     private boolean mScanning;
     private Handler mHandler;
-    private Handler mLogHandler;
     private Map<String, BluetoothDevice> mScanResults;
 
 
@@ -69,7 +70,6 @@ public class ClientActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
-        mLogHandler = new Handler(Looper.getMainLooper());
 
         bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -392,10 +392,6 @@ public class ClientActivity extends AppCompatActivity {
 
     public void setConnected(boolean connected) {
         mConnected = connected;
-    }
-
-    public void initializeTime() {
-        mTimeInitialized = true;
     }
 
     public void initializeEcho() {

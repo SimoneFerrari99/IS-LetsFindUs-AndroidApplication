@@ -7,7 +7,13 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.lets_findus.client.ClientActivity;
+import com.example.lets_findus.server.ServerActivity;
+
 public class MainActivity extends AppCompatActivity {
+
+    private Button client;
+    private Button server;
 
 
     @Override
@@ -15,11 +21,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button button = findViewById(R.id.client);
-        button.setOnClickListener(new View.OnClickListener() {
+        client = findViewById(R.id.client);
+        server = findViewById(R.id.server);
+        client.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, ClientActivity.class);
+                startActivity(i);
+            }
+        });
+        server.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, ServerActivity.class);
                 startActivity(i);
             }
         });

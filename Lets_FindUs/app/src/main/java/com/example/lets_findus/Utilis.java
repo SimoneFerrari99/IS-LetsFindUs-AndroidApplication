@@ -178,4 +178,15 @@ public class Utilis {
         return stringBytes;
     }
 
+    public static boolean requiresConfirmation(BluetoothGattCharacteristic characteristic) {
+        return (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
+                == BluetoothGattCharacteristic.PROPERTY_INDICATE;
+    }
+
+    public static boolean requiresResponse(BluetoothGattCharacteristic characteristic) {
+        return (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)
+                != BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE;
+    }
+
+
 }
