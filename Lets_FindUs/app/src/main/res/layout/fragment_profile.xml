@@ -156,7 +156,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <uk.co.onemandan.materialtextview.MaterialTextView
-                        android:id="@+id/description_tv"
+                        android:id="@+id/name_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
@@ -165,6 +165,34 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/non_obbligatory_data_label"
+                        app:mtv_contentTextColor="@color/black"
+                        app:mtv_labelText="@string/name_tv_label"
+                        app:mtv_labelTextColor="@color/colorPrimaryDark" />
+
+                    <uk.co.onemandan.materialtextview.MaterialTextView
+                        android:id="@+id/surname_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/name_tv"
+                        app:mtv_contentTextColor="@color/black"
+                        app:mtv_labelText="@string/surname_tv_label"
+                        app:mtv_labelTextColor="@color/colorPrimaryDark" />
+
+                    <uk.co.onemandan.materialtextview.MaterialTextView
+                        android:id="@+id/description_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/surname_tv"
                         app:mtv_contentTextColor="@color/black"
                         app:mtv_labelText="@string/description_tv_label"
                         app:mtv_labelTextColor="@color/colorPrimaryDark" />

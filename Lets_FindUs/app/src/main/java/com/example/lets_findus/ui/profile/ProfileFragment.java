@@ -220,6 +220,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     assert value != null;
                     myProfile.yearOfBirth = Integer.parseInt(value);
                     break;
+                case R.id.name_tv:
+                    myProfile.name = value;
+                    break;
+                case R.id.surname_tv:
+                    myProfile.surname = value;
+                    break;
                 case R.id.description_tv:
                     myProfile.description = value;
                     break;
