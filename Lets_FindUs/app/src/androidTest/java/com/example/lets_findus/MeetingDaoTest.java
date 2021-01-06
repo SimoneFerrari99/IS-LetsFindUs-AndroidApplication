@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.Meeting;
 import com.example.lets_findus.utilities.MeetingDao;
+import com.example.lets_findus.utilities.MeetingPerson;
 import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.PersonDao;
 import com.google.common.util.concurrent.FutureCallback;
@@ -77,6 +78,22 @@ public class MeetingDaoTest {
             }
         }, ex1);
 
+    }
+
+    @Test
+    public void getAndSetFavouriteAllMeetings() throws Exception{
+        ListenableFuture<MeetingPerson> sel = md.getMeetingFromId(1);
+        Futures.addCallback(sel, new FutureCallback<MeetingPerson>() {
+            @Override
+            public void onSuccess(@NullableDecl MeetingPerson result) {
+                md.setFavourite(result.meeting.id);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        }, Executors.newSingleThreadExecutor());
     }
 
 

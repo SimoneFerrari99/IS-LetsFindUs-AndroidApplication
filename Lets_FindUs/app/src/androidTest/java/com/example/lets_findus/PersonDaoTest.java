@@ -42,8 +42,8 @@ public class PersonDaoTest {
 
     @Test
     public void storePerson() throws Exception {
-        Person p = new Person("", "Franco", Person.Sex.MALE, 1999);
-        pd.insert(p).get();
+        Person p = new Person("file:/storage/emulated/0/Android/data/com.example.lets_findus/files/Pictures/JPEG_20210105_161931_2239807227168968199.jpg", "Franco", Person.Sex.MALE, 1999);
+        pd.insert(p);
     }
 
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:id="@+id/not_favourite">
+        <item
+            android:id="@+id/empty_star"
+            android:icon="@drawable/ic_round_star_outline_24"
+            android:title="@string/set_favourite"
+            app:showAsAction="ifRoom"/>
+    </group>
+
+    <group android:id="@+id/favourite">
+        <item
+            android:id="@+id/filled_star"
+            android:icon="@drawable/ic_round_star_24"
+            android:title="@string/is_favourite"
+            app:showAsAction="ifRoom"/>
+    </group>
+</menu>

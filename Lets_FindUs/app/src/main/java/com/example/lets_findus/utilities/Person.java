@@ -134,7 +134,7 @@ public class Person {
         dumper.put("Instagram", instagram);
         dumper.put("Linkedin", linkedin);
         dumper.put("Email", email);
-        dumper.put("Telefono", (phoneNumber != 0) ? String.valueOf(phoneNumber) : null);
+        dumper.put("Telefono", phoneNumber != null && phoneNumber != 0 ? String.valueOf(phoneNumber) : null);
         if(birthDate != null){
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
             dumper.put("Data di nascita", sdf.format(birthDate));

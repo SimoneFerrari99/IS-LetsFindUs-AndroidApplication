@@ -1,6 +1,7 @@
 package com.example.lets_findus.ui.favourites;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import com.example.lets_findus.PersonProfileActivity;
 import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.MeetingDao;
@@ -77,7 +79,7 @@ public class FavouritesFragment extends Fragment {
         return root;
     }
 
-    private static class MyOnClickListener implements View.OnClickListener {
+    private class MyOnClickListener implements View.OnClickListener {
 
         private final Context context;
 
@@ -93,6 +95,9 @@ public class FavouritesFragment extends Fragment {
         private void removeItem(View v) {
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
             //Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
+            Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
+            startPersonProfile.putExtra("MEETING_ID", favouriteMeetings.get(selectedItemPosition).meeting.id);
+            startActivity(startPersonProfile);
         }
     }
 }

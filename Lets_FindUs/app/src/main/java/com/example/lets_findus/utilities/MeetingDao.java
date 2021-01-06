@@ -9,7 +9,6 @@ import androidx.room.Transaction;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -21,16 +20,11 @@ public abstract class MeetingDao {
     @Insert
     public abstract ListenableFuture<Long[]> insertAll(Meeting... m);
 
-    @Query("UPDATE Meeting SET isFavourite = 1 WHERE id IN (:ids)")
-    abstract void setFavouriteAllId(List<Integer> ids);
+    @Query("UPDATE Meeting SET isFavourite = 1 WHERE id = :meetingId")
+    public abstract void setFavourite(int meetingId);
 
-    public void setFavouriteAll(List<Meeting> meetings){
-        List<Integer> ids = new ArrayList<>();
-        for(Meeting m : meetings){
-            ids.add(m.id);
-        }
-        setFavouriteAllId(ids);
-    }
+    @Query("UPDATE Meeting SET isFavourite = 0 WHERE id = :meetingId")
+    public abstract void setNotFavourite(int meetingId);
 
     @Delete
     public abstract void delete(Meeting m);
@@ -47,5 +41,9 @@ public abstract class MeetingDao {
     @Transaction
     @Query("SELECT * FROM Meeting INNER JOIN Person ON Meeting.personId = Person.id WHERE Meeting.isFavourite = 1")
     public abstract ListenableFuture<List<MeetingPerson>> getFavouriteMeetings();
+
+    @Transaction
+    @Query("SELECT * FROM Meeting INNER JOIN Person ON Meeting.personId = Person.id WHERE Meeting.id = :meetingId")
+    public abstract ListenableFuture<MeetingPerson> getMeetingFromId(int meetingId);
 
 }

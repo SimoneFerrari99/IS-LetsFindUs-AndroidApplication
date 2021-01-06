@@ -45,5 +45,7 @@
     <string name="checkbox_2_text">CheckBox</string>
     <string name="checkbox_3_text">CheckBox</string>
     <string name="responsibility_end_button_text">Fine</string>
+    <string name="set_favourite">Set Favourite</string>
+    <string name="is_favourite">Is Favourite</string>
 
 </resources>

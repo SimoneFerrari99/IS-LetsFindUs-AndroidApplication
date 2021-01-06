@@ -247,6 +247,12 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                     @Override
                     public void run() {
                         MatchingFragment.meetings.clear();
+                        if(result.size() == 0){
+                            sheetBehavior.setPeekHeight(0);
+                        }
+                        else{
+                            sheetBehavior.setPeekHeight(50);
+                        }
                         MatchingFragment.meetings.addAll(result);
                         adapter.notifyDataSetChanged();
                         removeVisibleMarker(visibleMarkers);
