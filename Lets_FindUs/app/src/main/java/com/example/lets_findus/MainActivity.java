@@ -1,22 +1,30 @@
 package com.example.lets_findus;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.lets_findus.ui.MissingBluetoothDialog;
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
 import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
@@ -32,14 +40,20 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements MissingBluetoothDialog.NoticeDialogListener, MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private Fragment match_frag;
     private final Fragment fav_frag = new FavouritesFragment();
     private final Fragment prof_frag = new ProfileFragment();
     private Fragment active;
     private FragmentManager fm = getSupportFragmentManager();
 
-    private static int AUTOCOMPLETE_REQUEST_CODE = 92;
+    private BluetoothAdapter bluetoothAdapter;
+
+    public static ActivityResultLauncher<String> requestPermissionLauncher;
+
+    private static int AUTOCOMPLETE_REQUEST_CODE = 3;
+    private static final int REQUEST_ENABLE_BT = 1;
+    private static final int ACCESS_LOCATION = 2;
 
     private PlacesClient placesClient;
 
@@ -63,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         else {
             setContentView(R.layout.activity_main);
             BottomNavigationView navView = findViewById(R.id.nav_view);
-
             navView.setOnNavigationItemSelectedListener(this);
 
             setTitle(R.string.title_matching);
@@ -83,6 +96,33 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             fm.beginTransaction().add(R.id.nav_host_fragment, fav_frag, "2").hide(fav_frag).commit();
             fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
 
+            requestPermissionLauncher =
+                    registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+                        @SuppressLint("MissingPermission")
+                        @Override
+                        public void onActivityResult(Boolean isGranted) {
+                            if (isGranted) {
+                                fm.beginTransaction().remove(match_frag).commit();
+                                match_frag = new MatchingFragment();
+                                fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
+                            } else {
+                                DialogFragment newFragment = new MissingPermissionDialog();
+                                newFragment.show(getSupportFragmentManager(), "Location permission");
+                            }
+                        }
+                    });
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (!bluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
+            else{
+                askLocationPermission();
+            }
+            if(!(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED)){
+                //requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+            }
+
             isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
             if (isFromEdit){
                 navView.setSelectedItemId(R.id.navigation_profile);
@@ -94,19 +134,47 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         }
     }
 
+    private void askLocationPermission(){
+        if (!(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d("AutocompleteApi", "Request code: "+ requestCode + " resultCode: "+resultCode);
+        if(requestCode == REQUEST_ENABLE_BT){
+            if(resultCode == RESULT_CANCELED) {
+                DialogFragment newFragment = new MissingBluetoothDialog();
+                newFragment.show(getSupportFragmentManager(), "Missing bluetooth");
+            }
+            else{
+                askLocationPermission();
+            }
+        }
+        if(requestCode == ACCESS_LOCATION){
+            askLocationPermission();
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ){
+                fm.beginTransaction().remove(match_frag).commit();
+                match_frag = new MatchingFragment();
+                fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
+            }
+        }
     }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package",this.getPackageName(), null);
-        intent.setData(uri);
-        this.startActivity(intent);
+        if(dialog.getClass().getSimpleName().compareTo("MissingBluetoothDialog") == 0){
+            bluetoothAdapter.enable();
+            askLocationPermission();
+        }
+        else{
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package",this.getPackageName(), null);
+            intent.setData(uri);
+            startActivityForResult(intent, ACCESS_LOCATION);
+        }
     }
 
     @Override
@@ -184,11 +252,16 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getTitle().toString().compareTo("Cerca") == 0){
-            List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG);
 
-            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                    .build(this);
-            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+            try {
+                List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG);
+                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                        .build(this);
+                startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+            }
+            catch (RuntimeException e){
+                e.printStackTrace();
+            }
         }
         return super.onOptionsItemSelected(item);
     }

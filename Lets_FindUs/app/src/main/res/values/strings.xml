@@ -47,5 +47,7 @@
     <string name="responsibility_end_button_text">Fine</string>
     <string name="set_favourite">Set Favourite</string>
     <string name="is_favourite">Is Favourite</string>
+    <string name="missing_bluetooth_message">Ci manca il bluetoot</string>
+    <string name="missing_activate_bluetooth_positive_text">Attiva il bluetooth</string>
 
 </resources>

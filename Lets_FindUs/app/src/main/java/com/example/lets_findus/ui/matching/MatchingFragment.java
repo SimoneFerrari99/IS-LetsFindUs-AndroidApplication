@@ -16,12 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,7 +26,6 @@ import androidx.room.Room;
 
 import com.example.lets_findus.PersonProfileActivity;
 import com.example.lets_findus.R;
-import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.MeetingPerson;
@@ -81,9 +76,6 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private static List<MeetingPerson> meetings;
     private List<Marker> visibleMarkers;
 
-    private ActivityResultLauncher<String> requestPermissionLauncher;
-
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -113,20 +105,6 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                 animateHide(v);
             }
         });
-
-        requestPermissionLauncher =
-                registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-                    @SuppressLint("MissingPermission")
-                    @Override
-                    public void onActivityResult(Boolean isGranted) {
-                        if (isGranted) {
-                            mapFragment.getMapAsync(MatchingFragment.this);
-                        } else {
-                            DialogFragment newFragment = new MissingPermissionDialog();
-                            newFragment.show(getParentFragmentManager(), "missing_permission");
-                        }
-                    }
-                });
 
         if (fusedLocationClient == null) {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -181,7 +159,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                 }
             });
         } else {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            //MainActivity.requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
