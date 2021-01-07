@@ -167,7 +167,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(v.getContext().CLIPBOARD_SERVICE);
                             ClipData clip = ClipData.newPlainText(label, content);
                             clipboard.setPrimaryClip(clip);
-                            Toast.makeText(v.getContext(), "Campo copiato negli appunti", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(v.getContext(), R.string.copied, Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
