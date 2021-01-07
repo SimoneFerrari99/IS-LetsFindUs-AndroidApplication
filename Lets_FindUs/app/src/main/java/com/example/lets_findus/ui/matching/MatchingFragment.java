@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -14,7 +15,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,9 +28,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import com.example.lets_findus.PersonProfileActivity;
 import com.example.lets_findus.R;
 import com.example.lets_findus.ui.MissingPermissionDialog;
-import com.example.lets_findus.ui.favourites.FavAdapter;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.MeetingPerson;
@@ -160,7 +160,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         meetings = new ArrayList<>();
         visibleMarkers = new ArrayList<>();
 
-        adapter = new FavAdapter(meetings);
+        adapter = new MatchAdapter(meetings);
         recyclerView.setAdapter(adapter);
 
         return root;
@@ -198,7 +198,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             animateShow(show_match);
     }
 
-    private static class MyOnClickListener implements View.OnClickListener {
+    private class MyOnClickListener implements View.OnClickListener {
 
         private final Context context;
 
@@ -208,12 +208,10 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
 
         @Override
         public void onClick(View v) {
-            removeItem(v);
-        }
-
-        private void removeItem(View v) {
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
-            Toast.makeText(v.getContext(), "Ciao "+meetings.get(selectedItemPosition).person.nickname, Toast.LENGTH_SHORT).show();
+            Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
+            startPersonProfile.putExtra("MEETING_ID", meetings.get(selectedItemPosition).meeting.id);
+            startActivity(startPersonProfile);
         }
     }
 
@@ -290,4 +288,5 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                     }
                 });
     }
+
 }

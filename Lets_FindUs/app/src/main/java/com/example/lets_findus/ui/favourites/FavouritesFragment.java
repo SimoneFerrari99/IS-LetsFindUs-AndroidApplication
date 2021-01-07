@@ -89,10 +89,6 @@ public class FavouritesFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            removeItem(v);
-        }
-
-        private void removeItem(View v) {
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
             Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
             startPersonProfile.putExtra("MEETING_ID", favouriteMeetings.get(selectedItemPosition).meeting.id);
