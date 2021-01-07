@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 import com.google.gson.internal.$Gson$Preconditions;
 
 import java.io.File;
@@ -30,6 +31,8 @@ public class SettingsActivity extends AppCompatActivity {
         setTitle(R.string.title_settings);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+        // Eliminazione dei dati dal menu impostazioni
         TextView deleteData = findViewById(R.id.delete_data_label);
         deleteData.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +61,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-
+        // Pulizia della cache dal menu impostazioni
         TextView clearCache = findViewById(R.id.clear_cache_label);
         clearCache.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +86,25 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
+        // Apertura informazioni APP
+        TextView informations = findViewById(R.id.informations_label);
+        informations.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startFirstOpening = new Intent(v.getContext(), FirstOpeningInformations.class);
+                startActivity(startFirstOpening);
+            }
+        });
 
+        // Apertura invio feedback
+        TextView feedback = findViewById(R.id.feedback_label);
+        feedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startFeedback= new Intent("android.intent.action.VIEW", Uri.parse("https://forms.gle/uEYMHAPhgmg2KBVY7"));
+                startActivity(startFeedback);
+            }
+        });
     }
 
     @Override
