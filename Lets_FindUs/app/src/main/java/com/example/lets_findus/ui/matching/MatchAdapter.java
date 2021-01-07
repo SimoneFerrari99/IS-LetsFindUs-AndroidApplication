@@ -21,15 +21,17 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MyViewHolder
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView textViewName;
-        TextView textViewVersion;
-        ImageView imageViewIcon;
+        TextView textViewNickname;
+        TextView textViewData;
+        TextView textViewTime;
+        ImageView imageViewProfileImage;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            this.textViewName = itemView.findViewById(R.id.textViewName);
-            this.textViewVersion = itemView.findViewById(R.id.textViewVersion);
-            this.imageViewIcon = itemView.findViewById(R.id.imageView);
+            this.textViewNickname = itemView.findViewById(R.id.card_nickname);
+            this.textViewData = itemView.findViewById(R.id.card_data_label);
+            this.textViewTime = itemView.findViewById(R.id.card_time_label);
+            this.imageViewProfileImage = itemView.findViewById(R.id.card_circular_profile_image);
         }
     }
 
@@ -50,12 +52,15 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MyViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        TextView textViewName = holder.textViewName;
-        TextView textViewVersion = holder.textViewVersion;
-        ImageView imageView = holder.imageViewIcon;
-        textViewName.setText("Nickname: "+dataSet.get(position).person.nickname);
-        textViewVersion.setText("Anno di nascita: "+String.valueOf(dataSet.get(position).person.yearOfBirth));
-        //imageView.setImageResource(dataSet.get(position).getImage());
+        TextView textViewNickname = holder.textViewNickname;
+        TextView textViewData = holder.textViewData;
+        TextView textViewTime = holder.textViewTime;
+        ImageView imageView = holder.imageViewProfileImage;
+
+        textViewNickname.setText(dataSet.get(position).person.nickname);
+        textViewData.setText("07/01/2021");
+        textViewTime.setText("21:36");
+        //imageViewProfileImage.setImageResource(dataSet.get(position).getImage());
     }
 
     @Override
