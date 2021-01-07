@@ -190,6 +190,13 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
                     .build(this);
             startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
         }
+        else if(item.getTitle().toString().compareTo("Impostazioni") == 0){
+            Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
+            startActivity(startFirstOpening);
+        }
+
+
+
         return super.onOptionsItemSelected(item);
     }
 }
