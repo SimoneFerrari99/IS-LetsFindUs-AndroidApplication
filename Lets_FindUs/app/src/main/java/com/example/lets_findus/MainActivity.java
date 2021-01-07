@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             }
 
             isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
-            if (isFromEdit){
+            if (isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
                 navView.setSelectedItemId(R.id.navigation_profile);
             }
 
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         this.menu = menu;
         MenuInflater inflater=getMenuInflater();
         inflater.inflate(R.menu.main_act_menu, menu);
-        if(isFromEdit){
+        if(isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
             menu.setGroupVisible(R.id.match_menu, false);
             menu.setGroupVisible(R.id.fav_menu, false);
             menu.setGroupVisible(R.id.prof_menu, true);
@@ -263,6 +263,11 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 e.printStackTrace();
             }
         }
+        else if(item.getTitle().toString().compareTo("Impostazioni") == 0){
+            Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
+            startActivity(startSettingsActivity);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 }

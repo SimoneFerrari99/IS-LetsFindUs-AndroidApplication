@@ -26,28 +26,41 @@
     <string name="birth_date_tv_label">Data di nascita</string>
     <string name="other_tv_label">Altro</string>
     <string name="description_tv_label">Descrizione</string>
-    <string name="edit_mode">Edit mode</string>
-    <string name="confirm">Confirm</string>
+    <string name="edit_mode">Modalita\' modifica</string>
+    <string name="confirm">Conferma</string>
     <string name="nickname">Nickname</string>
     <string name="social_hint">Nome profilo o link profilo</string>
     <string name="mail_hint">nome@gmail.com</string>
     <string name="image_transition">imageTransition</string>
-    <string name="add_to_favourite">Add to favourite</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="profile_photo_intro_string">Inserisci una foto profilo, ti raccomandiamo di scegliere una foto in cui tu possa essere riconosciuto!</string>
-    <string name="insert_obbligatory_data_string">Ora inserisci alcuni dati. Questi dati sono obbligatori per il funzionamento della nostra app!</string>
+    <string name="add_to_favourite">Aggiungi ai preferiti</string>
+
+
+    <string name="profile_photo_intro_string">Inserisci la tua foto profilo: fai in modo che le persone possano riconoscerti!</string>
+    <string name="insert_obbligatory_data_string">Inserisci ora il tuo nickname, il sesso e l\'anno di nascita: sono dati obbligatori.</string>
     <string name="maschio">Maschio</string>
     <string name="name_tv_label">Nome</string>
     <string name="surname_tv_label">Cognome</string>
-    <string name="insert_nonobbligatory_data_string">Ora se vuoi puoi inserire alcuni di questi dati facoltativi.</string>
-    <string name="checkbox_1_text">CheckBox</string>
-    <string name="checkbox_2_text">CheckBox</string>
-    <string name="checkbox_3_text">CheckBox</string>
+    <string name="insert_nonobbligatory_data_string">Se ti va, arricchisci il tuo profilo con tutto cio\' che vuoi!</string>
+    <string name="checkbox_1_text">Ho letto e appreso i possibili rischi legati alla privacy.</string>
+    <string name="checkbox_2_text">Mi impegno ad utilizzare l\'applicazione solo per scopi leciti.</string>
+    <string name="checkbox_3_text">Mi assumo la completa responsabilità sui dati condivisi.</string>
     <string name="responsibility_end_button_text">Fine</string>
-    <string name="set_favourite">Set Favourite</string>
-    <string name="is_favourite">Is Favourite</string>
-    <string name="missing_bluetooth_message">Ci manca il bluetoot</string>
-    <string name="missing_activate_bluetooth_positive_text">Attiva il bluetooth</string>
+    <string name="set_favourite">Aggiungi ai preferiti</string>
+    <string name="is_favourite">E\' nei preferiti</string>
+
+    <string name="title_settings">Impostazioni</string>
+    <string name="settings_archive_label">Archiviazione</string>
+    <string name="settings_info_label">Help</string>
+    <string name="delete_data_label">Elimina tutti i dati</string>
+    <string name="clear_cache_label">Pulisci la cache</string>
+    <string name="informations_label">Rivedi informazioni APP</string>
+    <string name="feedback_label">Invia Feedback / Segnala Bug</string>
+    <string name="title_person_profile">Incontro</string>
+    <string name="delete_data_confirm_title">Conferma</string>
+    <string name="delete_data_confirm_label">Vuoi davvero cancellare tutti i dati?</string>
+    <string name="clear_cache_confirm_title">Conferma</string>
+    <string name="clear_cache_confirm_label">Vuoi davvero pulire la cache?</string>
+    <string name="yes">Si</string>
+    <string name="no">Annulla</string>
 
 </resources>
