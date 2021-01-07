@@ -49,6 +49,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_profile);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(R.string.title_person_profile);
 
         final ConstraintLayout obbData = findViewById(R.id.obbligatory_data);
         final ConstraintLayout nonObbData = findViewById(R.id.other_data);

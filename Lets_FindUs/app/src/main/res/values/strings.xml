@@ -48,4 +48,19 @@
     <string name="set_favourite">Aggiungi ai preferiti</string>
     <string name="is_favourite">E\' nei preferiti</string>
 
+    <string name="title_settings">Impostazioni</string>
+    <string name="settings_archive_label">Archiviazione</string>
+    <string name="settings_info_label">Help</string>
+    <string name="delete_data_label">Elimina tutti i dati</string>
+    <string name="clear_cache_label">Pulisci la cache</string>
+    <string name="informations_label">Rivedi informazioni APP</string>
+    <string name="feedback_label">Invia Feedback / Segnala Bug</string>
+    <string name="title_person_profile">Incontro</string>
+    <string name="delete_data_confirm_title">Conferma</string>
+    <string name="delete_data_confirm_label">Vuoi davvero cancellare tutti i dati?</string>
+    <string name="clear_cache_confirm_title">Conferma</string>
+    <string name="clear_cache_confirm_label">Vuoi davvero pulire la cache?</string>
+    <string name="yes">Si</string>
+    <string name="no">Annulla</string>
+
 </resources>

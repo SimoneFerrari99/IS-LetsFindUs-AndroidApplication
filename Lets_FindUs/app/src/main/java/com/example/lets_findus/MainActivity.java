@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
 
             isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
-            if (isFromEdit){
+            if (isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
                 navView.setSelectedItemId(R.id.navigation_profile);
             }
 
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
     public void onDialogPositiveClick(DialogFragment dialog) {
         Intent intent = new Intent();
         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package",this.getPackageName(), null);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
         this.startActivity(intent);
     }
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
         this.menu = menu;
         MenuInflater inflater=getMenuInflater();
         inflater.inflate(R.menu.main_act_menu, menu);
-        if(isFromEdit){
+        if(isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
             menu.setGroupVisible(R.id.match_menu, false);
             menu.setGroupVisible(R.id.fav_menu, false);
             menu.setGroupVisible(R.id.prof_menu, true);
@@ -191,11 +191,9 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
         }
         else if(item.getTitle().toString().compareTo("Impostazioni") == 0){
-            Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
-            startActivity(startFirstOpening);
+            Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
+            startActivity(startSettingsActivity);
         }
-
-
 
         return super.onOptionsItemSelected(item);
     }
