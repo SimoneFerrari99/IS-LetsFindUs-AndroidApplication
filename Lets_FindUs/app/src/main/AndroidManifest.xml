@@ -16,7 +16,6 @@
     <uses-feature
         android:name="android.hardware.location.gps" />
 
-
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

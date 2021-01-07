@@ -393,6 +393,14 @@ public class ServerActivity extends AppCompatActivity {
             });
 
         }
+
+        @Override
+        public void onMtuChanged(BluetoothDevice device, int mtu) {
+            super.onMtuChanged(device, mtu);
+            mLogHandler.post(() -> {
+                log.append("\nonMtuChanged --> Mtu changed: " + mtu);
+            });
+        }
     };
 
 /* ------------------------------------------------------------------------------ */

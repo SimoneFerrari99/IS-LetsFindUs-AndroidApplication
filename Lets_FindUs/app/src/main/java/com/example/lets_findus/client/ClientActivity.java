@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,6 +63,7 @@ public class ClientActivity extends AppCompatActivity {
     private boolean mScanning;
     private Handler mHandler;
     private Map<String, BluetoothDevice> mScanResults;
+
 
 
     Button start;
@@ -281,6 +281,7 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
+            boolean mtu;
 
             mLogHandler.post(() -> {
                 log.append("\nonConnectionStateChange --> Status: " + status);
@@ -292,7 +293,10 @@ public class ClientActivity extends AppCompatActivity {
                         log.append("\nonConnectionStateChange --> Connected to device " + gatt.getDevice().getName());
                     });
                     setConnected(true);
-                    gatt.discoverServices();
+                    mtu = gatt.requestMtu(517);
+                    mLogHandler.post(() -> {
+                        log.append("\nrequestMtu --> " + mtu);
+                    });
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     mLogHandler.post(() -> {
@@ -378,6 +382,7 @@ public class ClientActivity extends AppCompatActivity {
                     });
                 }
             }
+
         }
 
         @Override
@@ -454,6 +459,22 @@ public class ClientActivity extends AppCompatActivity {
             }
         }
 
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+            if(status == 0) {
+                mLogHandler.post(() -> {
+                    log.append("\nonMtuChanged --> Mtu changed successfully: " + mtu + ", " + status);
+                    gatt.discoverServices();
+                });
+            }
+            else {
+                mLogHandler.post(() -> {
+                    log.append("\nonMtuChanged --> Mtu not changed (Mtu not supported): " + mtu + ", " + status);
+                    gatt.discoverServices();
+                });
+            }
+        }
     };
 
 /* ------------------------------------------------------------------------------ */
@@ -523,5 +544,7 @@ public class ClientActivity extends AppCompatActivity {
     }
 
 /* ------------------------------------------------------------------------------ */
+
+
 
 }
