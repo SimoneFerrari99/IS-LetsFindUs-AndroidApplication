@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.Executors;
 
 @RunWith(AndroidJUnit4.class)
@@ -42,7 +43,17 @@ public class PersonDaoTest {
 
     @Test
     public void storePerson() throws Exception {
-        Person p = new Person("file:/storage/emulated/0/Android/data/com.example.lets_findus/files/Pictures/JPEG_20210105_161931_2239807227168968199.jpg", "Franco", Person.Sex.MALE, 1999);
+        Person p = new Person("file:/storage/emulated/0/Android/data/com.example.lets_findus/files/Pictures/JPEG_20210105_161931_2239807227168968199.jpg", "Baudo", Person.Sex.MALE, 1999);
+        p.description = "Ciao mi piace la pizza";
+        p.name = "Pippo";
+        p.surname = "Baudo";
+        p.facebook = "Pippo Baudo";
+        p.instagram = "@pippobaudo.class";
+        p.linkedin = "Pippo Baudo";
+        p.phoneNumber = 3499112345L;
+        p.email = "pippobaudo@gmail.com";
+        p.birthDate = new Date("20/04/1999");
+        p.other = "Altro";
         pd.insert(p);
     }
 

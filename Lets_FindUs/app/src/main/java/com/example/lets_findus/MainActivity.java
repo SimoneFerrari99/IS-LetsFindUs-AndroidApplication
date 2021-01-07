@@ -87,6 +87,10 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             if (isFromEdit){
                 navView.setSelectedItemId(R.id.navigation_profile);
             }
+
+            if(getIntent().hasExtra("IS_FROM_FAV")){
+                navView.setSelectedItemId(R.id.navigation_favorites);
+            }
         }
     }
 
@@ -163,9 +167,16 @@ public class MainActivity extends AppCompatActivity implements MissingPermission
             menu.setGroupVisible(R.id.prof_menu, true);
         }
         else {
-            menu.setGroupVisible(R.id.match_menu, true);
-            menu.setGroupVisible(R.id.fav_menu, false);
-            menu.setGroupVisible(R.id.prof_menu, false);
+            if(getIntent().hasExtra("IS_FROM_FAV")){
+                menu.setGroupVisible(R.id.match_menu, false);
+                menu.setGroupVisible(R.id.fav_menu, true);
+                menu.setGroupVisible(R.id.prof_menu, false);
+            }
+            else {
+                menu.setGroupVisible(R.id.match_menu, true);
+                menu.setGroupVisible(R.id.fav_menu, false);
+                menu.setGroupVisible(R.id.prof_menu, false);
+            }
         }
         return super.onCreateOptionsMenu(menu);
     }

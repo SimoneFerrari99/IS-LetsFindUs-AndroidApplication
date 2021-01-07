@@ -81,7 +81,7 @@ public class MeetingDaoTest {
     }
 
     @Test
-    public void getAndSetFavouriteAllMeetings() throws Exception{
+    public void getAndSetFavouriteMeetings() throws Exception{
         ListenableFuture<MeetingPerson> sel = md.getMeetingFromId(1);
         Futures.addCallback(sel, new FutureCallback<MeetingPerson>() {
             @Override

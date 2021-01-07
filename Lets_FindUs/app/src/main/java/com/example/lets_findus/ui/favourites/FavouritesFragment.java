@@ -94,9 +94,9 @@ public class FavouritesFragment extends Fragment {
 
         private void removeItem(View v) {
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
-            //Toast.makeText(v.getContext(), "Ciao "+data.get(selectedItemPosition).data.nickname, Toast.LENGTH_SHORT).show();
             Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
             startPersonProfile.putExtra("MEETING_ID", favouriteMeetings.get(selectedItemPosition).meeting.id);
+            startPersonProfile.putExtra("IS_FROM_FAVOURITE", true);
             startActivity(startPersonProfile);
         }
     }
