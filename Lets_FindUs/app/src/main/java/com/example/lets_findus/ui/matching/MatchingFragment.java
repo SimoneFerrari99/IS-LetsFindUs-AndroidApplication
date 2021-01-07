@@ -38,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -203,7 +204,8 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             Log.d("setMarker", String.valueOf(mp.meeting.id));
             markers.add(map.addMarker(new MarkerOptions()
                     .position(new LatLng(mp.meeting.latitude, mp.meeting.longitude))
-                    .title(mp.person.nickname)));
+                    .title(mp.person.nickname)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))));
         }
         return markers;
     }
