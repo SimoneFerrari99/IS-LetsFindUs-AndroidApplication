@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -8,54 +9,100 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        card_view:cardBackgroundColor="@color/cardview_light_background"
+        android:layout_height="match_parent"
         android:elevation="8dp"
-        card_view:cardElevation="5dp"
+        card_view:cardBackgroundColor="@color/cardview_light_background"
         card_view:cardCornerRadius="10dp"
+        card_view:cardElevation="5dp"
         card_view:cardUseCompatPadding="true">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp">
+            android:layout_height="115dp"
+            android:layout_weight="1">
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="5dp"
+            <com.mikhaellopez.circularimageview.CircularImageView
+                android:id="@+id/card_circular_profile_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp"
                 android:layout_weight="1"
                 android:src="@drawable/ic_favourites_black_24dp"
-                android:tag="image_tag" />
+                android:transitionName="@string/image_transition"
+                card_view:civ_border_color="@color/colorPrimary"
+                card_view:civ_border_width="3dp"
+                card_view:civ_shadow="true"
+                card_view:civ_shadow_color="#b0bec5"
+                card_view:civ_shadow_radius="2dp"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toTopOf="parent" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/card_nickname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_weight="2"
-                android:orientation="vertical">
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="Nickname"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toEndOf="@+id/card_circular_profile_image"
+                card_view:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/textViewName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="2dp"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+            <ImageView
+                android:id="@+id/card_data_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"
+                card_view:layout_constraintStart_toEndOf="@+id/card_circular_profile_image"
+                card_view:layout_constraintTop_toBottomOf="@+id/card_nickname"
+                card_view:srcCompat="@drawable/ic_round_calendar_today_24" />
 
-                <TextView
-                    android:id="@+id/textViewVersion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="2dp"
-                    android:text="ciao"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            <TextView
+                android:id="@+id/card_data_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="Data"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                card_view:layout_constraintBottom_toBottomOf="@+id/card_data_icon"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toEndOf="@+id/card_data_icon"
+                card_view:layout_constraintTop_toTopOf="@+id/card_data_icon" />
 
-            </LinearLayout>
-        </LinearLayout>
+            <ImageView
+                android:id="@+id/card_time_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"
+                card_view:layout_constraintStart_toEndOf="@+id/card_circular_profile_image"
+                card_view:layout_constraintTop_toBottomOf="@+id/card_data_icon"
+                card_view:srcCompat="@drawable/ic_round_watch_later_24" />
+
+            <TextView
+                android:id="@+id/card_time_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="Hour"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                card_view:layout_constraintBottom_toBottomOf="@+id/card_time_icon"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toEndOf="@+id/card_time_icon"
+                card_view:layout_constraintTop_toTopOf="@+id/card_time_icon" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.cardview.widget.CardView>
 </LinearLayout>
