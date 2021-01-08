@@ -207,7 +207,11 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private List<Marker> setVisibleMeetingsMarker(List<MeetingPerson> meetings, GoogleMap map){
         List<Marker> markers = new ArrayList<>();
         for(MeetingPerson mp : meetings){
-            Marker marker = map.addMarker(new MarkerOptions().position(new LatLng(mp.meeting.latitude, mp.meeting.longitude)).title(mp.person.nickname).snippet(String.valueOf(mp.person.id)));
+            Marker marker = map.addMarker(new MarkerOptions()
+                    .position(new LatLng(mp.meeting.latitude, mp.meeting.longitude))
+                    .title(mp.person.nickname)
+                    .snippet(String.valueOf(mp.person.id))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
             markers.add(marker);
         }
         return markers;
