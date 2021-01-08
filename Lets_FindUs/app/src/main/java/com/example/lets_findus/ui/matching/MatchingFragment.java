@@ -11,7 +11,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -158,8 +157,6 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                     setupMarkers(googleMap);
                 }
             });
-        } else {
-            //MainActivity.requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
@@ -168,6 +165,15 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         map = googleMap;
         setupMap(map);
         map.setOnCameraMoveStartedListener(this);
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
+                startPersonProfile.putExtra("MEETING_ID", Integer.parseInt(marker.getSnippet()));
+                startActivity(startPersonProfile);
+            }
+        });
+        map.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
     }
 
     @Override
@@ -200,10 +206,8 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private List<Marker> setVisibleMeetingsMarker(List<MeetingPerson> meetings, GoogleMap map){
         List<Marker> markers = new ArrayList<>();
         for(MeetingPerson mp : meetings){
-            Log.d("setMarker", String.valueOf(mp.meeting.id));
-            markers.add(map.addMarker(new MarkerOptions()
-                    .position(new LatLng(mp.meeting.latitude, mp.meeting.longitude))
-                    .title(mp.person.nickname)));
+            Marker marker = map.addMarker(new MarkerOptions().position(new LatLng(mp.meeting.latitude, mp.meeting.longitude)).title(mp.person.nickname).snippet(String.valueOf(mp.person.id)));
+            markers.add(marker);
         }
         return markers;
     }
