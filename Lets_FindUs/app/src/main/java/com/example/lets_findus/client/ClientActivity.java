@@ -64,6 +64,8 @@ public class ClientActivity extends AppCompatActivity {
     private Handler mHandler;
     private Map<String, BluetoothDevice> mScanResults;
 
+    private static final int DEFAULT_BYTES_VIA_BLE = 512;
+
 
 
     Button start;
@@ -518,6 +520,64 @@ public class ClientActivity extends AppCompatActivity {
             mLogHandler.post(() -> {
                 log.append("\nsendMessage --> Failed to write data");
             });
+        }
+    }
+
+    private void sendImage(byte[] image) {
+        if (!mConnected) {
+            mLogHandler.post(() -> {
+                log.append("\nsendImage --> Not connected");
+            });
+            return;
+        }
+        BluetoothGattCharacteristic characteristic = Utilis.findEchoCharacteristic(mGatt);
+        if (characteristic == null) {
+            mLogHandler.post(() -> {
+                log.append("\nsendImage --> Unable to find echo characteristic");
+            });
+            disconnectGattServer();
+            return;
+        }
+        int n = 0;
+        while(n <= image.length) {
+            if(n + DEFAULT_BYTES_VIA_BLE > image.length) {
+                int i = 0;
+                byte[] lastPacket = new byte[image.length - n];
+                for(int j = n; j <= image.length; j++) {
+                    lastPacket[i] = image[j];
+                    i++;
+                    n++;
+                }
+                characteristic.setValue(lastPacket);
+                boolean success = mGatt.writeCharacteristic(characteristic);
+                if (success) {
+                    mLogHandler.post(() -> {
+                        log.append("\nsendImage --> Wrote: " + lastPacket);
+                    });
+                } else {
+                    mLogHandler.post(() -> {
+                        log.append("\nsendImage --> Failed to write data");
+                    });
+                }
+            }
+            else {
+                byte[] first_middle = new byte[DEFAULT_BYTES_VIA_BLE];
+                for(int k = 0; k <= DEFAULT_BYTES_VIA_BLE; k++) {
+                    first_middle[k] = image[n];
+                    n++;
+                }
+                characteristic.setValue(first_middle);
+                boolean success = mGatt.writeCharacteristic(characteristic);
+                if (success) {
+                    mLogHandler.post(() -> {
+                        log.append("\nsendImage --> Wrote: " + first_middle);
+                    });
+                } else {
+                    mLogHandler.post(() -> {
+                        log.append("\nsendImage --> Failed to write data");
+                    });
+                }
+            }
         }
     }
 

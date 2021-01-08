@@ -4,8 +4,11 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -188,5 +191,18 @@ public class Utilis {
                 != BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE;
     }
 
+    private byte[] imageToByte(String path) {
+
+        Bitmap bm = BitmapFactory.decodeFile(path);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100 , baos);
+        return baos.toByteArray();
+    }
+
+    private Bitmap byteToImage(byte[] image) {
+        Bitmap bmp = BitmapFactory.decodeByteArray(image, 0, image.length);
+        return Bitmap.createScaledBitmap(bmp, 100, 100, false);
+    }
+    
 
 }
