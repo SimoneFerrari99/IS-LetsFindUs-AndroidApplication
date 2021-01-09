@@ -127,16 +127,16 @@ public class ProfilePictureFragment extends Fragment {
     private final View.OnClickListener imageSelector = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final CharSequence[] options = { "Fai una foto", "Scegli dalla galleria"};
+            final CharSequence[] options = { getString(R.string.take_photo), getString(R.string.choose_photo)};
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Scegli la tua foto profilo");
+            builder.setTitle(R.string.choose_pro_pic);
 
             builder.setItems(options, new DialogInterface.OnClickListener() {
 
                 @Override
                 public void onClick(DialogInterface dialog, int item) {
-                    if (options[item].equals("Fai una foto")) {
+                    if (options[item].equals(getString(R.string.take_photo))) {
                         File photoFile = null;
                         try {
                             photoFile = createImageFile();

@@ -51,7 +51,7 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
 
         final TextInputEditText birthDate = (TextInputEditText) ((TextInputLayout)root.findViewById(R.id.birth_date_tv)).getEditText();
         materialDateBuilder = MaterialDatePicker.Builder.datePicker();
-        materialDateBuilder.setTitleText("Scegli la tua data di nascita");
+        materialDateBuilder.setTitleText(R.string.birth_year);
         materialDatePicker = materialDateBuilder.build();
         materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
             @Override

@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getTitle().toString().compareTo("Cerca") == 0){
+        if(item.getTitle().toString().compareTo(getString(R.string.search)) == 0){
             try {
                 List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG);
                 Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 e.printStackTrace();
             }
         }
-        else if(item.getTitle().toString().compareTo("Impostazioni") == 0){
+        else if(item.getTitle().toString().compareTo(getString(R.string.settings)) == 0){
             Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(startSettingsActivity);
         }

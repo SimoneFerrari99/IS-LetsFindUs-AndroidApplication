@@ -8,7 +8,7 @@
     android:paddingBottom="@dimen/appintro_bottombar_height">
 
     <ImageView
-        android:id="@+id/imageView5"
+        android:id="@+id/firstImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

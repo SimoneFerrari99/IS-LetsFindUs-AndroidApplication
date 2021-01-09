@@ -1,19 +1,25 @@
 <resources>
     <string name="app_name">Let\'s FindUs</string>
+
+    <!-- Titoli pagine -->
     <string name="title_matching">Incontri</string>
     <string name="title_favorites">Preferiti</string>
     <string name="title_profile">Profilo</string>
+    <string name="edit_mode">Modifica profilo</string>
+    <string name="title_settings">Impostazioni</string>
+    <string name="title_person_profile">Incontro</string>
+    <string name="choose_pro_pic">Scegli la tua foto profilo</string>
 
+    <!-- Etichette -->
     <string name="search">Cerca</string>
     <string name="filter">Filtri</string>
     <string name="settings">Impostazioni</string>
     <string name="searchHint">Esegui una ricerca</string>
-    <string name="missing_permission_title">:(</string>
-    <string name="missing_permission_message">La nostra applicazione non può funzionare senza la localizzazione. Se non si vogliono garantire i permessi necessari, nessun problema: semplicemente disinstalla l\'applicazione. Se ti sei sbagliato, vai nelle impostazioni di Android e dai il consenso per la localizzazione.</string>
-    <string name="missing_permission_positive_text">Concedi i permessi</string>
-    <string name="missing_permission_negative_text">Disinstalla l\'applicazione :(</string>
-    <string name="search_match_button">Cerca incontri in questa area</string>
     <string name="matching_button_show_meetings">Mostra incontri</string>
+    <string name="set_favourite">Aggiungi ai preferiti</string>
+    <string name="is_favourite">E\' nei preferiti</string>
+
+    <!-- Pagina profilo -->
     <string name="obbligatory_data_label">Dati obbligatori</string>
     <string name="sex_tv_label">Sesso</string>
     <string name="nickname_tv_label">Nickname</string>
@@ -26,36 +32,44 @@
     <string name="birth_date_tv_label">Data di nascita</string>
     <string name="other_tv_label">Altro</string>
     <string name="description_tv_label">Descrizione</string>
-    <string name="edit_mode">Modalita\' modifica</string>
-    <string name="confirm">Conferma</string>
     <string name="nickname">Nickname</string>
     <string name="social_hint">Nome profilo o link profilo</string>
     <string name="mail_hint">nome@gmail.com</string>
-    <string name="image_transition">imageTransition</string>
+    <string name="confirm">Conferma</string>
     <string name="add_to_favourite">Aggiungi ai preferiti</string>
+    <string name="image_transition">imageTransition</string>
+    <string name="select_birth_date">Scegli la tua data di nascita</string>
+    <string name="select_birth_year">Scegli il tuo anno di nascita</string>
+    <string name="male">Maschio</string>
+    <string name="female">Femmina</string>
+    <string name="other_genre">Altro</string>
+    <string name="field_can_not_be_empty">Questo campo non può essere vuoto</string>
 
 
+    <!-- Primo avvio -->
     <string name="profile_photo_intro_string">Inserisci la tua foto profilo: fai in modo che le persone possano riconoscerti!</string>
     <string name="insert_obbligatory_data_string">Inserisci ora il tuo nickname, il sesso e l\'anno di nascita: sono dati obbligatori.</string>
-    <string name="maschio">Maschio</string>
-    <string name="name_tv_label">Nome</string>
-    <string name="surname_tv_label">Cognome</string>
     <string name="insert_nonobbligatory_data_string">Se ti va, arricchisci il tuo profilo con tutto cio\' che vuoi!</string>
+    <string name="birth_year">\"Scegli la tua data di nascita\"</string>
     <string name="checkbox_1_text">Ho letto e appreso i possibili rischi legati alla privacy.</string>
     <string name="checkbox_2_text">Mi impegno ad utilizzare l\'applicazione solo per scopi leciti.</string>
     <string name="checkbox_3_text">Mi assumo la completa responsabilità sui dati condivisi.</string>
+    <string name="maschio">Maschio</string>
+    <string name="name_tv_label">Nome</string>
+    <string name="surname_tv_label">Cognome</string>
     <string name="responsibility_end_button_text">Fine</string>
-    <string name="set_favourite">Aggiungi ai preferiti</string>
-    <string name="is_favourite">E\' nei preferiti</string>
+    <string name="done">\"Ho capito\"</string>
 
-    <string name="title_settings">Impostazioni</string>
+
+    <!-- Impostazioni -->
     <string name="settings_archive_label">Archiviazione</string>
     <string name="settings_info_label">Help</string>
     <string name="delete_data_label">Elimina tutti i dati</string>
     <string name="clear_cache_label">Pulisci la cache</string>
     <string name="informations_label">Rivedi informazioni APP</string>
     <string name="feedback_label">Invia Feedback / Segnala Bug</string>
-    <string name="title_person_profile">Incontro</string>
+
+    <!-- Dialog message -->
     <string name="delete_data_confirm_title">Conferma</string>
     <string name="delete_data_confirm_label">Vuoi davvero cancellare tutti i dati?</string>
     <string name="clear_cache_confirm_title">Conferma</string>
@@ -65,5 +79,15 @@
     <string name="missing_bluetooth_message">Non hai attivato il Bluetooth!</string>
     <string name="missing_activate_bluetooth_positive_text">Attivalo</string>
     <string name="copied">Campo copiato negli appunti</string>
+
+    <!-- Permessi -->
+    <string name="missing_permission_title">:(</string>
+    <string name="missing_permission_message">La nostra applicazione non può funzionare senza la localizzazione. Se non si vogliono garantire i permessi necessari, nessun problema: semplicemente disinstalla l\'applicazione. Se ti sei sbagliato, vai nelle impostazioni di Android e dai il consenso per la localizzazione.</string>
+    <string name="missing_permission_positive_text">Concedi i permessi</string>
+    <string name="missing_permission_negative_text">Disinstalla l\'applicazione :(</string>
+    <string name="search_match_button">Cerca incontri in questa area</string>
+    <string name="take_photo">Fai una foto</string>
+    <string name="choose_photo">Scegli dalla galleria</string>
+
 
 </resources>
