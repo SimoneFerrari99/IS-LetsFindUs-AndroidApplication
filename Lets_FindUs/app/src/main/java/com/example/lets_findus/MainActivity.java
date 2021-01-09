@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.lets_findus.ui.MissingBluetoothDialog;
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
+import com.example.lets_findus.ui.filter.Filter;
 import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
@@ -264,9 +265,12 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 e.printStackTrace();
             }
         }
-        else if(item.getTitle().toString().compareTo("Impostazioni") == 0){
+        if(item.getTitle().toString().compareTo("Impostazioni") == 0){
             Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(startSettingsActivity);
+        }
+        else if(item.getTitle().toString().compareTo("Filtri") == 0){
+            //TODO: da fare
         }
 
         return super.onOptionsItemSelected(item);
