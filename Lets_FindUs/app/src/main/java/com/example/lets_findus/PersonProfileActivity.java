@@ -143,6 +143,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     mIntent.putExtra("IS_FROM_FAV", true);
                 }
                 mIntent.putExtra("IS_FROM_VIEW", true);
+                finish();
                 startActivity(mIntent);
             }
         }

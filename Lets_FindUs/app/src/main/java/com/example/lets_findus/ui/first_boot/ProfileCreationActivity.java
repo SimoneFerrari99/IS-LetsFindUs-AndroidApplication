@@ -56,6 +56,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         startActivity(new Intent(this, ResponsibilityActivity.class));
+        finish();
         return super.onOptionsItemSelected(item);
     }
 

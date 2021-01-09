@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
         if(isFirstBoot == 0) {
             Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
+            finish();
             startActivity(startFirstOpening);
         }
         else {
@@ -253,7 +254,6 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getTitle().toString().compareTo("Cerca") == 0){
-
             try {
                 List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG);
                 Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
@@ -270,5 +270,11 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+        super.onBackPressed();
     }
 }

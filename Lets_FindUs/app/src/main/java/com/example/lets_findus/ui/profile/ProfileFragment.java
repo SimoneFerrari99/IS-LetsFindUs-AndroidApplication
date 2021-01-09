@@ -295,6 +295,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         Bundle obbData = getFieldValueBundle(obbligatory, null);
         Bundle send = getFieldValueBundle(other, obbData);
         intent.putExtra("FIELD_VALUES", send);
+        //getActivity().finish();
         startActivity(intent);
     }
 }

@@ -1,26 +1,22 @@
 package com.example.lets_findus;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
-import com.google.gson.internal.$Gson$Preconditions;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.File;
-import java.util.concurrent.Executors;
-import android.os.Build.*;
+import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -36,7 +32,7 @@ public class SettingsActivity extends AppCompatActivity {
         TextView deleteData = findViewById(R.id.delete_data_label);
         deleteData.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 //TODO: AGGIUNGI SI O NO
 
                 new AlertDialog.Builder(v.getContext())
@@ -112,8 +108,8 @@ public class SettingsActivity extends AppCompatActivity {
         Intent mIntent = new Intent(this, MainActivity.class);
 
         mIntent.putExtra("IS_FROM_PROFILE", true);
+        finish();
         startActivity(mIntent);
-
         return super.onOptionsItemSelected(item);
     }
 

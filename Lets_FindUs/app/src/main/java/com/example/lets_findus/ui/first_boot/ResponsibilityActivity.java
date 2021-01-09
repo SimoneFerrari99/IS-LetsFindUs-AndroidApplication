@@ -37,6 +37,7 @@ public class ResponsibilityActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt("FIRST_BOOT", 1);
                 editor.apply();
+                finish();
                 startActivity(new Intent(ResponsibilityActivity.this, MainActivity.class));
             }
         });

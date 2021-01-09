@@ -1,6 +1,5 @@
 package com.example.lets_findus.ui.profile;
 
-import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +10,6 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -376,7 +374,8 @@ public class EditProfileActivity extends AppCompatActivity {
                     mIntent = new Intent(EditProfileActivity.this, ProfileCreationActivity.class);
                 }
                 mIntent.putExtra("IS_FROM_EDIT", true);
-                startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+                finish();
+                startActivity(mIntent);
                 return true;
             case R.id.confirm:
                 Bundle obbForm = getFormValues(obbligatory, null);
@@ -390,10 +389,10 @@ public class EditProfileActivity extends AppCompatActivity {
                 mIntent.putExtra("IS_FROM_EDIT",true);
                 mIntent.putExtra("FORM_DATA", data);
                 if(modifiedPhoto){
-                    Log.d("Modified photo", "ciao");
                     mIntent.putExtra("PROPIC_CHANGED", currentPhotoPath);
                 }
-                startActivity(mIntent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+                finish();
+                startActivity(mIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
