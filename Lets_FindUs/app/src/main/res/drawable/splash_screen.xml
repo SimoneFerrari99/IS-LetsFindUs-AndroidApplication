@@ -2,8 +2,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/white"/>
     <item
-        android:width="175dp"
-        android:height="175dp"
-        android:drawable="@drawable/lets_findus"
+        android:width="275dp"
+        android:height="275dp"
+        android:drawable="@drawable/lets_findus_icon_plus_name"
         android:gravity="center"/>
 </layer-list>
