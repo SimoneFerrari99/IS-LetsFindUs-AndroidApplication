@@ -268,6 +268,7 @@ public class EditProfileActivity extends AppCompatActivity {
         options.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         options.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        options.setCompressionQuality(30);
         UCrop.of(source, destination)
                 .withOptions(options)
                 .withAspectRatio(1, 1)
