@@ -65,5 +65,11 @@
     <string name="missing_bluetooth_message">Non hai attivato il Bluetooth!</string>
     <string name="missing_activate_bluetooth_positive_text">Attivalo</string>
     <string name="copied">Campo copiato negli appunti</string>
+    <string name="apply_a_filter">Applica un filtro</string>
+    <string name="data_filter">Data</string>
+    <string name="hour_filter">Ora</string>
+    <string name="sex_filter">Sesso</string>
+    <string name="age_filter">Età</string>
+    <string name="botton_filter">Filtra</string>
 
 </resources>
