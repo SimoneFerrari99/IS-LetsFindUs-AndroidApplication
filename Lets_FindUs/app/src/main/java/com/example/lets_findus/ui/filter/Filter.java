@@ -21,8 +21,7 @@ public class Filter extends AppCompatActivity implements AdapterView.OnItemSelec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.filter_popup_window);   penso sia sbagliato la parte sotto
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.filter_popup_window);
         //Getting the instance of Spinner and applying OnItemSelectedListener on it
         Spinner spin = (Spinner) findViewById(R.id.spinner_date);
         Spinner spin_date = (Spinner) findViewById(R.id.spinner_date);

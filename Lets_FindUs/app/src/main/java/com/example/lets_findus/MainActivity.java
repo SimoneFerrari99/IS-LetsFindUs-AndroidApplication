@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             startActivity(startSettingsActivity);
         }
         else if(item.getTitle().toString().compareTo("Filtri") == 0){
-            //TODO: da fare
+            setContentView(R.layout.filter_popup_window);
         }
 
         return super.onOptionsItemSelected(item);
