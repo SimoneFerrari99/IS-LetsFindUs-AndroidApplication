@@ -67,7 +67,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> pickPhoto;
     private String currentPhotoPath;
 
-    private String[] sex = {getString(R.string.male), getString(R.string.female), getString(R.string.other_genre)};
+    private String[] sex = {"Maschio", "Femmina", "Altro"};
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +83,7 @@ public class EditProfileActivity extends AppCompatActivity {
         final TextInputEditText yearBirth = (TextInputEditText) ((TextInputLayout)findViewById(R.id.year_birth_tv)).getEditText();
 
         materialDateBuilder = MaterialDatePicker.Builder.datePicker();
-        materialDateBuilder.setTitleText(R.string.select_birth_date);
+        materialDateBuilder.setTitleText("Scegli la tua data di nascita");
         materialDatePicker = materialDateBuilder.build();
         materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
             @Override
@@ -103,7 +103,7 @@ public class EditProfileActivity extends AppCompatActivity {
         },  today.get(Calendar.YEAR), today.get(Calendar.MONTH));
         final MonthPickerDialog yearPicker = materialYearBuilder.setMinYear(1950)
                 .setMaxYear(today.get(Calendar.YEAR))
-                .setTitle(getString(R.string.select_birth_year))
+                .setTitle("Scegli il tuo anno di nascita")
                 .showYearOnly().build();
 
         yearBirth.setInputType(InputType.TYPE_NULL);
@@ -192,10 +192,10 @@ public class EditProfileActivity extends AppCompatActivity {
     private final View.OnClickListener imageSelector = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final CharSequence[] options = { getString(R.string.take_photo), getString(R.string.choose_photo)};
+            final CharSequence[] options = { "Fai una foto", "Scegli dalla galleria"};
 
             AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
-            builder.setTitle(R.string.choose_pro_pic);
+            builder.setTitle("Scegli la tua foto profilo");
 
             builder.setItems(options, new DialogInterface.OnClickListener() {
 
@@ -342,7 +342,7 @@ public class EditProfileActivity extends AppCompatActivity {
                         if(count == 0){
                             menu.findItem(R.id.confirm).setEnabled(false).setVisible(false);
                             ((TextInputLayout) v).setErrorEnabled(true);
-                            ((TextInputLayout) v).setError(getString(R.string.field_can_not_be_empty));
+                            ((TextInputLayout) v).setError("Questo campo non può essere vuoto");
                         }
                         else{
                             menu.findItem(R.id.confirm).setEnabled(true).setVisible(true);

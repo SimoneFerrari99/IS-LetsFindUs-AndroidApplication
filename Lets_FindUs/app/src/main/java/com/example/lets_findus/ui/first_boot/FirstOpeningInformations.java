@@ -27,7 +27,7 @@ public class FirstOpeningInformations extends AppIntro {
         setStatusBarColorRes(R.color.colorPrimaryDark);
         setBarColor(getColor(R.color.colorSecondary));
         setSeparatorColor(getColor(R.color.colorSecondary));
-        setDoneText(R.string.done);
+        setDoneText("Ho capito");
         setColorDoneText(Color.BLACK);
         setIndicatorColor(getColor(R.color.selectedDot), getColor(R.color.unselectedDot));
         setNextArrowColor(Color.BLACK);
