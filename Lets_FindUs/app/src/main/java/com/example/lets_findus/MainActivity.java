@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyAFjB2Yk9GGgLqzgVMGOBlxNvSDnDUKy5w");
