@@ -73,8 +73,8 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
         if(isFirstBoot == 0) {
             Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
-            finish();
             startActivity(startFirstOpening);
+            finish();
         }
         else {
             setContentView(R.layout.activity_main);
