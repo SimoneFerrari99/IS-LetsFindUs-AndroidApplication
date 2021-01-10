@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -289,6 +291,8 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
     private void showFilterPopup(){
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final View popupView = inflater.inflate(R.layout.filter_popup_window, null);
+        popupView.setBackgroundResource(android.R.color.white);
+        popupView.setElevation(32);
 
         final Spinner age = popupView.findViewById(R.id.spinner_age);
         final Spinner date = popupView.findViewById(R.id.spinner_date);
