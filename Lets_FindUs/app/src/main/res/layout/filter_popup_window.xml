@@ -24,7 +24,7 @@
 
             <Spinner
                 android:id="@+id/spinner_age"
-                android:layout_width="260dp"
+                android:layout_width="220dp"
                 android:layout_height="21dp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView10"
                 app:layout_constraintEnd_toEndOf="@+id/spinner_sex"
@@ -83,7 +83,7 @@
 
             <Spinner
                 android:id="@+id/spinner_date"
-                android:layout_width="260dp"
+                android:layout_width="220dp"
                 android:layout_height="21dp"
                 android:layout_marginStart="42dp"
                 android:layout_marginEnd="16dp"
@@ -94,7 +94,7 @@
 
             <Spinner
                 android:id="@+id/spinner_hour"
-                android:layout_width="260dp"
+                android:layout_width="220dp"
                 android:layout_height="21dp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView8"
                 app:layout_constraintEnd_toEndOf="@+id/spinner_date"
@@ -104,7 +104,7 @@
 
             <Spinner
                 android:id="@+id/spinner_sex"
-                android:layout_width="260dp"
+                android:layout_width="220dp"
                 android:layout_height="21dp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView9"
                 app:layout_constraintEnd_toEndOf="@+id/spinner_hour"
@@ -127,7 +127,7 @@
                 android:id="@+id/button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/botton_filter"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
