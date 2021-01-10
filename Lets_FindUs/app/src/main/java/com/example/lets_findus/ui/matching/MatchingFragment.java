@@ -28,6 +28,7 @@ import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.MeetingPerson;
+import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.PersonDao;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -52,7 +53,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class MatchingFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraMoveStartedListener {
@@ -74,6 +77,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private static PersonDao pd;
 
     private static List<MeetingPerson> meetings;
+    private static List<MeetingPerson> allMeetings = new ArrayList<>();
     private List<Marker> visibleMarkers;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -239,6 +243,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                             sheetBehavior.setPeekHeight(50);
                         }
                         MatchingFragment.meetings.addAll(result);
+                        MatchingFragment.allMeetings.addAll(result);
                         adapter.notifyDataSetChanged();
                         removeVisibleMarker(visibleMarkers);
                         visibleMarkers = setVisibleMeetingsMarker(MatchingFragment.meetings, map);
@@ -274,6 +279,38 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                         v.setVisibility(View.GONE);
                     }
                 });
+    }
+
+    public void filterItems(Map<String, String> filterOptions){
+        meetings.clear();
+        meetings.addAll(allMeetings);
+        Iterator<MeetingPerson> mpIterator = meetings.iterator();
+        while (mpIterator.hasNext()) {
+            MeetingPerson elem = mpIterator.next();
+            switch (filterOptions.get("sex")) {
+                case "Maschio":
+                    if(elem.person.sex != Person.Sex.MALE)
+                        mpIterator.remove();
+                    break;
+                case "Femmina":
+                    if(elem.person.sex != Person.Sex.FEMALE)
+                        mpIterator.remove();
+                    break;
+                case "Altro":
+                    if(elem.person.sex != Person.Sex.OTHER)
+                        mpIterator.remove();
+                    break;
+            }
+        }
+        if(meetings.size() == 0){
+            sheetBehavior.setPeekHeight(0);
+        }
+        else{
+            sheetBehavior.setPeekHeight(50);
+        }
+        adapter.notifyDataSetChanged();
+        removeVisibleMarker(visibleMarkers);
+        visibleMarkers = setVisibleMeetingsMarker(meetings, map);
     }
 
 }

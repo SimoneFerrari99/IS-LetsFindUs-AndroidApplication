@@ -19,6 +19,7 @@ import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.MeetingPerson;
+import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.PersonDao;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -26,7 +27,9 @@ import com.google.common.util.concurrent.Futures;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class FavouritesFragment extends Fragment {
@@ -36,6 +39,7 @@ public class FavouritesFragment extends Fragment {
     private static RecyclerView recyclerView;
     static View.OnClickListener myOnClickListener;
     private static List<MeetingPerson> favouriteMeetings;
+    private List<MeetingPerson> allMeetings = new ArrayList<>();
 
     private static AppDatabase db;
     private static MeetingDao md;
@@ -64,6 +68,7 @@ public class FavouritesFragment extends Fragment {
             @Override
             public void onSuccess(@NullableDecl List<MeetingPerson> result) {
                 favouriteMeetings = result;
+                allMeetings.addAll(result);
                 adapter = new FavAdapter(favouriteMeetings);
                 recyclerView.setAdapter(adapter);
             }
@@ -96,4 +101,29 @@ public class FavouritesFragment extends Fragment {
             startActivity(startPersonProfile);
         }
     }
+
+    public void filterItems(Map<String, String> filterOptions){
+        favouriteMeetings.clear();
+        favouriteMeetings.addAll(allMeetings);
+        Iterator<MeetingPerson> mpIterator = favouriteMeetings.iterator();
+        while (mpIterator.hasNext()) {
+            MeetingPerson elem = mpIterator.next();
+            switch (filterOptions.get("sex")) {
+                case "Maschio":
+                    if(elem.person.sex != Person.Sex.MALE)
+                        mpIterator.remove();
+                    break;
+                case "Femmina":
+                    if(elem.person.sex != Person.Sex.FEMALE)
+                        mpIterator.remove();
+                    break;
+                case "Altro":
+                    if(elem.person.sex != Person.Sex.OTHER)
+                        mpIterator.remove();
+                    break;
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
+
 }
