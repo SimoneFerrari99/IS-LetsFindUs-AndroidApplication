@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -57,6 +58,13 @@ public class ServerActivity extends AppCompatActivity {
     private Button start;
     private Button stop;
     private Button restart;
+
+    private boolean isImage = false;
+    private boolean array_initialized = false;
+    private boolean data = false;
+    private int n = 0;
+    private byte[] packet;
+    private String size;
 
 /* ----------------------------- LIFECYCLE ----------------------------- */
 
@@ -298,6 +306,8 @@ public class ServerActivity extends AppCompatActivity {
 /* ----------------------------- SERVER CALLBACK ----------------------------- */
 
     BluetoothGattServerCallback bluetoothGattServerCallback = new BluetoothGattServerCallback() {
+        boolean isImage = false;
+        boolean already_initialized = false;
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
@@ -350,6 +360,13 @@ public class ServerActivity extends AppCompatActivity {
                 log.append("\nonCharacteristicWriteRequest" + characteristic.getUuid().toString()
                         + "\nReceived: " + Utilis.byteArrayInHexFormat(value));
             });
+
+            try {
+                mergePacket(value);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 
             if (CHARACTERISTIC_ECHO_UUID.equals(characteristic.getUuid())) {
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
@@ -404,5 +421,55 @@ public class ServerActivity extends AppCompatActivity {
     };
 
 /* ------------------------------------------------------------------------------ */
+
+
+    public void mergePacket(byte[] value) throws InterruptedException {
+        if(!isImage && !data) {
+            if(Utilis.byteToString(value).equals("iamge")) {
+                isImage = true;
+                Thread.sleep(40);
+                return;
+            }
+            else {
+                if(Utilis.byteToString(value).equals("dataPerson"));
+                data = true;
+                Thread.sleep(40);
+                return;
+
+            }
+        }
+        else {
+            if(!array_initialized) {
+                size = Utilis.byteToString(value);
+                packet = setSizeByteArray(Integer.parseInt(size));
+                array_initialized = true;
+                Thread.sleep(40);
+                return;
+            }
+        }
+        for(int i = 0; i < value.length; i++) {
+            packet[n] = value[i];
+            n++;
+        }
+        if(n >= Integer.parseInt(size)) {
+            isImage = false;
+            array_initialized = false;
+            data = false;
+            n = 0;
+            Log.i("mergePacket", "------------" + Utilis.byteToString(packet) + "------------");
+            mLogHandler.post(() -> {
+                log.append("\nmergePacket --> ------------ " + packet.toString() + "------------");
+            });
+            return;
+        }
+        else {
+            Thread.sleep(40);
+            return;
+        }
+    }
+
+    public byte[] setSizeByteArray(int size) {
+        return new byte[size];
+    }
 
 }

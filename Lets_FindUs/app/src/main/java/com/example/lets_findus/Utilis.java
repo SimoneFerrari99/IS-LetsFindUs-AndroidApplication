@@ -10,6 +10,8 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -191,18 +193,27 @@ public class Utilis {
                 != BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE;
     }
 
-    private byte[] imageToByte(String path) {
+    public static byte[] imageToByte(String path) {
 
         Bitmap bm = BitmapFactory.decodeFile(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 100 , baos);
+        bm.compress(Bitmap.CompressFormat.JPEG, 100 , baos);
         return baos.toByteArray();
     }
 
-    private Bitmap byteToImage(byte[] image) {
+    public static Bitmap byteToImage(byte[] image) {
         Bitmap bmp = BitmapFactory.decodeByteArray(image, 0, image.length);
         return Bitmap.createScaledBitmap(bmp, 100, 100, false);
     }
+
+    public static byte[] intToByte(int data) {
+        return ByteBuffer.allocate(4).putInt(data).array();
+    }
+
+    public static String byteToString(byte[] data) {
+        return new String(data, StandardCharsets.UTF_8);
+    }
+
     
 
 }

@@ -114,7 +114,10 @@ public class ClientActivity extends AppCompatActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage();
+                String message = mEdit.getText().toString();
+                byte[] messageBytes = Utilis.bytesFromString(message);
+                //sendMessage();
+                sendImage(messageBytes, false);
             }
         });
 
@@ -523,13 +526,14 @@ public class ClientActivity extends AppCompatActivity {
         }
     }
 
-    private void sendImage(byte[] image) {
+    private void sendImage(byte[] data, boolean isImage) {
         if (!mConnected) {
             mLogHandler.post(() -> {
                 log.append("\nsendImage --> Not connected");
             });
             return;
         }
+
         BluetoothGattCharacteristic characteristic = Utilis.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
             mLogHandler.post(() -> {
@@ -538,47 +542,204 @@ public class ClientActivity extends AppCompatActivity {
             disconnectGattServer();
             return;
         }
-        int n = 0;
-        while(n <= image.length) {
-            if(n + DEFAULT_BYTES_VIA_BLE > image.length) {
-                int i = 0;
-                byte[] lastPacket = new byte[image.length - n];
-                for(int j = n; j <= image.length; j++) {
-                    lastPacket[i] = image[j];
-                    i++;
-                    n++;
+
+
+
+
+        if(isImage) {
+            String first = "image";
+            String size = "" + data.length;
+
+            byte[] first_convert = Utilis.bytesFromString(first);
+            characteristic.setValue(first_convert);
+            boolean success = mGatt.writeCharacteristic(characteristic);
+            if (success) {
+                mLogHandler.post(() -> {
+                    log.append("\nsendMessage --> Wrote: " + Utilis.byteArrayInHexFormat(first_convert));
+                });
+            } else {
+                mLogHandler.post(() -> {
+                    log.append("\nsendMessage --> Failed to write data");
+                });
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            byte[] second_converted = Utilis.bytesFromString(size);
+            characteristic.setValue(second_converted);
+            success = mGatt.writeCharacteristic(characteristic);
+            if (success) {
+                mLogHandler.post(() -> {
+                    log.append("\nsendMessage --> Wrote: " + Utilis.byteArrayInHexFormat(second_converted));
+                });
+            } else {
+                mLogHandler.post(() -> {
+                    log.append("\nsendMessage --> Failed to write data");
+                });
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            int n = 0;
+            while(n < data.length) {
+                if(n + DEFAULT_BYTES_VIA_BLE >= data.length) {
+                    int i = 0;
+                    byte[] lastPacket = new byte[data.length - n];
+                    for(int j = n; j < data.length; j++) {
+                        lastPacket[i] = data[j];
+                        i++;
+                        n++;
+                    }
+                    characteristic.setValue(lastPacket);
+                    success = mGatt.writeCharacteristic(characteristic);
+                    if (success) {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendImage --> Wrote: " + lastPacket);
+                        });
+                    } else {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendImage --> Failed to write data");
+                        });
+                    }
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                characteristic.setValue(lastPacket);
-                boolean success = mGatt.writeCharacteristic(characteristic);
-                if (success) {
-                    mLogHandler.post(() -> {
-                        log.append("\nsendImage --> Wrote: " + lastPacket);
-                    });
-                } else {
-                    mLogHandler.post(() -> {
-                        log.append("\nsendImage --> Failed to write data");
-                    });
+                else {
+                    byte[] first_middle = new byte[DEFAULT_BYTES_VIA_BLE];
+                    for(int k = 0; k < DEFAULT_BYTES_VIA_BLE; k++) {
+                        first_middle[k] = data[n];
+                        n++;
+                    }
+                    characteristic.setValue(first_middle);
+                    success = mGatt.writeCharacteristic(characteristic);
+                    if (success) {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendImage --> Wrote: " + first_middle);
+                        });
+                    } else {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendImage --> Failed to write data");
+                        });
+                    }
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             }
-            else {
-                byte[] first_middle = new byte[DEFAULT_BYTES_VIA_BLE];
-                for(int k = 0; k <= DEFAULT_BYTES_VIA_BLE; k++) {
-                    first_middle[k] = image[n];
-                    n++;
-                }
-                characteristic.setValue(first_middle);
-                boolean success = mGatt.writeCharacteristic(characteristic);
-                if (success) {
-                    mLogHandler.post(() -> {
-                        log.append("\nsendImage --> Wrote: " + first_middle);
-                    });
-                } else {
-                    mLogHandler.post(() -> {
-                        log.append("\nsendImage --> Failed to write data");
-                    });
-                }
-            }
+            return;
         }
+        else {
+
+
+            String person = "dataPerson";
+            String size = "" + data.length;
+
+
+            byte[] first_convert = Utilis.bytesFromString(person);
+            characteristic.setValue(first_convert);
+            boolean success = mGatt.writeCharacteristic(characteristic);
+            if (success) {
+                mLogHandler.post(() -> {
+                    log.append("\nsendData --> Wrote: " + first_convert);
+                });
+            } else {
+                mLogHandler.post(() -> {
+                    log.append("\nsendData --> Failed to write data");
+                });
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            byte[] second_converted = Utilis.bytesFromString(size);
+            characteristic.setValue(second_converted);
+            success = mGatt.writeCharacteristic(characteristic);
+            if (success) {
+                mLogHandler.post(() -> {
+                    log.append("\nsendData --> Wrote: " + Utilis.byteArrayInHexFormat(second_converted));
+                });
+            } else {
+                mLogHandler.post(() -> {
+                    log.append("\nsendData --> Failed to write data");
+                });
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            int n = 0;
+            while(n < data.length) {
+                if(n + DEFAULT_BYTES_VIA_BLE >= data.length) {
+                    int i = 0;
+                    byte[] lastPacket = new byte[data.length - n];
+                    for(int j = n; j < data.length; j++) {
+                        lastPacket[i] = data[j];
+                        i++;
+                        n++;
+                    }
+                    characteristic.setValue(lastPacket);
+                    success = mGatt.writeCharacteristic(characteristic);
+                    if (success) {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendData --> Wrote: " + lastPacket);
+                        });
+                    } else {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendData --> Failed to write data");
+                        });
+                    }
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    byte[] first_middle = new byte[DEFAULT_BYTES_VIA_BLE];
+                    for(int k = 0; k < DEFAULT_BYTES_VIA_BLE; k++) {
+                        first_middle[k] = data[n];
+                        n++;
+                    }
+                    characteristic.setValue(first_middle);
+                    success = mGatt.writeCharacteristic(characteristic);
+                    if (success) {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendData --> Wrote: " + first_middle);
+                        });
+                    } else {
+                        mLogHandler.post(() -> {
+                            log.append("\nsendData --> Failed to write data");
+                        });
+                    }
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+            return;
+        }
+
     }
 
 /* ------------------------------------------------------------------------------ */
