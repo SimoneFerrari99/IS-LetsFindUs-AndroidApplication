@@ -28,7 +28,6 @@ import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.AppDatabase;
 import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.MeetingPerson;
-import com.example.lets_findus.utilities.PersonDao;
 import com.example.lets_findus.utilities.UtilFunction;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -62,27 +61,24 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private SupportMapFragment mapFragment;
     private FusedLocationProviderClient fusedLocationClient;
     private GoogleMap map;
-    private View root;
     private MaterialButton show_match;
 
-    private BottomSheetBehavior sheetBehavior;
-    private static RecyclerView.Adapter adapter; //l'adapter serve per popolare ogni riga
-    private RecyclerView.LayoutManager layoutManager;
+    private BottomSheetBehavior<View> sheetBehavior;
+    private static RecyclerView.Adapter<MatchAdapter.MyViewHolder> adapter; //l'adapter serve per popolare ogni riga
     private static RecyclerView recyclerView;
     static View.OnClickListener myOnClickListener;
 
     private static AppDatabase db;
     private static MeetingDao md;
-    private static PersonDao pd;
 
     private static List<MeetingPerson> meetings;
-    private static List<MeetingPerson> allMeetings = new ArrayList<>();
+    private static final List<MeetingPerson> allMeetings = new ArrayList<>();
     private List<Marker> visibleMarkers;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        root = inflater.inflate(R.layout.fragment_matching, container, false);
+        View root = inflater.inflate(R.layout.fragment_matching, container, false);
 
         show_match = root.findViewById(R.id.matching_button);
         show_match.setVisibility(View.GONE);
@@ -123,7 +119,6 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         if(db == null){
             db = Room.databaseBuilder(getContext(), AppDatabase.class, "meeting_db").build();
             md = db.meetingDao();
-            pd = db.personDao();
         }
 
         sheetBehavior = BottomSheetBehavior.from(root.findViewById(R.id.bs_card_view));
@@ -134,7 +129,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         recyclerView = root.findViewById(R.id.bottom_sheet_rec_view);
         recyclerView.setHasFixedSize(true);
 
-        layoutManager = new LinearLayoutManager(root.getContext());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(root.getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
