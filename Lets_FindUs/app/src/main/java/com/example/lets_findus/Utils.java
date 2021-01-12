@@ -22,13 +22,13 @@ import static com.example.lets_findus.GattAttributes.CLIENT_CONFIGURATION_DESCRI
 import static com.example.lets_findus.GattAttributes.SERVICE_STRING;
 
 
-public class Utilis {
+public class Utils {
 
     public static List<BluetoothGattCharacteristic> findCharacteristics(BluetoothGatt bluetoothGatt) {
         List<BluetoothGattCharacteristic> matchingCharacteristics = new ArrayList<>();
 
         List<BluetoothGattService> serviceList = bluetoothGatt.getServices();
-        BluetoothGattService service = Utilis.findService(serviceList);
+        BluetoothGattService service = Utils.findService(serviceList);
         if (service == null) {
             return matchingCharacteristics;
         }
@@ -173,10 +173,11 @@ public class Utilis {
     }
 
     public static byte[] bytesFromString(String string) {
-        byte[] stringBytes = new byte[0];
+        byte[] stringBytes;
         try {
             stringBytes = string.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
+            stringBytes = new byte[0];
             Log.e("bytesFromString", "Failed to convert message string to byte array");
         }
 
@@ -202,8 +203,7 @@ public class Utilis {
     }
 
     public static Bitmap byteToImage(byte[] image) {
-        Bitmap bmp = BitmapFactory.decodeByteArray(image, 0, image.length);
-        return Bitmap.createScaledBitmap(bmp, 100, 100, false);
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
     public static byte[] intToByte(int data) {

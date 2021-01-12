@@ -29,7 +29,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lets_findus.R;
-import com.example.lets_findus.Utilis;
+import com.example.lets_findus.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -268,12 +268,12 @@ public class ServerActivity extends AppCompatActivity {
         BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
         mLogHandler.post(() -> {
             log.append("\nNotifying characteristic " + characteristic.getUuid().toString()
-                    + ", \nnew value: " + Utilis.byteArrayInHexFormat(value));
+                    + ", \nnew value: " + Utils.byteArrayInHexFormat(value));
         });
 
         characteristic.setValue(value);
         // Indications require confirmation, notifications do not
-        boolean confirm = Utilis.requiresConfirmation(characteristic);
+        boolean confirm = Utils.requiresConfirmation(characteristic);
         for (BluetoothDevice device : mDevices) {
             if (clientEnabledNotifications(device, characteristic)) {
                 mGattServer.notifyCharacteristicChanged(device, characteristic, confirm);
@@ -283,7 +283,7 @@ public class ServerActivity extends AppCompatActivity {
 
     private boolean clientEnabledNotifications(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
         List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
-        BluetoothGattDescriptor descriptor = Utilis.findClientConfigurationDescriptor(descriptorList);
+        BluetoothGattDescriptor descriptor = Utils.findClientConfigurationDescriptor(descriptorList);
         if (descriptor == null) {
             // There is no client configuration descriptor, treat as true
             return true;
@@ -347,7 +347,7 @@ public class ServerActivity extends AppCompatActivity {
                 log.append("\nonCharacteristicReadRequest " + characteristic.getUuid().toString());
             });
 
-            if (Utilis.requiresResponse(characteristic)) {
+            if (Utils.requiresResponse(characteristic)) {
                 // Unknown read characteristic requiring response, send failure
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
             }
@@ -358,7 +358,7 @@ public class ServerActivity extends AppCompatActivity {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
             mLogHandler.post(() -> {
                 log.append("\nonCharacteristicWriteRequest" + characteristic.getUuid().toString()
-                        + "\nReceived: " + Utilis.byteArrayInHexFormat(value));
+                        + "\nReceived: " + Utils.byteArrayInHexFormat(value));
             });
 
             try {
@@ -373,7 +373,7 @@ public class ServerActivity extends AppCompatActivity {
 
                 characteristic.setValue(value);
                 mLogHandler.post(() -> {
-                    log.append("\nSending: " + Utilis.byteArrayInHexFormat(value));
+                    log.append("\nSending: " + Utils.byteArrayInHexFormat(value));
                 });
                 notifyCharacteristic(value, CHARACTERISTIC_ECHO_UUID);
             }
@@ -392,7 +392,7 @@ public class ServerActivity extends AppCompatActivity {
             super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
             mLogHandler.post(() -> {
                 log.append("\nonDescriptorWriteRequest: " + descriptor.getUuid().toString()
-                        + "\nvalue: " + Utilis.byteArrayInHexFormat(value));
+                        + "\nvalue: " + Utils.byteArrayInHexFormat(value));
             });
 
             if (CLIENT_CONFIGURATION_DESCRIPTOR_UUID.equals(descriptor.getUuid())) {
@@ -425,45 +425,43 @@ public class ServerActivity extends AppCompatActivity {
 
     public void mergePacket(byte[] value) throws InterruptedException {
         if(!isImage && !data) {
-            if(Utilis.byteToString(value).equals("iamge")) {
+            if(Utils.byteToString(value).equals("image")) {
                 isImage = true;
-                Thread.sleep(40);
                 return;
             }
             else {
-                if(Utilis.byteToString(value).equals("dataPerson"));
+                if(Utils.byteToString(value).equals("dataPerson"));
                 data = true;
-                Thread.sleep(40);
                 return;
 
             }
         }
         else {
             if(!array_initialized) {
-                size = Utilis.byteToString(value);
+                size = Utils.byteToString(value);
                 packet = setSizeByteArray(Integer.parseInt(size));
                 array_initialized = true;
-                Thread.sleep(40);
                 return;
             }
-        }
-        for(int i = 0; i < value.length; i++) {
-            packet[n] = value[i];
-            n++;
+            else {
+                for(int i = 0; i < value.length; i++) {
+                    packet[n] = value[i];
+                    n++;
+                }
+            }
         }
         if(n >= Integer.parseInt(size)) {
             isImage = false;
             array_initialized = false;
             data = false;
             n = 0;
-            Log.i("mergePacket", "------------" + Utilis.byteToString(packet) + "------------");
+            Log.i("mergePacket", "------------" + Utils.byteToString(packet) + "------------");
             mLogHandler.post(() -> {
                 log.append("\nmergePacket --> ------------ " + packet.toString() + "------------");
             });
             return;
         }
         else {
-            Thread.sleep(40);
             return;
         }
     }

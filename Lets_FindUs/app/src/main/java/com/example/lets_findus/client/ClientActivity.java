@@ -29,7 +29,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lets_findus.R;
-import com.example.lets_findus.Utilis;
+import com.example.lets_findus.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.example.lets_findus.GattAttributes.SERVICE_UUID;
-import static com.example.lets_findus.Utilis.findCharacteristics;
+import static com.example.lets_findus.Utils.findCharacteristics;
 
 
 public class ClientActivity extends AppCompatActivity {
@@ -115,7 +115,7 @@ public class ClientActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String message = mEdit.getText().toString();
-                byte[] messageBytes = Utilis.bytesFromString(message);
+                byte[] messageBytes = Utils.bytesFromString(message);
                 //sendMessage();
                 sendImage(messageBytes, false);
             }
@@ -357,11 +357,11 @@ public class ClientActivity extends AppCompatActivity {
                     mLogHandler.post(() -> {
                         log.append("\nonServicesDiscovered --> Characteristic notification set successfully for " + characteristic.getUuid().toString());
                     });
-                    if (Utilis.isEchoCharacteristic(characteristic)) {
+                    if (Utils.isEchoCharacteristic(characteristic)) {
                         initializeEcho();
-                    } else if (Utilis.isTimeCharacteristic(characteristic)) {
+                    } else if (Utils.isTimeCharacteristic(characteristic)) {
                         List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
-                        BluetoothGattDescriptor descriptor = Utilis.findClientConfigurationDescriptor(descriptorList);
+                        BluetoothGattDescriptor descriptor = Utils.findClientConfigurationDescriptor(descriptorList);
                         if (descriptor == null) {
                             mLogHandler.post(() -> {
                                 log.append("\nonServicesDiscovered --> Unable to find Characteristic Configuration Descriptor");
@@ -399,9 +399,9 @@ public class ClientActivity extends AppCompatActivity {
                 });
                 byte[] messageBytes = characteristic.getValue();
                 mLogHandler.post(() -> {
-                    log.append("\nonCharacteristicRead --> Read: " + Utilis.byteArrayInHexFormat(messageBytes));
+                    log.append("\nonCharacteristicRead --> Read: " + Utils.byteArrayInHexFormat(messageBytes));
                 });
-                String message = Utilis.stringFromBytes(messageBytes);
+                String message = Utils.stringFromBytes(messageBytes);
                 if (message == null) {
                     mLogHandler.post(() -> {
                         log.append("\nonCharacteristicRead --> Unable to convert bytes to string");
@@ -437,9 +437,9 @@ public class ClientActivity extends AppCompatActivity {
             });
             byte[] messageBytes = characteristic.getValue();
             mLogHandler.post(() -> {
-                log.append("\nonCharacteristicChanged --> Read " + Utilis.byteArrayInHexFormat(messageBytes));
+                log.append("\nonCharacteristicChanged --> Read " + Utils.byteArrayInHexFormat(messageBytes));
             });
-            String message = Utilis.stringFromBytes(messageBytes);
+            String message = Utils.stringFromBytes(messageBytes);
             if (message == null) {
                 mLogHandler.post(() -> {
                     log.append("\nonCharacteristicChanged --> Unable to convert bytes to string");
@@ -491,7 +491,7 @@ public class ClientActivity extends AppCompatActivity {
             return;
         }
 
-        BluetoothGattCharacteristic characteristic = Utilis.findEchoCharacteristic(mGatt);
+        BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
             mLogHandler.post(() -> {
                 log.append("\nsendMessage --> Unable to find echo characteristic");
@@ -505,7 +505,7 @@ public class ClientActivity extends AppCompatActivity {
             log.append("\nsendMessage --> Sending message: " + message);
         });
 
-        byte[] messageBytes = Utilis.bytesFromString(message);
+        byte[] messageBytes = Utils.bytesFromString(message);
         if (messageBytes.length == 0) {
             mLogHandler.post(() -> {
                 log.append("\nsendMessage --> Unable to convert message to bytes");
@@ -517,7 +517,7 @@ public class ClientActivity extends AppCompatActivity {
         boolean success = mGatt.writeCharacteristic(characteristic);
         if (success) {
             mLogHandler.post(() -> {
-                log.append("\nsendMessage --> Wrote: " + Utilis.byteArrayInHexFormat(messageBytes));
+                log.append("\nsendMessage --> Wrote: " + Utils.byteArrayInHexFormat(messageBytes));
             });
         } else {
             mLogHandler.post(() -> {
@@ -527,14 +527,16 @@ public class ClientActivity extends AppCompatActivity {
     }
 
     private void sendImage(byte[] data, boolean isImage) {
+        /*
         if (!mConnected) {
             mLogHandler.post(() -> {
                 log.append("\nsendImage --> Not connected");
             });
             return;
         }
+        */
 
-        BluetoothGattCharacteristic characteristic = Utilis.findEchoCharacteristic(mGatt);
+        BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
             mLogHandler.post(() -> {
                 log.append("\nsendImage --> Unable to find echo characteristic");
@@ -548,40 +550,42 @@ public class ClientActivity extends AppCompatActivity {
 
         if(isImage) {
             String first = "image";
-            String size = "" + data.length;
+            String size = String.valueOf(data.length);
 
-            byte[] first_convert = Utilis.bytesFromString(first);
+            byte[] first_convert = Utils.bytesFromString(first);
             characteristic.setValue(first_convert);
             boolean success = mGatt.writeCharacteristic(characteristic);
             if (success) {
                 mLogHandler.post(() -> {
-                    log.append("\nsendMessage --> Wrote: " + Utilis.byteArrayInHexFormat(first_convert));
+                    log.append("\nsendMessage --> Wrote: " + Utils.byteArrayInHexFormat(first_convert));
                 });
             } else {
                 mLogHandler.post(() -> {
                     log.append("\nsendMessage --> Failed to write data");
                 });
+                return;
             }
             try {
-                Thread.sleep(200);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            byte[] second_converted = Utilis.bytesFromString(size);
+            byte[] second_converted = Utils.bytesFromString(size);
             characteristic.setValue(second_converted);
             success = mGatt.writeCharacteristic(characteristic);
             if (success) {
                 mLogHandler.post(() -> {
-                    log.append("\nsendMessage --> Wrote: " + Utilis.byteArrayInHexFormat(second_converted));
+                    log.append("\nsendMessage --> Wrote: " + Utils.byteArrayInHexFormat(second_converted));
                 });
             } else {
                 mLogHandler.post(() -> {
                     log.append("\nsendMessage --> Failed to write data");
                 });
+                return;
             }
             try {
-                Thread.sleep(200);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -608,7 +612,7 @@ public class ClientActivity extends AppCompatActivity {
                         });
                     }
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(150);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -631,7 +635,7 @@ public class ClientActivity extends AppCompatActivity {
                         });
                     }
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(150);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -644,10 +648,10 @@ public class ClientActivity extends AppCompatActivity {
 
 
             String person = "dataPerson";
-            String size = "" + data.length;
+            String size = String.valueOf(data.length);
 
 
-            byte[] first_convert = Utilis.bytesFromString(person);
+            byte[] first_convert = Utils.bytesFromString(person);
             characteristic.setValue(first_convert);
             boolean success = mGatt.writeCharacteristic(characteristic);
             if (success) {
@@ -658,28 +662,30 @@ public class ClientActivity extends AppCompatActivity {
                 mLogHandler.post(() -> {
                     log.append("\nsendData --> Failed to write data");
                 });
+                return;
             }
             try {
-                Thread.sleep(200);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
 
-            byte[] second_converted = Utilis.bytesFromString(size);
+            byte[] second_converted = Utils.bytesFromString(size);
             characteristic.setValue(second_converted);
             success = mGatt.writeCharacteristic(characteristic);
             if (success) {
                 mLogHandler.post(() -> {
-                    log.append("\nsendData --> Wrote: " + Utilis.byteArrayInHexFormat(second_converted));
+                    log.append("\nsendData --> Wrote: " + Utils.byteArrayInHexFormat(second_converted));
                 });
             } else {
                 mLogHandler.post(() -> {
                     log.append("\nsendData --> Failed to write data");
                 });
+                return;
             }
             try {
-                Thread.sleep(200);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -707,7 +713,7 @@ public class ClientActivity extends AppCompatActivity {
                         });
                     }
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(150);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -730,7 +736,7 @@ public class ClientActivity extends AppCompatActivity {
                         });
                     }
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(150);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
