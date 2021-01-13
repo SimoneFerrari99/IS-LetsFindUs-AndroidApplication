@@ -151,14 +151,14 @@ public class UtilFunction {
         }
     }
 
-    private void deletePicture(String path){
+    private static void deletePicture(String path){
         File current = new File(path);
         if(current.exists()){
             current.delete();
         }
     }
 
-    public void deleteMeetingsOlderThan(int nDays, MeetingDao md, PersonDao pd){
+    public static void deleteMeetingsOlderThan(int nDays, MeetingDao md, PersonDao pd){
         Date start = subtractDays(Calendar.getInstance().getTime(), nDays);
         ListenableFuture<List<MeetingPerson>> meetingsToDelete = md.getMeetingBeforeDate(start);
         Futures.addCallback(meetingsToDelete, new FutureCallback<List<MeetingPerson>>() {

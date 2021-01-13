@@ -13,6 +13,7 @@ import com.example.lets_findus.utilities.MeetingDao;
 import com.example.lets_findus.utilities.MeetingPerson;
 import com.example.lets_findus.utilities.Person;
 import com.example.lets_findus.utilities.PersonDao;
+import com.example.lets_findus.utilities.UtilFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -25,6 +26,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -51,6 +53,26 @@ public class MeetingDaoTest {
 
     @Test
     public void insertMeeting() throws Exception{
+        ListenableFuture<Person> person = pd.getLastPersonInserted();
+        final Executor ex1 = Executors.newSingleThreadExecutor();
+        final Executor ex2 = Executors.newSingleThreadExecutor();
+        Futures.addCallback(person, new FutureCallback<Person>() {
+            @Override
+            public void onSuccess(@NullableDecl Person result) {
+                Meeting m1 = new Meeting(result, 45.17, 11.59, new Date("20/04/2020"));
+                ListenableFuture<Long> ins = md.insert(m1);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("SelectLast", "Test failure");
+            }
+        }, ex1);
+
+    }
+
+    @Test
+    public void insertAllMeeting() throws Exception{
         ListenableFuture<List<Person>> allPerson = pd.getAllPerson();
         final Executor ex1 = Executors.newSingleThreadExecutor();
         final Executor ex2 = Executors.newSingleThreadExecutor();
@@ -80,6 +102,45 @@ public class MeetingDaoTest {
             }
         }, ex1);
 
+    }
+
+    @Test
+    public void deleteMeetingOlderThan() throws Exception{
+        UtilFunction.deleteMeetingsOlderThan(0, md, pd);
+    }
+
+    @Test
+    public void getMeetingBeforeDate() throws Exception{
+        ListenableFuture<List<MeetingPerson>> result = md.getMeetingBeforeDate(Calendar.getInstance().getTime());
+        Futures.addCallback(result, new FutureCallback<List<MeetingPerson>>() {
+            @Override
+            public void onSuccess(@NullableDecl List<MeetingPerson> result) {
+                for(MeetingPerson mp : result){
+                    Log.d("Elemento", mp.person.nickname);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        }, Executors.newSingleThreadExecutor());
+    }
+
+    @Test
+    public void printMeetingById() throws Exception{
+        ListenableFuture<MeetingPerson> sel = md.getMeetingFromId(4);
+        Futures.addCallback(sel, new FutureCallback<MeetingPerson>() {
+            @Override
+            public void onSuccess(@NullableDecl MeetingPerson result) {
+                Log.d("Successo", result.person.nickname + " " + result.meeting.date.toString());
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        }, Executors.newSingleThreadExecutor());
     }
 
     @Test
@@ -113,11 +174,11 @@ public class MeetingDaoTest {
             meetings.add(mp.meeting);
         }
         md.setFavouriteAll(meetings);
-    }
+    }*/
 
     @Test
     public void deleteMeeting() throws Exception{
-        List<MeetingPerson> sel = md.getMeetingsBetweenRegion(50, 40, 10, 12);
-        md.delete(sel.get(0).meeting);
-    }*/
+        ListenableFuture<MeetingPerson> sel = md.getMeetingFromId(3);
+        md.delete(sel.get().meeting);
+    }
 }
