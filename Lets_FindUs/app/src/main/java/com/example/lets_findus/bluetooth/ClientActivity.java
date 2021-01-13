@@ -76,8 +76,7 @@ public class ClientActivity extends AppCompatActivity {
         //way to send something
         String message = mEdit.getText().toString();
         byte[] messageBytes = Utils.bytesFromString(message);
-        //sendMessage();
-        sendImage(messageBytes, false);
+        sendData(messageBytes, false);
 
 
     }
@@ -102,6 +101,7 @@ public class ClientActivity extends AppCompatActivity {
         }
 
         disconnectGattServer();
+        //String, BluetoothDevice
         mScanResults = new HashMap<>();
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
 
@@ -118,6 +118,7 @@ public class ClientActivity extends AppCompatActivity {
         mBluetoothLeScanner.startScan(filters, settings, scanCallback);
 
         mHandler = new Handler();
+        //stoppo la scansione dopo un tot di tempo ossia SCAN PERIOD
         mHandler.postDelayed(this::stopScan, SCAN_PERIOD);
 
         mScanning = true;
@@ -134,6 +135,7 @@ public class ClientActivity extends AppCompatActivity {
         mHandler = null;
     }
 
+    //PER OGNI DEVICE LO PRENDE E SI CONNETTE
     private void scanComplete() {
         if (!mScanResults.isEmpty()) {
             for (String deviceAddress : mScanResults.keySet()) {
@@ -185,6 +187,7 @@ public class ClientActivity extends AppCompatActivity {
 
     ScanCallback scanCallback = new ScanCallback() {
 
+        //INSERISCO I DISPOSITIVI TROVATI NELLA LISTA
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
@@ -215,8 +218,10 @@ public class ClientActivity extends AppCompatActivity {
 
     /* ----------------------------- GATT CALLBACK ----------------------------- */
 
+
     BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
 
+        //vari step di connessione
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
@@ -227,19 +232,11 @@ public class ClientActivity extends AppCompatActivity {
                     gatt.requestMtu(517);
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
+                    //sono stato respinto
                     break;
                 default:
                     disconnectGattServer();
                     break;
-            }
-            if (status == BluetoothGatt.GATT_FAILURE) {
-                mLogHandler.post(() -> {
-                    //log.append("\nonConnectionStateChange --> Connection Gatt failure status " + status);
-                });
-            } else {
-                mLogHandler.post(() -> {
-                    //log.append("\nonConnectionStateChange --> Connection not GATT sucess status " + status);
-                });
             }
         }
 
@@ -255,9 +252,11 @@ public class ClientActivity extends AppCompatActivity {
                 return;
             }
 
+            boolean characteristicWriteSuccess = false;
+
             for (BluetoothGattCharacteristic characteristic : matchingCharacteristics) {
                 characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-                boolean characteristicWriteSuccess = gatt.setCharacteristicNotification(characteristic, true);
+                characteristicWriteSuccess = gatt.setCharacteristicNotification(characteristic, true);
                 if (characteristicWriteSuccess) {
                     if (Utils.isEchoCharacteristic(characteristic)) {
                         initializeEcho();
@@ -267,87 +266,36 @@ public class ClientActivity extends AppCompatActivity {
                         if (descriptor == null) {
                             return;
                         }
-
                         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        boolean descriptorWriteInitiated = gatt.writeDescriptor(descriptor);
-                        if (descriptorWriteInitiated) {
-                            mLogHandler.post(() -> {
-                                //log.append("\nonServicesDiscovered --> Characteristic Configuration Descriptor write initiated: " + descriptor.getUuid().toString());
-                            });
-                        } else {
-                            mLogHandler.post(() -> {
-                                //log.append("\nonServicesDiscovered --> Characteristic Configuration Descriptor write failed to initiate: " + descriptor.getUuid().toString());
-                            });
-                        }
+                        gatt.writeDescriptor(descriptor);
                     }
-                } else {
-                    mLogHandler.post(() -> {
-                        //log.append("\nonServicesDiscovered --> Characteristic notification set failure for " + characteristic.getUuid().toString());
-                    });
                 }
             }
-
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicRead(gatt, characteristic, status);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                byte[] messageBytes = characteristic.getValue();
-                String message = Utils.stringFromBytes(messageBytes);
+            if(characteristicWriteSuccess) {
+                //TODO QUA POSSO SENDARE LE COSE
+                //prima mando la stringa
+                //aspetto circa mezzo secondo
+                //poi mando l'immagine
+            }
+            else{
+                //se non posso scrivere va in figa
+                disconnectGattServer();
             }
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mLogHandler.post(() -> {
-                    //log.append("\nonCharacteristicWrite --> Characteristic written successfully");
-                });
-            } else {
-                mLogHandler.post(() -> {
-                    //log.append("\nonCharacteristicWrite --> Characteristic write unsuccessful, status: " + status);
-                });
+            if (status != BluetoothGatt.GATT_SUCCESS) {
                 disconnectGattServer();
-            }
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            super.onCharacteristicChanged(gatt, characteristic);
-            byte[] messageBytes = characteristic.getValue();
-            String message = Utils.stringFromBytes(messageBytes);
-        }
-
-        @Override
-        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mLogHandler.post(() -> {
-                    //log.append("\nonDescriptorWrite --> Descriptor written successfully: " + descriptor.getUuid().toString());
-                });
-            } else {
-                mLogHandler.post(() -> {
-                    //log.append("\nonDescriptorWrite --> Descriptor write unsuccessful: " + descriptor.getUuid().toString());
-                });
             }
         }
 
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
-            if(status == 0) {
-                mLogHandler.post(() -> {
-                    //log.append("\nonMtuChanged --> Mtu changed successfully: " + mtu + ", " + status);
-                    gatt.discoverServices();
-                });
-            }
-            else {
-                mLogHandler.post(() -> {
-                    //log.append("\nonMtuChanged --> Mtu not changed (Mtu not supported): " + mtu + ", " + status);
-                    gatt.discoverServices();
-                });
-            }
+            //una volta che ho la connessione devo capire che servizi posso usare
+            gatt.discoverServices();
         }
     };
 
@@ -355,43 +303,8 @@ public class ClientActivity extends AppCompatActivity {
 
     /* ----------------------------- INVIO DEL DATO ----------------------------- */
 
-    //questa funzione probabilmente non serve a niente
-    private void sendMessage() {
-        if (!mConnected) {
-            return;
-        }
 
-        BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
-        if (characteristic == null) {
-            disconnectGattServer();
-            return;
-        }
-
-        //TODO rimpiazzare con la vera roba da scrivere
-        String message = mEdit.getText().toString();
-
-        byte[] messageBytes = Utils.bytesFromString(message);
-        if (messageBytes.length == 0) {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Unable to convert message to bytes");
-            });
-            return;
-        }
-
-        characteristic.setValue(messageBytes);
-        boolean success = mGatt.writeCharacteristic(characteristic);
-        if (success) {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Wrote: " + Utils.byteArrayInHexFormat(messageBytes));
-            });
-        } else {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Failed to write data");
-            });
-        }
-    }
-
-    private void sendImage(byte[] data, boolean isImage) {
+    private void sendData(byte[] data, boolean isImage) {
 
         BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
@@ -414,14 +327,8 @@ public class ClientActivity extends AppCompatActivity {
         byte[] first_convert = Utils.bytesFromString(first);
         characteristic.setValue(first_convert);
         success = mGatt.writeCharacteristic(characteristic);
-        if (success) {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Wrote: " + Utils.byteArrayInHexFormat(first_convert));
-            });
-        } else {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Failed to write data");
-            });
+        if (!success) {
+            //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
             return;
         }
         try {
@@ -433,14 +340,8 @@ public class ClientActivity extends AppCompatActivity {
         byte[] second_converted = Utils.bytesFromString(size);
         characteristic.setValue(second_converted);
         success = mGatt.writeCharacteristic(characteristic);
-        if (success) {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Wrote: " + Utils.byteArrayInHexFormat(second_converted));
-            });
-        } else {
-            mLogHandler.post(() -> {
-                //log.append("\nsendMessage --> Failed to write data");
-            });
+        if (!success) {
+            //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
             return;
         }
         try {
@@ -461,14 +362,9 @@ public class ClientActivity extends AppCompatActivity {
                 }
                 characteristic.setValue(lastPacket);
                 success = mGatt.writeCharacteristic(characteristic);
-                if (success) {
-                    mLogHandler.post(() -> {
-                        //log.append("\nsendImage --> Wrote: " + lastPacket);
-                    });
-                } else {
-                    mLogHandler.post(() -> {
-                        //log.append("\nsendImage --> Failed to write data");
-                    });
+                if (!success) {
+                    //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                    return;
                 }
                 try {
                     Thread.sleep(150);
@@ -484,14 +380,9 @@ public class ClientActivity extends AppCompatActivity {
                 }
                 characteristic.setValue(first_middle);
                 success = mGatt.writeCharacteristic(characteristic);
-                if (success) {
-                    mLogHandler.post(() -> {
-                        //log.append("\nsendImage --> Wrote: " + first_middle);
-                    });
-                } else {
-                    mLogHandler.post(() -> {
-                        //log.append("\nsendImage --> Failed to write data");
-                    });
+                if (!success) {
+                    //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                    return;
                 }
                 try {
                     Thread.sleep(150);

@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -92,6 +91,7 @@ public class ServerActivity extends AppCompatActivity {
             return;
         }
 
+        //andrebbe nella on create
         // Check low energy support
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, "No BLE Support", Toast.LENGTH_LONG).show();
@@ -99,6 +99,7 @@ public class ServerActivity extends AppCompatActivity {
             return;
         }
 
+        //andrebbe nella on create
         // Check advertising
         if (!mBluetoothAdapter.isMultipleAdvertisementSupported()) {
             // Unable to run the server on this device, get a better device
@@ -200,6 +201,7 @@ public class ServerActivity extends AppCompatActivity {
         }
     }
 
+    //questa cosa è praticamente inutile
     private final AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
@@ -241,6 +243,7 @@ public class ServerActivity extends AppCompatActivity {
         }
     }
 
+    //serve perchè potrebbero esserci dei problemi, boh vediamo se serve
     private boolean clientEnabledNotifications(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
         List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
         BluetoothGattDescriptor descriptor = Utils.findClientConfigurationDescriptor(descriptorList);
@@ -264,38 +267,20 @@ public class ServerActivity extends AppCompatActivity {
     /* ------------------------------------------------------------------------------ */
 
     /* ----------------------------- SERVER CALLBACK ----------------------------- */
-
+    //va modificata questa per salvare le cose
     BluetoothGattServerCallback bluetoothGattServerCallback = new BluetoothGattServerCallback() {
 
+        //ogni dispositivo che che si connette viene buttato in una lista, se si disconnette o ha problemi viene rimosso
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
-            //la tv log non esiste, bisognerà capire cosa fare gg
-            mLogHandler.post(() -> {
-                /*log.append("\nonConnectionStateChange " + device.getAddress()
-                        + "\nstatus " + status
-                        + "\nnewState " + newState);*/
-            });
 
-            switch (newState) {
-                case BluetoothProfile.STATE_CONNECTED:
-                    mLogHandler.post(() -> {
-                        //log.append("\nDevice added: " + device.getAddress());
-                    });
-                    mDevices.add(device);
-                    break;
-                case BluetoothProfile.STATE_DISCONNECTED:
-                    mLogHandler.post(() -> {
-                        //log.append("\nDevice removed : " + device.getAddress());
-                    });
-                    mDevices.remove(device);
-                    String deviceAddress = device.getAddress();
-                    mClientConfigurations.remove(deviceAddress);
-                    break;
-                default:
-                    mLogHandler.post(() -> {
-                        //log.append("\nError device: " + device.getAddress() + ", status: " + status + ", newState: " + newState);
-                    });
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                mDevices.add(device);
+            } else {
+                mDevices.remove(device);
+                String deviceAddress = device.getAddress();
+                mClientConfigurations.remove(deviceAddress);
             }
 
         }
@@ -303,86 +288,38 @@ public class ServerActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-            mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                //log.append("\nonCharacteristicReadRequest " + characteristic.getUuid().toString());
-            });
-
+            //se richiede una caratteristica che non ho lo dico al client
             if (Utils.requiresResponse(characteristic)) {
                 // Unknown read characteristic requiring response, send failure
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
             }
         }
 
+        //qua avviene la roba importante
         @Override
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
-            mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                /*log.append("\nonCharacteristicWriteRequest" + characteristic.getUuid().toString()
-                        + "\nReceived: " + Utils.byteArrayInHexFormat(value));*/
-            });
 
             try {
                 mergePacket(value);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-
+            //conferma l'andato al buon fine della ricezione del pacchetto
             if (CHARACTERISTIC_ECHO_UUID.equals(characteristic.getUuid())) {
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-
-                characteristic.setValue(value);
-                mLogHandler.post(() -> {
-                    //la tv log non esiste, bisognerà capire cosa fare gg
-                    //log.append("\nSending: " + Utils.byteArrayInHexFormat(value));
-                });
-                notifyCharacteristic(value, CHARACTERISTIC_ECHO_UUID);
             }
-        }
-
-        @Override
-        public void onDescriptorReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattDescriptor descriptor) {
-            super.onDescriptorReadRequest(device, requestId, offset, descriptor);
-            mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                //log.append("\nonDescriptorReadRequest" + descriptor.getUuid().toString());
-            });
         }
 
         @Override
         public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
-            mLogHandler.post(() -> {
-                /*log.append("\nonDescriptorWriteRequest: " + descriptor.getUuid().toString()
-                        + "\nvalue: " + Utils.byteArrayInHexFormat(value));*/
-            });
 
             if (CLIENT_CONFIGURATION_DESCRIPTOR_UUID.equals(descriptor.getUuid())) {
                 String deviceAddress = device.getAddress();
                 mClientConfigurations.put(deviceAddress, value);
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             }
-        }
-
-        @Override
-        public void onNotificationSent(BluetoothDevice device, int status) {
-            super.onNotificationSent(device, status);
-            mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                //log.append("\nonNotificationSent");
-            });
-
-        }
-
-        @Override
-        public void onMtuChanged(BluetoothDevice device, int mtu) {
-            super.onMtuChanged(device, mtu);
-            mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                //log.append("\nonMtuChanged --> Mtu changed: " + mtu);
-            });
         }
     };
 
@@ -417,15 +354,12 @@ public class ServerActivity extends AppCompatActivity {
             }
         }
         if(n >= Integer.parseInt(size)) {
+            //qua è quando finisce
+            //l'array packet contiene i miei dati, dovrò salvarli subito perchè poi vengono distrutti
             isImage = false;
             array_initialized = false;
             data = false;
             n = 0;
-            Log.i("mergePacket", "------------" + Utils.byteToString(packet) + "------------");
-            mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                //log.append("\nmergePacket --> ------------ " + packet.toString() + "------------");
-            });
         }
     }
 
