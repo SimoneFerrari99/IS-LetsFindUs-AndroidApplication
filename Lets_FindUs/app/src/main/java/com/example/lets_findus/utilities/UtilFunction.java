@@ -1,14 +1,21 @@
 package com.example.lets_findus.utilities;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.LocalDate;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 public class UtilFunction {
 
@@ -142,5 +149,32 @@ public class UtilFunction {
             if(needsToRemove)
                 mpIterator.remove();
         }
+    }
+
+    private void deletePicture(String path){
+        File current = new File(path);
+        if(current.exists()){
+            current.delete();
+        }
+    }
+
+    public void deleteMeetingsOlderThan(int nDays, MeetingDao md, PersonDao pd){
+        Date start = subtractDays(Calendar.getInstance().getTime(), nDays);
+        ListenableFuture<List<MeetingPerson>> meetingsToDelete = md.getMeetingBeforeDate(start);
+        Futures.addCallback(meetingsToDelete, new FutureCallback<List<MeetingPerson>>() {
+            @Override
+            public void onSuccess(@NullableDecl List<MeetingPerson> result) {
+                for(MeetingPerson mp : result){
+                    deletePicture(mp.person.profilePath);
+                    pd.deleteAll(mp.person);
+                    md.delete(mp.meeting);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        }, Executors.newSingleThreadExecutor());
     }
 }
