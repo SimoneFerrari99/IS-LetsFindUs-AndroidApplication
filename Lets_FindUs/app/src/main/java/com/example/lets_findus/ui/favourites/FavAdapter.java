@@ -1,5 +1,6 @@
 package com.example.lets_findus.ui.favourites;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.lets_findus.R;
 import com.example.lets_findus.utilities.MeetingPerson;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
@@ -56,10 +59,13 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
         TextView textViewTime = holder.textViewTime;
         ImageView imageView = holder.imageViewProfileImage;
 
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
         textViewNickname.setText(dataSet.get(position).person.nickname);
-        textViewData.setText("07/01/2021");
-        textViewTime.setText("21:36");
-        //imageViewProfileImage.setImageResource(dataSet.get(position).getImage());
+        textViewData.setText(dateFormat.format(dataSet.get(position).meeting.date));
+        textViewTime.setText(timeFormat.format(dataSet.get(position).meeting.date));
+        imageView.setImageURI(Uri.parse(dataSet.get(position).person.profilePath));
     }
 
     @Override
