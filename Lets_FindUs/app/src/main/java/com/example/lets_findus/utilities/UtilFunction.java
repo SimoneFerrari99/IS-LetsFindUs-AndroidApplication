@@ -38,105 +38,109 @@ public class UtilFunction {
     public static void filterItems(List<MeetingPerson> meetingsToFilter, List<MeetingPerson> allMeetings, Map<String, String> filterOptions) {
         meetingsToFilter.clear();
         meetingsToFilter.addAll(allMeetings);
+        boolean needsToRemove = false;
         Iterator<MeetingPerson> mpIterator = meetingsToFilter.iterator();
         while (mpIterator.hasNext()) {
+            needsToRemove = false;
             MeetingPerson elem = mpIterator.next();
             switch (filterOptions.get("sex")) {
                 case "Maschio":
                     if (elem.person.sex != Person.Sex.MALE)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "Femmina":
                     if (elem.person.sex != Person.Sex.FEMALE)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "Altro":
                     if (elem.person.sex != Person.Sex.OTHER)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
             }
             switch (filterOptions.get("date")) {
                 case "Oggi":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 0)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "Ieri":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 1)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "2 giorni fa":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 2)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "3 giorni fa":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 3)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "4 giorni fa":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 4)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "5 giorni fa":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 5)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "6 giorni fa":
                     if (DateTimeComparator.getDateOnlyInstance().compare(elem.meeting.date, subtractDays(Calendar.getInstance().getTime(), 6)) != 0)
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
             }
             switch (filterOptions.get("hour")) {
                 case "00.00 – 04.00":
                     if (!isInHourRange(elem.meeting.date, 0, 4))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "04.00 – 08.00":
                     if (!isInHourRange(elem.meeting.date, 4, 8))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "08.00 – 12.00":
                     if (!isInHourRange(elem.meeting.date, 8, 12))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "12.00 – 16.00":
                     if (!isInHourRange(elem.meeting.date, 12, 16))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "16.00 – 20.00":
                     if (!isInHourRange(elem.meeting.date, 16, 20))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "20.00 – 24.00":
                     if (!isInHourRange(elem.meeting.date, 20, 24))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
             }
             switch (filterOptions.get("age")) {
                 case "14 – 18":
                     if (!isInYearRange(elem.person.yearOfBirth, 14, 18))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "19 – 24":
                     if (!isInYearRange(elem.person.yearOfBirth, 19, 24))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "25 – 30":
                     if (!isInYearRange(elem.person.yearOfBirth, 25, 30))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "31 – 40":
                     if (!isInYearRange(elem.person.yearOfBirth, 31, 40))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "41 – 50":
                     if (!isInYearRange(elem.person.yearOfBirth, 41, 50))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
                 case "51+":
                     if (!isInYearRange(elem.person.yearOfBirth, 51, 0))
-                        mpIterator.remove();
+                        needsToRemove = true;
                     break;
             }
+            if(needsToRemove)
+                mpIterator.remove();
         }
     }
 }
