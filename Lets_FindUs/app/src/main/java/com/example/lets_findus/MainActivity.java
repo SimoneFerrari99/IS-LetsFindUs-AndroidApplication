@@ -6,12 +6,23 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.Spinner;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -38,12 +49,14 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements MissingBluetoothDialog.NoticeDialogListener, MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
-    private Fragment match_frag;
-    private final Fragment fav_frag = new FavouritesFragment();
-    private final Fragment prof_frag = new ProfileFragment();
+    private MatchingFragment match_frag;
+    private final FavouritesFragment fav_frag = new FavouritesFragment();
+    private final ProfileFragment prof_frag = new ProfileFragment();
     private Fragment active;
     private FragmentManager fm = getSupportFragmentManager();
 
@@ -264,12 +277,70 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 e.printStackTrace();
             }
         }
-        else if(item.getTitle().toString().compareTo("Impostazioni") == 0){
+        if(item.getTitle().toString().compareTo("Impostazioni") == 0){
             Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(startSettingsActivity);
         }
+        else if(item.getTitle().toString().compareTo("Filtri") == 0){
+            showFilterPopup();
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showFilterPopup(){
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View popupView = inflater.inflate(R.layout.filter_popup_window, null);
+        popupView.setBackgroundResource(android.R.color.white);
+        popupView.setElevation(32);
+
+        final Spinner age = popupView.findViewById(R.id.spinner_age);
+        final Spinner date = popupView.findViewById(R.id.spinner_date);
+        final Spinner hour = popupView.findViewById(R.id.spinner_hour);
+        final Spinner sex = popupView.findViewById(R.id.spinner_sex);
+
+        ArrayAdapter<CharSequence> ageAdapter = ArrayAdapter.createFromResource(this, R.array.age_spinner_options, android.R.layout.simple_spinner_item);
+        ageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        age.setAdapter(ageAdapter);
+
+        ArrayAdapter<CharSequence> dateAdapter = ArrayAdapter.createFromResource(this, R.array.date_spinner_options, android.R.layout.simple_spinner_item);
+        dateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        date.setAdapter(dateAdapter);
+
+        ArrayAdapter<CharSequence> hourAdapter = ArrayAdapter.createFromResource(this, R.array.hour_spinner_options, android.R.layout.simple_spinner_item);
+        hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        hour.setAdapter(hourAdapter);
+
+        ArrayAdapter<CharSequence> sexAdapter = ArrayAdapter.createFromResource(this, R.array.sex_spinner_options, android.R.layout.simple_spinner_item);
+        sexAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sex.setAdapter(sexAdapter);
+
+        int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.setElevation(10);
+
+        Button filter = popupView.findViewById(R.id.button2);
+        filter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Map<String, String> options = new HashMap<>();
+                options.put("age", age.getSelectedItem().toString());
+                options.put("date", date.getSelectedItem().toString());
+                options.put("hour", hour.getSelectedItem().toString());
+                options.put("sex", sex.getSelectedItem().toString());
+                if(active == match_frag){
+                    match_frag.filterItems(options);
+                }
+                if(active == fav_frag){
+                    fav_frag.filterItems(options);
+                }
+                popupWindow.dismiss();
+            }
+        });
+
+        popupWindow.showAtLocation(new LinearLayout(this), Gravity.CENTER, 0, 0);
     }
 
     @Override

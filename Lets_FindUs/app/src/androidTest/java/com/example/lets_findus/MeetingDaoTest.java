@@ -24,7 +24,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -56,7 +58,7 @@ public class MeetingDaoTest {
             @Override
             public void onSuccess(@NullableDecl List<Person> result) {
                 for(Person p : result) {
-                    Meeting m1 = new Meeting(p, 45.17, 11.59, null);
+                    Meeting m1 = new Meeting(p, 45.17, 11.59, Calendar.getInstance(Locale.ITALY).getTime());
                     ListenableFuture<Long> ins = md.insert(m1);
                     Futures.addCallback(ins, new FutureCallback<Long>() {
                         @Override

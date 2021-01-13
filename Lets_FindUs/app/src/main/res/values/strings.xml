@@ -67,5 +67,49 @@
     <string name="missing_bluetooth_message">Non hai attivato il Bluetooth!</string>
     <string name="missing_activate_bluetooth_positive_text">Attivalo</string>
     <string name="copied">Campo copiato negli appunti</string>
+    <string name="apply_a_filter">Applica un filtro</string>
+    <string name="data_filter">Data:</string>
+    <string name="hour_filter">Ora:</string>
+    <string name="sex_filter">Sesso:</string>
+    <string name="age_filter">Età:</string>
+    <string name="botton_filter">Filtra</string>
+
+    <string-array name="date_spinner_options">
+        <item>Nessun filtro</item>
+        <item>Oggi</item>
+        <item>Ieri</item>
+        <item>2 giorni fa</item>
+        <item>3 giorni fa</item>
+        <item>4 giorni fa</item>
+        <item>5 giorni fa</item>
+        <item>6 giorni fa</item>
+    </string-array>
+
+    <string-array name="hour_spinner_options">
+        <item>Nessun filtro</item>
+        <item>00.00 – 04.00</item>
+        <item>04.00 – 08.00</item>
+        <item>08.00 – 12.00</item>
+        <item>12.00 – 16.00</item>
+        <item>16.00 – 20.00</item>
+        <item>20.00 – 24.00</item>
+    </string-array>
+
+    <string-array name="sex_spinner_options">
+        <item>Nessun filtro</item>
+        <item>Maschio</item>
+        <item>Femmina</item>
+        <item>Altro</item>
+    </string-array>
+
+    <string-array name="age_spinner_options">
+        <item>Nessun filtro</item>
+        <item>14 – 18</item>
+        <item>19 – 24</item>
+        <item>25 – 30</item>
+        <item>31 – 40</item>
+        <item>41 – 50</item>
+        <item>51+</item>
+    </string-array>
 
 </resources>
