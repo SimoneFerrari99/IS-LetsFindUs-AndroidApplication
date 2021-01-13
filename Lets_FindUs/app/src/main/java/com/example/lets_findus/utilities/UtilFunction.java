@@ -1,5 +1,7 @@
 package com.example.lets_findus.utilities;
 
+import android.net.Uri;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -152,7 +154,7 @@ public class UtilFunction {
     }
 
     private static void deletePicture(String path){
-        File current = new File(path);
+        File current = new File(Uri.parse(path).getPath());
         if(current.exists()){
             current.delete();
         }

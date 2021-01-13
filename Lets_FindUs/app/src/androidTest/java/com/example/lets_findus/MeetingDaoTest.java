@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -55,11 +54,10 @@ public class MeetingDaoTest {
     public void insertMeeting() throws Exception{
         ListenableFuture<Person> person = pd.getLastPersonInserted();
         final Executor ex1 = Executors.newSingleThreadExecutor();
-        final Executor ex2 = Executors.newSingleThreadExecutor();
         Futures.addCallback(person, new FutureCallback<Person>() {
             @Override
             public void onSuccess(@NullableDecl Person result) {
-                Meeting m1 = new Meeting(result, 45.17, 11.59, new Date("20/04/2020"));
+                Meeting m1 = new Meeting(result, 45.17, 11.59, Calendar.getInstance().getTime());
                 ListenableFuture<Long> ins = md.insert(m1);
             }
 

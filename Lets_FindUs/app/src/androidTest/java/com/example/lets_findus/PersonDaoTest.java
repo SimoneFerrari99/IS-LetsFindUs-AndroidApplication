@@ -43,7 +43,7 @@ public class PersonDaoTest {
 
     @Test
     public void storePerson() throws Exception {
-        Person p = new Person("file:/storage/emulated/0/Android/data/com.example.lets_findus/files/Pictures/JPEG_20210112_172444_5136533354515758766.jpg", "Pippo99", Person.Sex.MALE, 1999);
+        Person p = new Person("file:/storage/emulated/0/Android/data/com.example.lets_findus/files/Pictures/JPEG_20210112_172444_5136533354515758766.jpg", "Luca99", Person.Sex.MALE, 1999);
         p.description = "Ciao, mi piace la pizza";
         p.name = "Pippo";
         p.surname = "Baudo";
