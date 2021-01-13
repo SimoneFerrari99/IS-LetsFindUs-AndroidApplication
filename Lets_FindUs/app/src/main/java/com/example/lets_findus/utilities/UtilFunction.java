@@ -1,21 +1,34 @@
 package com.example.lets_findus.utilities;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeComparator;
-import org.joda.time.LocalDate;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class UtilFunction {
 
@@ -158,32 +171,5 @@ public class UtilFunction {
 
             }
         });
-    }
-
-    private void deletePicture(String path){
-        File current = new File(path);
-        if(current.exists()){
-            current.delete();
-        }
-    }
-
-    public void deleteMeetingsOlderThan(int nDays, MeetingDao md, PersonDao pd){
-        Date start = subtractDays(Calendar.getInstance().getTime(), nDays);
-        ListenableFuture<List<MeetingPerson>> meetingsToDelete = md.getMeetingBeforeDate(start);
-        Futures.addCallback(meetingsToDelete, new FutureCallback<List<MeetingPerson>>() {
-            @Override
-            public void onSuccess(@NullableDecl List<MeetingPerson> result) {
-                for(MeetingPerson mp : result){
-                    deletePicture(mp.person.profilePath);
-                    pd.deleteAll(mp.person);
-                    md.delete(mp.meeting);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-
-            }
-        }, Executors.newSingleThreadExecutor());
     }
 }
