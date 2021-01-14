@@ -3,6 +3,7 @@ package com.example.lets_findus;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -23,13 +24,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.room.Room;
 
+import com.example.lets_findus.bluetooth.Client;
+import com.example.lets_findus.bluetooth.Server;
 import com.example.lets_findus.ui.MissingBluetoothDialog;
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
 import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
+import com.example.lets_findus.utilities.AppDatabase;
+import com.example.lets_findus.utilities.MeetingDao;
+import com.example.lets_findus.utilities.Person;
+import com.example.lets_findus.utilities.PersonDao;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -37,8 +45,12 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity implements MissingBluetoothDialog.NoticeDialogListener, MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private Fragment match_frag;
@@ -48,6 +60,15 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
     private FragmentManager fm = getSupportFragmentManager();
 
     private BluetoothAdapter bluetoothAdapter;
+    private BluetoothManager bluetoothManager;
+    private Client blClient;
+    private Server blServer;
+
+    private static AppDatabase db;
+    private static MeetingDao md;
+    private static PersonDao pd;
+
+    private String myProfileFilename = "myProfile";
 
     public static ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -113,7 +134,8 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                             }
                         }
                     });
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+            bluetoothAdapter = bluetoothManager.getAdapter();
             if (!bluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -125,6 +147,12 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 //requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
             }
 
+            if(db == null){
+                db = Room.databaseBuilder(this, AppDatabase.class, "meeting_db").build();
+                md = db.meetingDao();
+                pd = db.personDao();
+            }
+
             isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
             if (isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
                 navView.setSelectedItemId(R.id.navigation_profile);
@@ -133,6 +161,22 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             if(getIntent().hasExtra("IS_FROM_FAV")){
                 navView.setSelectedItemId(R.id.navigation_favorites);
             }
+
+            handleBluetooth();
+        }
+    }
+
+    private void handleBluetooth(){
+        try {
+            FileInputStream fis = this.openFileInput(myProfileFilename);
+            Future<Person> profile = Person.loadPersonAsync(fis);
+            blClient = new Client(this, profile.get(), bluetoothAdapter);
+            blServer = new Server(this, md, pd, bluetoothManager);
+            blClient.startScan();
+            //blServer.setupServer();
+            //blServer.startAdvertising();
+        } catch (FileNotFoundException | ExecutionException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

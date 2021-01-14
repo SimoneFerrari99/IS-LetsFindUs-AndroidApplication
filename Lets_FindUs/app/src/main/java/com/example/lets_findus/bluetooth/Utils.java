@@ -4,10 +4,17 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -130,8 +137,13 @@ public class Utils {
         return null;
     }
 
-    public static byte[] imageToByte(String path) {
-        Bitmap bm = BitmapFactory.decodeFile(path);
+    public static byte[] imageToByte(String path, Context context) {
+        Bitmap bm = null;
+        try {
+            bm = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bm.compress(Bitmap.CompressFormat.JPEG, 100 , baos);
         return baos.toByteArray();
@@ -180,6 +192,18 @@ public class Utils {
 
     public static boolean requiresResponse(BluetoothGattCharacteristic characteristic) {
         return (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE;
+    }
+
+    public static String saveImageFromByte(byte[] image, File file){
+        Bitmap img = byteToImage(image);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            img.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            return file.getAbsolutePath();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String stringFromBytes(byte[] bytes) {
