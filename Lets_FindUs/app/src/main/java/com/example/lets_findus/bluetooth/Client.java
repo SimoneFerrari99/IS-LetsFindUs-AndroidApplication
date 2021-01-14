@@ -164,7 +164,7 @@ public class Client {
         String personJson = gson.toJson(myProfile);
         byte[] profileToSend = Utils.bytesFromString(personJson);
         //prima mando la stringa
-        //sendData(profileToSend, false);
+        sendData(profileToSend, false);
         //aspetto circa mezzo secondo
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -321,7 +321,7 @@ public class Client {
             });
         }
         try {
-            Thread.sleep(150);
+            Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -342,7 +342,7 @@ public class Client {
             });
         }
         try {
-            Thread.sleep(150);
+            Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -370,7 +370,7 @@ public class Client {
                     return;
                 }
                 try {
-                    Thread.sleep(150);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -394,7 +394,7 @@ public class Client {
                     return;
                 }
                 try {
-                    Thread.sleep(150);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
