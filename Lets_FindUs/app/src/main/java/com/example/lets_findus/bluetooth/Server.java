@@ -270,7 +270,7 @@ public class Server {
             if (CHARACTERISTIC_ECHO_UUID.equals(characteristic.getUuid())) {
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             }
-            notifyCharacteristic(value, CHARACTERISTIC_ECHO_UUID);
+            //notifyCharacteristic(value, CHARACTERISTIC_ECHO_UUID);
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
         }
 

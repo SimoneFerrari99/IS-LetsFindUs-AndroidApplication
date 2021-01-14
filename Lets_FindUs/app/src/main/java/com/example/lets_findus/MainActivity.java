@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             }
 
             bluetoothClient();
-            //bluetoothServer();
+            bluetoothServer();
         }
     }
 

@@ -157,7 +157,7 @@ public class Client {
     private void connectDevice(BluetoothDevice device) {
         mGatt = device.connectGatt(context, false, gattCallback);
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             //inizializzo tutti i dati da mandare
             Gson gson = new Gson();
             //File image = new File(myProfile.profilePath);
