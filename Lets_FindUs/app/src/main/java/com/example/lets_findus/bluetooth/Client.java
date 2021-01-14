@@ -23,6 +23,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 import com.example.lets_findus.utilities.Person;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -149,6 +150,29 @@ public class Client {
 
     private void connectDevice(BluetoothDevice device) {
         mGatt = device.connectGatt(context, false, gattCallback);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //inizializzo tutti i dati da mandare
+        Gson gson = new Gson();
+        //File image = new File(myProfile.profilePath);
+        byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
+        //non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
+        myProfile.profilePath = "";
+        String personJson = gson.toJson(myProfile);
+        byte[] profileToSend = Utils.bytesFromString(personJson);
+        //prima mando la stringa
+        //sendData(profileToSend, false);
+        //aspetto circa mezzo secondo
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                sendData(imageToSend, true);
+            }
+        }, 10000);
     }
 
     /* ------------------------------------------------------------------------------ */
@@ -233,40 +257,9 @@ public class Client {
                     }
                 }
             }
-            /*
-            if(characteristicWriteSuccess) {
-                mLogHandler.post(()->{
-                    Log.d("Client", "CharacteristicWriteSuccess");
-                });
-                //TODO QUA POSSO SENDARE LE COSE
-                //inizializzo tutti i dati da mandare
-                Gson gson = new Gson();
-                //File image = new File(myProfile.profilePath);
-                byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
-                //non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
-                myProfile.profilePath = "";
-                String personJson = gson.toJson(myProfile);
-                byte[] profileToSend = Utils.bytesFromString(personJson);
-                //prima mando la stringa
-                sendData(profileToSend, false);
-                //aspetto circa mezzo secondo
-                try {
-                    Thread.sleep(10000);
-                    mLogHandler.post(()->{
-                        Log.d("Client", "sto sleeppando");
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //poi mando l'immagine
-                sendData(imageToSend, true);
-            }
-            else{
-                //se non posso scrivere va in figa
+            if(!characteristicWriteSuccess) {
                 disconnectGattServer();
             }
-
-             */
         }
 
         @Override
@@ -274,9 +267,6 @@ public class Client {
             super.onCharacteristicWrite(gatt, characteristic, status);
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 disconnectGattServer();
-                mLogHandler.post(()->{
-                    Log.d("Client", "me so disconnesso");
-                });
             }
         }
 
@@ -293,7 +283,7 @@ public class Client {
     /* ----------------------------- INVIO DEL DATO ----------------------------- */
 
 
-    private void sendData(byte[] data, boolean isImage) {
+    public void sendData(byte[] data, boolean isImage) {
         BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
             disconnectGattServer();
@@ -340,8 +330,16 @@ public class Client {
         characteristic.setValue(second_converted);
         success = mGatt.writeCharacteristic(characteristic);
         if (!success) {
+            mLogHandler.post(()->{
+                Log.d("Client", "non ho mandato la lunghezza");
+            });
             //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
             return;
+        }
+        else{
+            mLogHandler.post(()->{
+                Log.d("Client", "ho mandato la lunghezza");
+            });
         }
         try {
             Thread.sleep(150);
@@ -362,9 +360,12 @@ public class Client {
                 characteristic.setValue(lastPacket);
                 success = mGatt.writeCharacteristic(characteristic);
                 mLogHandler.post(()->{
-                    Log.d("Client", "sto mandando ghesbo " + first);
+                    Log.d("Client", "sto mandando l'ultimo packet " + first);
                 });
                 if (!success) {
+                    mLogHandler.post(()->{
+                        Log.d("Client", "invio fallito di " + first);
+                    });
                     //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
                     return;
                 }
@@ -382,8 +383,14 @@ public class Client {
                 }
                 characteristic.setValue(first_middle);
                 success = mGatt.writeCharacteristic(characteristic);
+                mLogHandler.post(()->{
+                    Log.d("Client", "sto mandando i pacchetti intermedi di " + first);
+                });
                 if (!success) {
                     //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                    mLogHandler.post(()->{
+                        Log.d("Client", "invio fallito di " + first);
+                    });
                     return;
                 }
                 try {

@@ -239,9 +239,6 @@ public class Server {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mDevices.add(device);
-                mLogHandler.post(()->{
-                    Log.d("Server", "onConnectionStateChange connesso" + status);
-                });
             } else {
                 mDevices.remove(device);
                 String deviceAddress = device.getAddress();
@@ -253,9 +250,6 @@ public class Server {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-            mLogHandler.post(()->{
-                Log.d("Server", "onCharacteristicReadRequest");
-            });
             //se richiede una caratteristica che non ho lo dico al client
             if (Utils.requiresResponse(characteristic)) {
                 // Unknown read characteristic requiring response, send failure
@@ -266,9 +260,6 @@ public class Server {
         //qua avviene la roba importante
         @Override
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
-            mLogHandler.post(()->{
-                Log.d("Server", "onCharacteristicWriteRequest");
-            });
             try {
                 mergePacket(value);
             } catch (InterruptedException e) {
@@ -285,13 +276,7 @@ public class Server {
         @Override
         public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
-            mLogHandler.post(()->{
-                Log.d("Server", "onDescriptorWriteRequest fuori if");
-            });
             if (CLIENT_CONFIGURATION_DESCRIPTOR_UUID.equals(descriptor.getUuid())) {
-                mLogHandler.post(()->{
-                    Log.d("Server", "onDescriptorWriteRequest dentro if");
-                });
                 String deviceAddress = device.getAddress();
                 mClientConfigurations.put(deviceAddress, value);
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
@@ -304,7 +289,7 @@ public class Server {
 
     public void mergePacket(byte[] value) throws InterruptedException {
         mLogHandler.post(()->{
-            Log.d("Server", "sto ricevendo ghesbo");
+            Log.d("Server", "sto ricevendo");
         });
         if (!isImage && !data) {
             if (Utils.byteToString(value).equals("image")) {
@@ -317,31 +302,42 @@ public class Server {
             return;
         } else {
             if (!array_initialized) {
+                mLogHandler.post(()->{
+                    Log.d("Server", "inizializzo " + isImage);
+                });
                 size = Utils.byteToString(value);
                 packet = setSizeByteArray(Integer.parseInt(size));
                 array_initialized = true;
                 return;
             } else {
                 for (byte b : value) {
+                    if(n>=Integer.parseInt(size))
+                        break;
                     packet[n] = b;
                     n++;
                 }
+                mLogHandler.post(()->{
+                    Log.d("Server", "Ho letto " + n + " bytes rispetto a " + size);
+                });
             }
         }
         if (n >= Integer.parseInt(size)) {
             //qua è quando finisce
             //l'array packet contiene i miei dati, dovrò salvarli subito perchè poi vengono distrutti
             if (!isImage) {
+                mLogHandler.post(()->{
+                    Log.d("Server", "Ho finito la parola " + Utils.stringFromBytes(packet));
+                });
                 lastSavedPerson = Person.getPersonFromString(Utils.stringFromBytes(packet));
                 personSaved = true;
                 mLogHandler.post(()->{
-                    Log.d("Server", "go finio la persona ghesbo");
+                    Log.d("Server", "ho salvato la person " + lastSavedPerson.nickname);
                 });
             }
             if (isImage && personSaved) {
                 try {
                     mLogHandler.post(()->{
-                        Log.d("Server", "go finio l'immagine ghesbo");
+                        Log.d("Server", "ho finito l'immagine");
                     });
                     File imageFile = UtilFunction.createImageFile(context);
                     lastSavedPerson.profilePath = Utils.saveImageFromByte(packet, imageFile);
