@@ -240,9 +240,8 @@ public class Server {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mDevices.add(device);
                 mLogHandler.post(()->{
-                    Log.d("Server", "onConnectionStateChange connesso");
+                    Log.d("Server", "onConnectionStateChange connesso" + status);
                 });
-
             } else {
                 mDevices.remove(device);
                 String deviceAddress = device.getAddress();
@@ -267,7 +266,6 @@ public class Server {
         //qua avviene la roba importante
         @Override
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
-            super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
             mLogHandler.post(()->{
                 Log.d("Server", "onCharacteristicWriteRequest");
             });
@@ -280,13 +278,20 @@ public class Server {
             if (CHARACTERISTIC_ECHO_UUID.equals(characteristic.getUuid())) {
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             }
+            notifyCharacteristic(value, CHARACTERISTIC_ECHO_UUID);
+            super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
         }
 
         @Override
         public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
-
+            mLogHandler.post(()->{
+                Log.d("Server", "onDescriptorWriteRequest fuori if");
+            });
             if (CLIENT_CONFIGURATION_DESCRIPTOR_UUID.equals(descriptor.getUuid())) {
+                mLogHandler.post(()->{
+                    Log.d("Server", "onDescriptorWriteRequest dentro if");
+                });
                 String deviceAddress = device.getAddress();
                 mClientConfigurations.put(deviceAddress, value);
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);

@@ -23,7 +23,6 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 import com.example.lets_findus.utilities.Person;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -234,6 +233,7 @@ public class Client {
                     }
                 }
             }
+            /*
             if(characteristicWriteSuccess) {
                 mLogHandler.post(()->{
                     Log.d("Client", "CharacteristicWriteSuccess");
@@ -265,6 +265,8 @@ public class Client {
                 //se non posso scrivere va in figa
                 disconnectGattServer();
             }
+
+             */
         }
 
         @Override
@@ -317,6 +319,9 @@ public class Client {
         characteristic.setValue(first_convert);
         success = mGatt.writeCharacteristic(characteristic);
         if (!success) {
+            mLogHandler.post(()->{
+                Log.d("Client", "non ho mandato " + first);
+            });
             //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
             return;
         }
