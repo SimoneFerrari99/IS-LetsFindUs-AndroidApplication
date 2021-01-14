@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -162,22 +163,28 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 navView.setSelectedItemId(R.id.navigation_favorites);
             }
 
-            handleBluetooth();
+            bluetoothClient();
+            //bluetoothServer();
         }
     }
 
-    private void handleBluetooth(){
+    private void bluetoothClient(){
         try {
             FileInputStream fis = this.openFileInput(myProfileFilename);
             Future<Person> profile = Person.loadPersonAsync(fis);
             blClient = new Client(this, profile.get(), bluetoothAdapter);
-            blServer = new Server(this, md, pd, bluetoothManager);
             blClient.startScan();
-            //blServer.setupServer();
-            //blServer.startAdvertising();
+            Log.d("CLIENT", "LANCIO IL CLIENT");
         } catch (FileNotFoundException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private void bluetoothServer(){
+        blServer = new Server(this, md, pd, bluetoothManager);
+        blServer.setupServer();
+        blServer.startAdvertising();
+        Log.d("SERVER", "LANCIO IL SERVER");
     }
 
     private void askLocationPermission(){
