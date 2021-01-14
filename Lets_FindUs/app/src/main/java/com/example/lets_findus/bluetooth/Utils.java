@@ -145,7 +145,7 @@ public class Utils {
             e.printStackTrace();
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.JPEG, 100 , baos);
+        bm.compress(Bitmap.CompressFormat.JPEG, 20 , baos);
         return baos.toByteArray();
     }
 

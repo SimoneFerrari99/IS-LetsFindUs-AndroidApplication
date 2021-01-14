@@ -20,7 +20,6 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
-import android.util.Log;
 
 import com.example.lets_findus.utilities.Person;
 import com.google.gson.Gson;
@@ -29,6 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.example.lets_findus.bluetooth.GattAttributes.SERVICE_UUID;
 import static com.example.lets_findus.bluetooth.Utils.findCharacteristics;
@@ -40,6 +43,8 @@ public class Client {
     private final Person myProfile;
 
     Handler mLogHandler = new Handler(Looper.getMainLooper());
+
+    private Object dummy;
 
     private boolean mConnected;
     private final BluetoothAdapter mBluetoothAdapter;
@@ -63,6 +68,7 @@ public class Client {
         this.activity = activity;
         this.myProfile = myProfile;
         this.mBluetoothAdapter = mBluetoothAdapter;
+        dummy = new Object();
     }
 
 
@@ -152,27 +158,27 @@ public class Client {
         mGatt = device.connectGatt(context, false, gattCallback);
         try {
             Thread.sleep(1000);
+            //inizializzo tutti i dati da mandare
+            Gson gson = new Gson();
+            //File image = new File(myProfile.profilePath);
+            byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
+            //non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
+            myProfile.profilePath = "";
+            String personJson = gson.toJson(myProfile);
+            byte[] profileToSend = Utils.bytesFromString(personJson);
+            //prima mando la stringa
+            sendData(profileToSend, false);
+            //aspetto circa mezzo secondo
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    sendData(imageToSend, true);
+                }
+            }, 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        //inizializzo tutti i dati da mandare
-        Gson gson = new Gson();
-        //File image = new File(myProfile.profilePath);
-        byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
-        //non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
-        myProfile.profilePath = "";
-        String personJson = gson.toJson(myProfile);
-        byte[] profileToSend = Utils.bytesFromString(personJson);
-        //prima mando la stringa
-        sendData(profileToSend, false);
-        //aspetto circa mezzo secondo
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                sendData(imageToSend, true);
-            }
-        }, 10000);
     }
 
     /* ------------------------------------------------------------------------------ */
@@ -281,127 +287,90 @@ public class Client {
     /* ------------------------------------------------------------------------------ */
 
     /* ----------------------------- INVIO DEL DATO ----------------------------- */
-
-
-    public void sendData(byte[] data, boolean isImage) {
-        BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
-        if (characteristic == null) {
-            disconnectGattServer();
-            return;
-        }
-
-        boolean success;
-        String first;
-        String size;
-
-        if(isImage) {
-            first = "image";
-        }
-        else {
-            first = "dataPerson";
-        }
-        mLogHandler.post(()->{
-            Log.d("Client", "inizio a mandare " + first);
+    private Future<Boolean> sendPacket(byte[] packet, BluetoothGattCharacteristic characteristic){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        return executor.submit(()->{
+            characteristic.setValue(packet);
+            boolean success = mGatt.writeCharacteristic(characteristic);
+            Thread.sleep(300);
+            return success;
         });
-        size = String.valueOf(data.length);
+    }
 
-        byte[] first_convert = Utils.bytesFromString(first);
-        characteristic.setValue(first_convert);
-        success = mGatt.writeCharacteristic(characteristic);
-        if (!success) {
-            mLogHandler.post(()->{
-                Log.d("Client", "non ho mandato " + first);
-            });
-            //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
-            return;
-        }
-        else{
-            mLogHandler.post(()->{
-                Log.d("Client", "ho mandato " + first);
-            });
-        }
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        byte[] second_converted = Utils.bytesFromString(size);
-        characteristic.setValue(second_converted);
-        success = mGatt.writeCharacteristic(characteristic);
-        if (!success) {
-            mLogHandler.post(()->{
-                Log.d("Client", "non ho mandato la lunghezza");
-            });
-            //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
-            return;
-        }
-        else{
-            mLogHandler.post(()->{
-                Log.d("Client", "ho mandato la lunghezza");
-            });
-        }
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        int n = 0;
-        while(n < data.length) {
-            if(n + DEFAULT_BYTES_VIA_BLE >= data.length) {
-                int i = 0;
-                byte[] lastPacket = new byte[data.length - n];
-                for(int j = n; j < data.length; j++) {
-                    lastPacket[i] = data[j];
-                    i++;
-                    n++;
-                }
-                characteristic.setValue(lastPacket);
-                success = mGatt.writeCharacteristic(characteristic);
-                mLogHandler.post(()->{
-                    Log.d("Client", "sto mandando l'ultimo packet " + first);
-                });
-                if (!success) {
-                    mLogHandler.post(()->{
-                        Log.d("Client", "invio fallito di " + first);
-                    });
-                    //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+    public void sendData(byte[] data, boolean isImage){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(()->{
+            try {
+                BluetoothGattCharacteristic characteristic = Utils.findEchoCharacteristic(mGatt);
+                if (characteristic == null) {
+                    disconnectGattServer();
                     return;
                 }
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+
+                boolean success;
+                Future<Boolean> sended;
+                String first;
+                String size;
+
+                if (isImage) {
+                    first = "image";
+                } else {
+                    first = "dataPerson";
                 }
-            }
-            else {
-                byte[] first_middle = new byte[DEFAULT_BYTES_VIA_BLE];
-                for(int k = 0; k < DEFAULT_BYTES_VIA_BLE; k++) {
-                    first_middle[k] = data[n];
-                    n++;
-                }
-                characteristic.setValue(first_middle);
-                success = mGatt.writeCharacteristic(characteristic);
-                mLogHandler.post(()->{
-                    Log.d("Client", "sto mandando i pacchetti intermedi di " + first);
-                });
+                size = String.valueOf(data.length);
+
+                byte[] first_convert = Utils.bytesFromString(first);
+                sended = sendPacket(first_convert, characteristic);
+                success = sended.get();
                 if (!success) {
                     //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
-                    mLogHandler.post(()->{
-                        Log.d("Client", "invio fallito di " + first);
-                    });
                     return;
-                }
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } else {
                 }
 
+                byte[] second_converted = Utils.bytesFromString(size);
+                sended = sendPacket(second_converted, characteristic);
+                success = sended.get();
+                if (!success) {
+                    //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                    return;
+                } else {
+                }
+
+                int n = 0;
+                while (n < data.length) {
+                    if (n + DEFAULT_BYTES_VIA_BLE >= data.length) {
+                        int i = 0;
+                        byte[] lastPacket = new byte[data.length - n];
+                        for (int j = n; j < data.length; j++) {
+                            lastPacket[i] = data[j];
+                            i++;
+                            n++;
+                        }
+                        sended = sendPacket(lastPacket, characteristic);
+                        success = sended.get();
+                        if (!success) {
+                            //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                            return;
+                        }
+                    } else {
+                        byte[] first_middle = new byte[DEFAULT_BYTES_VIA_BLE];
+                        for (int k = 0; k < DEFAULT_BYTES_VIA_BLE; k++) {
+                            first_middle[k] = data[n];
+                            n++;
+                        }
+                        sended = sendPacket(first_middle, characteristic);
+                        success = sended.get();
+                        if (!success) {
+                            return;
+                        }
+                    }
+                }
             }
-        }
-
+            catch (ExecutionException | InterruptedException e){
+                e.printStackTrace();
+            }
+        });
     }
 
     /* ------------------------------------------------------------------------------ */

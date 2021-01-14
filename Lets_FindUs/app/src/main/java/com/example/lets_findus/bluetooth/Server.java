@@ -32,6 +32,7 @@ import com.example.lets_findus.utilities.UtilFunction;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -355,9 +356,13 @@ public class Server {
                         // for ActivityCompat#requestPermissions for more details.
                         return;
                     }
-                    Location currentLocation = fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, null).getResult();
-                    Meeting m = new Meeting(justSaved.id, currentLocation.getLatitude(), currentLocation.getLongitude(), Calendar.getInstance().getTime());
-                    md.insert(m);
+                    fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, null).addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            Meeting m = new Meeting(justSaved.id, location.getLatitude(), location.getLongitude(), Calendar.getInstance().getTime());
+                            md.insert(m);
+                        }
+                    });
                 } catch (IOException | ExecutionException e) {
                     e.printStackTrace();
                 }
