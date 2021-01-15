@@ -42,7 +42,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static com.example.lets_findus.bluetooth.GattAttributes.CHARACTERISTIC_ECHO_UUID;
@@ -77,7 +76,7 @@ public class Server {
     private int n = 0;
     private byte[] packet;
     private String size;
-    //TODO tulio commenta
+
     public Server(Activity activity, MeetingDao md, PersonDao pd, BluetoothManager mBluetoothManager) {
         this.context = activity.getApplicationContext();
         this.activity = activity;
@@ -91,6 +90,7 @@ public class Server {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
 
+    // Metodo per il setup del server
     public void setupServer() {
         BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -137,6 +137,7 @@ public class Server {
 
     /* ----------------------------- SETUP SERVICE ----------------------------- */
 
+    // Metodo utilizzato per rendere visibile il server a dispostivi remoti
     public void startAdvertising() {
         if (mBluetoothLeAdvertiser == null) {
             return;
@@ -190,56 +191,18 @@ public class Server {
 
     /* ------------------------------------------------------------------------------ */
 
-    /* ----------------------------- NOTIFICATIONS ----------------------------- */
-
-
-    private void notifyCharacteristic(byte[] value, UUID uuid) {
-        BluetoothGattService service = mGattServer.getService(SERVICE_UUID);
-        BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
-        characteristic.setValue(value);
-        // Indications require confirmation, notifications do not
-        boolean confirm = Utils.requiresConfirmation(characteristic);
-        for (BluetoothDevice device : mDevices) {
-            if (clientEnabledNotifications(device, characteristic)) {
-                mGattServer.notifyCharacteristicChanged(device, characteristic, confirm);
-            }
-        }
-    }
-
-    //serve perchè potrebbero esserci dei problemi, boh vediamo se serve
-    private boolean clientEnabledNotifications(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
-        List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
-        BluetoothGattDescriptor descriptor = Utils.findClientConfigurationDescriptor(descriptorList);
-        if (descriptor == null) {
-            // There is no client configuration descriptor, treat as true
-            return true;
-        }
-        String deviceAddress = device.getAddress();
-        byte[] clientConfiguration = mClientConfigurations.get(deviceAddress);
-        if (clientConfiguration == null) {
-            // Descriptor has not been set
-            return false;
-        }
-
-        byte[] notificationEnabled = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;
-        return clientConfiguration.length == notificationEnabled.length
-                && (clientConfiguration[0] & notificationEnabled[0]) == notificationEnabled[0]
-                && (clientConfiguration[1] & notificationEnabled[1]) == notificationEnabled[1];
-    }
-
-    /* ------------------------------------------------------------------------------ */
 
     /* ----------------------------- SERVER CALLBACK ----------------------------- */
-    //va modificata questa per salvare le cose
     private BluetoothGattServerCallback bluetoothGattServerCallback = new BluetoothGattServerCallback() {
 
-        //ogni dispositivo che che si connette viene buttato in una lista, se si disconnette o ha problemi viene rimosso
+        // Metodo che esegue l'aggiornamento sulla lista "mDevices" in caso di "connessione riuscita"
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mDevices.add(device);
+                if(!mDevices.equals(device))
+                    mDevices.add(device);
             } else {
                 mDevices.remove(device);
                 String deviceAddress = device.getAddress();
@@ -248,17 +211,18 @@ public class Server {
 
         }
 
+        // Metodo per la richiesta di lettura da parte di un dispositivo remoto di una determianta caratteristica
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-            //se richiede una caratteristica che non ho lo dico al client
+            //se richiede una caratteristica che non ho, lo dico al client
             if (Utils.requiresResponse(characteristic)) {
                 // Unknown read characteristic requiring response, send failure
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
             }
         }
 
-        //qua avviene la roba importante
+        // Metodo per la ricezione di pacchetti da parte di un device remoto
         @Override
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             try {
@@ -266,14 +230,13 @@ public class Server {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //conferma l'andato al buon fine della ricezione del pacchetto
             if (CHARACTERISTIC_ECHO_UUID.equals(characteristic.getUuid())) {
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             }
-            //notifyCharacteristic(value, CHARACTERISTIC_ECHO_UUID);
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
         }
 
+        // Metodo utilizzato per la richiesta da parte di un device remoto di scrivere su un descrittore
         @Override
         public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);

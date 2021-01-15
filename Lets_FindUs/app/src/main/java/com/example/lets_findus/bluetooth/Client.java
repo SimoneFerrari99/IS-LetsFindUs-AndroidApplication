@@ -222,7 +222,7 @@ public class Client {
             }
         }
 
-        //TODO tulio commenta qui che tu sai
+        //Callback invocata quando l'elenco di servizi remoti per il dispositivo remoto è stato aggiornato, ovvero quando nuovi servizi sono stati scoperti
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
@@ -284,7 +284,7 @@ public class Client {
         return executor.submit(()->{
             characteristic.setValue(packet);
             boolean success = mGatt.writeCharacteristic(characteristic);
-            Thread.sleep(300);
+            Thread.sleep(200);
             return success;
         });
     }

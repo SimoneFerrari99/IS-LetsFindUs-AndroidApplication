@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,19 +27,23 @@ import static com.example.lets_findus.bluetooth.GattAttributes.SERVICE_STRING;
 
 
 public class Utils {
-    //TODO tulio commenta
+
+    //Metodi per la conversione
     public static byte[] bytesFromString(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }
 
+    //Metodi per la conversione
     public static Bitmap byteToImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
+    //Metodi per la conversione
     public static String byteToString(byte[] data) {
         return new String(data, StandardCharsets.UTF_8);
     }
 
+    // Metodo utilizzato per controllare se due "characteristic" sono uguali
     private static boolean characteristicMatches(BluetoothGattCharacteristic characteristic, String uuidString) {
         if (characteristic == null) {
             return false;
@@ -49,6 +52,7 @@ public class Utils {
         return uuidMatches(uuid.toString(), uuidString);
     }
 
+    // Metodo utilizzato per scoprire nuovi servizi dal dispositivo remoto e controllo se due "characteristic" sono uguali
     private static BluetoothGattCharacteristic findCharacteristic(BluetoothGatt bluetoothGatt, String uuidString) {
         List<BluetoothGattService> serviceList = bluetoothGatt.getServices();
         BluetoothGattService service = findService(serviceList);
@@ -66,6 +70,7 @@ public class Utils {
         return null;
     }
 
+    // Metodo utilizzato per scoprire nuove caratteristiche  dal dispositivo remoto
     public static List<BluetoothGattCharacteristic> findCharacteristics(BluetoothGatt bluetoothGatt) {
         List<BluetoothGattCharacteristic> matchingCharacteristics = new ArrayList<>();
 
@@ -85,6 +90,7 @@ public class Utils {
         return matchingCharacteristics;
     }
 
+    // Metodo utilizzato per la ricerca di descrittori
     public static BluetoothGattDescriptor findClientConfigurationDescriptor(List<BluetoothGattDescriptor> descriptorList) {
         for(BluetoothGattDescriptor descriptor : descriptorList) {
             if (isClientConfigurationDescriptor(descriptor)) {
@@ -95,10 +101,12 @@ public class Utils {
         return null;
     }
 
+    // Metodo per la ricerca di "Characteristic" in un determinato "uuid"
     public static BluetoothGattCharacteristic findEchoCharacteristic(BluetoothGatt bluetoothGatt) {
         return findCharacteristic(bluetoothGatt, CHARACTERISTIC_ECHO_STRING);
     }
 
+    // Metodo per la ricerca di servizi in un dispostivo remoto
     private static BluetoothGattService findService(List<BluetoothGattService> serviceList) {
         for (BluetoothGattService service : serviceList) {
             String serviceIdString = service.getUuid().toString();
@@ -109,6 +117,7 @@ public class Utils {
         return null;
     }
 
+    // Metodo per la conversione
     public static byte[] imageToByte(String path, Context context) {
         Bitmap bm = null;
         try {
@@ -121,10 +130,7 @@ public class Utils {
         return baos.toByteArray();
     }
 
-    public static byte[] intToByte(int data) {
-        return ByteBuffer.allocate(4).putInt(data).array();
-    }
-
+    // Metodo per il controllo se due descrittori sono uguali
     private static boolean isClientConfigurationDescriptor(BluetoothGattDescriptor descriptor) {
         if (descriptor == null) {
             return false;
