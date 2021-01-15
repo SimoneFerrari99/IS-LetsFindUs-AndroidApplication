@@ -112,6 +112,12 @@ public class Person {
         });
     }
 
+    public static Person getPersonFromString(String personEncoding){
+        Gson gson = new Gson();
+        Type personType = new TypeToken<Person>() {}.getType();
+        return gson.fromJson(personEncoding, personType);
+    }
+
     public Map<String, String> dumpToString(){
         Map<String, String> dumper = new HashMap<>();
         dumper.put("Nickname", nickname);

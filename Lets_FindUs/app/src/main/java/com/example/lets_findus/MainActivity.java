@@ -6,6 +6,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.bluetooth.BluetoothManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,7 +37,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.room.Room;
 
+import com.example.lets_findus.bluetooth.Client;
+import com.example.lets_findus.bluetooth.Server;
 import com.example.lets_findus.ui.MissingBluetoothDialog;
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
@@ -43,6 +48,10 @@ import com.example.lets_findus.ui.first_boot.ProfileCreationActivity;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
 import com.example.lets_findus.utilities.DeleteBroadcastReceiver;
+import com.example.lets_findus.utilities.AppDatabase;
+import com.example.lets_findus.utilities.MeetingDao;
+import com.example.lets_findus.utilities.Person;
+import com.example.lets_findus.utilities.PersonDao;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -50,10 +59,14 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity implements MissingBluetoothDialog.NoticeDialogListener, MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private MatchingFragment match_frag;
@@ -63,6 +76,15 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
     private FragmentManager fm = getSupportFragmentManager();
 
     private BluetoothAdapter bluetoothAdapter;
+    private BluetoothManager bluetoothManager;
+    private Client blClient;
+    private Server blServer;
+
+    private static AppDatabase db;
+    private static MeetingDao md;
+    private static PersonDao pd;
+
+    private String myProfileFilename = "myProfile";
 
     public static ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -128,7 +150,8 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                             }
                         }
                     });
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+            bluetoothAdapter = bluetoothManager.getAdapter();
             if (!bluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -140,6 +163,12 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 //requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
             }
 
+            if(db == null){
+                db = Room.databaseBuilder(this, AppDatabase.class, "meeting_db").build();
+                md = db.meetingDao();
+                pd = db.personDao();
+            }
+
             isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
             if (isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
                 navView.setSelectedItemId(R.id.navigation_profile);
@@ -149,7 +178,29 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 navView.setSelectedItemId(R.id.navigation_favorites);
             }
             scheduleDeleteMeeting();
+
+            bluetoothClient();
+            bluetoothServer();
         }
+    }
+
+    private void bluetoothClient(){
+        try {
+            FileInputStream fis = this.openFileInput(myProfileFilename);
+            Future<Person> profile = Person.loadPersonAsync(fis);
+            blClient = new Client(this, profile.get(), bluetoothAdapter);
+            blClient.startScan();
+            Log.d("CLIENT", "LANCIO IL CLIENT");
+        } catch (FileNotFoundException | ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void bluetoothServer(){
+        blServer = new Server(this, md, pd, bluetoothManager);
+        blServer.setupServer();
+        blServer.startAdvertising();
+        Log.d("SERVER", "LANCIO IL SERVER");
     }
 
     private void askLocationPermission(){
