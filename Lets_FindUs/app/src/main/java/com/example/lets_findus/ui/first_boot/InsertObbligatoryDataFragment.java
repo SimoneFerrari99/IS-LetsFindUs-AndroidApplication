@@ -29,13 +29,12 @@ import java.io.FileNotFoundException;
 import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
+//sezione dell'inserimento dei dati obbligatori
 public class InsertObbligatoryDataFragment extends Fragment {
 
-    private String myProfileFilename = "myProfile";
+    private final String myProfileFilename = "myProfile";
     private Future<Person> profile;
 
-    private MonthPickerDialog.Builder materialYearBuilder;
     private String[] sex = {"Maschio", "Femmina", "Altro"};
     private AutoCompleteTextView editTextFilledExposedDropdown;
 
@@ -46,20 +45,21 @@ public class InsertObbligatoryDataFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_insert_obbligatory_data, container, false);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.sex_dropdown_menu_popup_item, sex);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.sex_dropdown_menu_popup_item, sex); //adapter per il menù a tendina con le varie opzioni per il sesso
 
         editTextFilledExposedDropdown = root.findViewById(R.id.creation_sex_exposed_dropdown);
         editTextFilledExposedDropdown.setAdapter(adapter);
-        editTextFilledExposedDropdown.setText(getString(R.string.maschio), false);
+        editTextFilledExposedDropdown.setText(getString(R.string.maschio), false); //setto il valore di default a maschio
 
+        //inizializzo il picker per l'anno
         final TextInputEditText yearBirth = (TextInputEditText) ((TextInputLayout)root.findViewById(R.id.creation_year_birth_tv)).getEditText();
         Calendar today = Calendar.getInstance();
-        materialYearBuilder = new MonthPickerDialog.Builder(getContext(), new MonthPickerDialog.OnDateSetListener() {
+        MonthPickerDialog.Builder materialYearBuilder = new MonthPickerDialog.Builder(getContext(), new MonthPickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(int selectedMonth, int selectedYear) {
                 yearBirth.setText(String.valueOf(selectedYear));
             }
-        },  today.get(Calendar.YEAR), today.get(Calendar.MONTH));
+        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
         final MonthPickerDialog yearPicker = materialYearBuilder.setMinYear(1950)
                 .setMaxYear(today.get(Calendar.YEAR))
                 .setTitle("Scegli il tuo anno di nascita")
@@ -94,6 +94,7 @@ public class InsertObbligatoryDataFragment extends Fragment {
         });
 
         try {
+            //mi prendo il mio profilo
             FileInputStream fis = requireContext().openFileInput(myProfileFilename);
             profile = Person.loadPersonAsync(fis);
         } catch (FileNotFoundException e) {
@@ -102,6 +103,7 @@ public class InsertObbligatoryDataFragment extends Fragment {
 
         final ConstraintLayout obbContainer = root.findViewById(R.id.obb_container);
 
+        //quando clicco sul bottone avanti salvo i dati e vado avanti
         nextFab = root.findViewById(R.id.obbligatory_data_next_fab);
         nextFab.hide();
         nextFab.setOnClickListener(new View.OnClickListener() {
@@ -116,7 +118,7 @@ public class InsertObbligatoryDataFragment extends Fragment {
 
         return root;
     }
-
+    //controlla se ho campi vuoti
     private boolean checkEmptyFields(ConstraintLayout container){
         boolean empty = false;
         for(int i = 0; i < container.getChildCount() && !empty; i++){
@@ -130,7 +132,7 @@ public class InsertObbligatoryDataFragment extends Fragment {
         }
         return empty;
     }
-
+    //salvo i valori contenuti nei campi nell'apposito campo del profilo
     private void storeFormValues(ConstraintLayout container, Future<Person> person){
         try {
             Person myProfile = person.get();
@@ -163,7 +165,7 @@ public class InsertObbligatoryDataFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
+    //funzione che setta un errore qualora uno dei campi obbligatori fosse vuoto
     private void setObbligatoryFieldsError(final ConstraintLayout container){
         for(int i = 0; i < container.getChildCount(); i++){
             final View v = container.getChildAt(i);

@@ -38,10 +38,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static android.app.Activity.RESULT_OK;
-
+//fragment per la visualizzazione del profilo
 public class ProfilePictureFragment extends Fragment {
     private Future<Person> profile;
-    private String myProfileFilename = "myProfile";
+    private final String myProfileFilename = "myProfile";
 
     private CircularImageView image;
     private FloatingActionButton nextFab;
@@ -57,6 +57,7 @@ public class ProfilePictureFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_profile_picture, container, false);
 
         try {
+            //mi prendo il mio profilo
             FileInputStream fis = requireContext().openFileInput(myProfileFilename);
             profile = Person.loadPersonAsync(fis);
         } catch (FileNotFoundException e) {
@@ -66,6 +67,7 @@ public class ProfilePictureFragment extends Fragment {
         image = root.findViewById(R.id.profile_picture_holder);
         image.setOnClickListener(imageSelector);
 
+        //creo un handler per quando ottengo il risultato dello scatto dalla fotocamera
         takePhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
@@ -75,19 +77,19 @@ public class ProfilePictureFragment extends Fragment {
                 }
             }
         });
-
+        //creo un handler per quando ottengo il risultato dalla selezione della galleria
         pickPhoto =  registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
                 if(result.getResultCode() == RESULT_OK && result.getData() != null){
-                    Uri sourceUri = result.getData().getData(); // 1
-                    File file = null; // 2
+                    Uri sourceUri = result.getData().getData(); //mi prendo l'uri dell'immagine salvata nel telefono
+                    File file = null;
                     try {
-                        file = createImageFile();
+                        file = createImageFile(); //creo un file su cui salvare l'immagine
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Uri destinationUri = Uri.fromFile(file);  // 3
+                    Uri destinationUri = Uri.fromFile(file);
                     launchUCrop(sourceUri, destinationUri);
                 }
             }
@@ -112,6 +114,7 @@ public class ProfilePictureFragment extends Fragment {
         return root;
     }
 
+    //override per gestire il risultato di uCrop
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -123,7 +126,7 @@ public class ProfilePictureFragment extends Fragment {
             final Throwable cropError = UCrop.getError(data);
         }
     }
-
+    //click listener per scegliere da dove prendere la foto
     private final View.OnClickListener imageSelector = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -158,7 +161,7 @@ public class ProfilePictureFragment extends Fragment {
             builder.show();
         }
     };
-
+    //funzione per creare un file univoco nella directory dell'applicazione
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -172,7 +175,7 @@ public class ProfilePictureFragment extends Fragment {
         currentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
-
+    //funzione per avviare uCrop, ossia la libreria per la gestione del cropping della foto
     private void launchUCrop(Uri source, Uri destination){
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));

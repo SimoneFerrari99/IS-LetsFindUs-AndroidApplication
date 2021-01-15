@@ -3,7 +3,7 @@ package com.example.lets_findus.bluetooth;
 import java.util.UUID;
 
 public class GattAttributes {
-
+    //TODO tulio commenta
     public static String SERVICE_STRING = "7D2EA28A-F7BD-485A-BD9D-92AD6ECFE93E";
     public static UUID SERVICE_UUID = UUID.fromString(SERVICE_STRING);
 

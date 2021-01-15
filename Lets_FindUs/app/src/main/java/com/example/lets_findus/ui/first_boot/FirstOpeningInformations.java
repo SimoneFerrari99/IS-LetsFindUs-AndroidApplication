@@ -1,7 +1,6 @@
 package com.example.lets_findus.ui.first_boot;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -12,12 +11,13 @@ import com.github.appintro.AppIntro;
 import com.github.appintro.AppIntroCustomLayoutFragment;
 
 import org.jetbrains.annotations.Nullable;
-
+//slide relativa alle informazioni sull'applicazione
 public class FirstOpeningInformations extends AppIntro {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //aggiungo i layout alle pagine
         addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_first));
         addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_information_one));
         addSlide(AppIntroCustomLayoutFragment.newInstance(R.layout.fragment_information_two));
@@ -33,19 +33,10 @@ public class FirstOpeningInformations extends AppIntro {
         setNextArrowColor(Color.BLACK);
         setSkipButtonEnabled(false);
     }
-
+    //Quando premo done mi manda alla pagina successiva
     @Override
     protected void onDonePressed(@Nullable Fragment currentFragment) {
         super.onDonePressed(currentFragment);
-        SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
-        int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
-
-        if(isFirstBoot == 0) {
-            startActivity(new Intent(this, ProfileCreationActivity.class));
-            finish();
-        }
-        else {
-            finish();
-        }
+        startActivity(new Intent(this, ProfileCreationActivity.class));
     }
 }

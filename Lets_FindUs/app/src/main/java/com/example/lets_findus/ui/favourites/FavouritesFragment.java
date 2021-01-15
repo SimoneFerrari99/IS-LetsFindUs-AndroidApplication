@@ -34,8 +34,8 @@ public class FavouritesFragment extends Fragment {
     private static RecyclerView.Adapter<FavAdapter.MyViewHolder> adapter; //l'adapter serve per popolare ogni riga
     private static RecyclerView recyclerView;
     static View.OnClickListener myOnClickListener;
-    private static List<MeetingPerson> favouriteMeetings;
-    private final List<MeetingPerson> allMeetings = new ArrayList<>();
+    private static List<MeetingPerson> favouriteMeetings; //meeting visualizzati in questo momento
+    private final List<MeetingPerson> allMeetings = new ArrayList<>(); //tutti i meeting salvati nei preferiti
 
     private static AppDatabase db;
     private static MeetingDao md;
@@ -54,10 +54,10 @@ public class FavouritesFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         if(db == null){
-            db = Room.databaseBuilder(getContext(), AppDatabase.class, "meeting_db").build();
+            db = Room.databaseBuilder(getContext(), AppDatabase.class, "meeting_db").build(); //ottengo un istanza del database se questa non è già stata inizializzata
             md = db.meetingDao();
         }
-
+        //eseguo una query sul database per selezionare tutti i meeting salvati nei preferiti e li visualizzo al completamento
         Futures.addCallback(md.getFavouriteMeetings(), new FutureCallback<List<MeetingPerson>>() {
             @Override
             public void onSuccess(@NullableDecl List<MeetingPerson> result) {
@@ -82,6 +82,7 @@ public class FavouritesFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
+            //quando clicco su un meeting mi si apre la pagina di visualizzazione del meeting
             int selectedItemPosition = recyclerView.getChildAdapterPosition(v);
             Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
             startPersonProfile.putExtra("MEETING_ID", favouriteMeetings.get(selectedItemPosition).meeting.id);
@@ -89,10 +90,10 @@ public class FavouritesFragment extends Fragment {
             startActivity(startPersonProfile);
         }
     }
-
+    //qualora venissero filtrati degli elementi qui viene gestito il filtraggio
     public void filterItems(Map<String, String> filterOptions){
         UtilFunction.filterItems(favouriteMeetings, allMeetings, filterOptions);
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged(); //notifico dei cambiamenti sul dataset in modo da aggiornare gli elementi visualizzati
     }
 
 }

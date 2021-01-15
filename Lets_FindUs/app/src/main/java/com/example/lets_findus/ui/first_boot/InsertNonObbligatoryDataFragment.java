@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
+//inserisco i dati non obbligatori
 public class InsertNonObbligatoryDataFragment extends Fragment {
 
     private String myProfileFilename = "myProfile";
@@ -41,14 +41,14 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_insert_non_obbligatory_data, container, false);
-
+        //ottengo il file in cui è salvato il mio profilo
         try {
             FileInputStream fis = requireContext().openFileInput(myProfileFilename);
             profile = Person.loadPersonAsync(fis);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        //inizializzo il date picker per la data di nascita
         final TextInputEditText birthDate = (TextInputEditText) ((TextInputLayout)root.findViewById(R.id.birth_date_tv)).getEditText();
         materialDateBuilder = MaterialDatePicker.Builder.datePicker();
         materialDateBuilder.setTitleText("Scegli la tua data di nascita");
@@ -61,7 +61,7 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
                 birthDate.setText(simpleFormat.format(date));
             }
         });
-
+        //visualizzo il date picker sia quando viene toccato sia quando viene focussato
         birthDate.setInputType(InputType.TYPE_NULL);
         birthDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +79,7 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
         });
 
         final ConstraintLayout nonobbContainer = root.findViewById(R.id.other_data);
-
+        //al press del bottone avanti vado avanti nella prossima pagina e salvo i dati inseriti
         nextFab = root.findViewById(R.id.nonobbligatory_data_next_fab);
         nextFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,11 +91,12 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
 
         return root;
     }
-
+    //funzione per salvare tutti i dati inseriti dall'utente
     private void storeFormValues(ConstraintLayout container, Future<Person> person){
         try {
             Person myProfile = person.get();
             String value;
+            //per ogni textview ne prendo il testo e lo inserisco nell'apposito campo del profilo, se non è stato inserito nel campo di testo inserisco null nel profilo
             for(int i = 0; i < container.getChildCount(); i++){
                 View v = container.getChildAt(i);
                 value = ((TextInputLayout) v).getEditText().getText().toString();
@@ -133,7 +134,7 @@ public class InsertNonObbligatoryDataFragment extends Fragment {
                         break;
                 }
             }
-            myProfile.storePersonAsync(getContext().openFileOutput(myProfileFilename, Context.MODE_PRIVATE));
+            myProfile.storePersonAsync(getContext().openFileOutput(myProfileFilename, Context.MODE_PRIVATE)); //salvo il profilo nell'apposito file
         } catch (ExecutionException | InterruptedException | FileNotFoundException | ParseException e) {
             e.printStackTrace();
         }

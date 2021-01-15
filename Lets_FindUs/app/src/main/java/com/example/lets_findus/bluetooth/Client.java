@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelUuid;
 
 import com.example.lets_findus.utilities.Person;
@@ -42,16 +41,12 @@ public class Client {
     private final Activity activity;
     private final Person myProfile;
 
-    Handler mLogHandler = new Handler(Looper.getMainLooper());
-
-    private Object dummy;
-
     private boolean mConnected;
     private final BluetoothAdapter mBluetoothAdapter;
     private boolean mEchoInitialized;
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothGatt mGatt;
-    private static final long SCAN_PERIOD = 5000;
+    private static final long SCAN_PERIOD = 5000; //periodo di durata della scansione, dopo quel periodo si ferma
 
 
     private static final int REQUEST_ENABLE_BT = 1;
@@ -59,24 +54,23 @@ public class Client {
 
     private boolean mScanning;
     private Handler mHandler;
-    private Map<String, BluetoothDevice> mScanResults;
+    private Map<String, BluetoothDevice> mScanResults; //lista in cui tenere i device bluetooth scansionati
 
-    private static final int DEFAULT_BYTES_VIA_BLE = 512;
+    private static final int DEFAULT_BYTES_VIA_BLE = 512; //numero di bytes massimo di un pacchetto
 
     public Client(Activity activity, Person myProfile, BluetoothAdapter mBluetoothAdapter) {
         this.context = activity.getApplicationContext();
         this.activity = activity;
         this.myProfile = myProfile;
         this.mBluetoothAdapter = mBluetoothAdapter;
-        dummy = new Object();
     }
 
-
+    //inizio della scansione dei dispositivi
     public void startScan() {
         if (!hasPermissions() || mScanning) {
             return;
         }
-
+        //mi disconnetto qualora avessi altri dispositivi precedentemente connessi
         disconnectGattServer();
         //String, BluetoothDevice
         mScanResults = new HashMap<>();
@@ -95,16 +89,17 @@ public class Client {
         mBluetoothLeScanner.startScan(filters, settings, scanCallback);
 
         mHandler = new Handler();
-        //stoppo la scansione dopo un tot di tempo ossia SCAN PERIOD
+        //stoppo la scansione dopo SCAN_PERIOD millisecondi
         mHandler.postDelayed(this::stopScan, SCAN_PERIOD);
 
         mScanning = true;
     }
 
+    //fine della scansione dei dispositivi
     private void stopScan() {
         if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
             mBluetoothLeScanner.stopScan(scanCallback);
-            scanComplete();
+            scanComplete(); //una volta che mi fermo chiamo la scanComplete
         }
 
         scanCallback = null;
@@ -112,7 +107,7 @@ public class Client {
         mHandler = null;
     }
 
-    //PER OGNI DEVICE LO PRENDE E SI CONNETTE
+    //una volta terminata la scansione mi connetto con tutti i dispositivi trovati
     private void scanComplete() {
         if (!mScanResults.isEmpty()) {
             for (String deviceAddress : mScanResults.keySet()) {
@@ -156,19 +151,19 @@ public class Client {
 
     private void connectDevice(BluetoothDevice device) {
         mGatt = device.connectGatt(context, false, gattCallback);
+        //dopo 2 secondi sono sicuro di essermi connesso quindi inizio a inviare i dati
         try {
             Thread.sleep(2000);
             //inizializzo tutti i dati da mandare
             Gson gson = new Gson();
-            //File image = new File(myProfile.profilePath);
             byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
             //non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
-            myProfile.profilePath = "";
-            String personJson = gson.toJson(myProfile);
+            myProfile.profilePath = " ";
+            String personJson = gson.toJson(myProfile); //converto la Person in una stringa
             byte[] profileToSend = Utils.bytesFromString(personJson);
             //prima mando la stringa
             sendData(profileToSend, false);
-            //aspetto circa mezzo secondo
+            //dopo 1 secondo invio anche l'immagine
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
@@ -187,7 +182,7 @@ public class Client {
 
     ScanCallback scanCallback = new ScanCallback() {
 
-        //INSERISCO I DISPOSITIVI TROVATI NELLA LISTA
+        //Inserisco i dispositivi trovati nella map
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
@@ -218,20 +213,16 @@ public class Client {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
 
-            switch (newState) {
-                case BluetoothProfile.STATE_CONNECTED:
-                    setConnected(true);
-                    gatt.requestMtu(517);
-                    break;
-                case BluetoothProfile.STATE_DISCONNECTED:
-                    //sono stato respinto
-                    break;
-                default:
-                    disconnectGattServer();
-                    break;
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                setConnected(true);
+                //quando mi connetto cambio la grandezza del pacchetto da inviare
+                gatt.requestMtu(517);
+            } else {
+                disconnectGattServer();
             }
         }
 
+        //TODO tulio commenta qui che tu sai
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
@@ -287,6 +278,7 @@ public class Client {
     /* ------------------------------------------------------------------------------ */
 
     /* ----------------------------- INVIO DEL DATO ----------------------------- */
+    //ogni pacchetto è inviato tramite un executor per poter sleeppare ritornare una Future sulla quale aspettare prima di inviare il successivo
     private Future<Boolean> sendPacket(byte[] packet, BluetoothGattCharacteristic characteristic){
         ExecutorService executor = Executors.newSingleThreadExecutor();
         return executor.submit(()->{
@@ -296,7 +288,7 @@ public class Client {
             return success;
         });
     }
-
+    //funzione principale per l'invio dei dati, tutto l'invio avviene in un thread a parte
     public void sendData(byte[] data, boolean isImage){
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(()->{
@@ -312,34 +304,37 @@ public class Client {
                 String first;
                 String size;
 
+                //invio la stringa "image" o "dataPerson" per far si che il server capisca che dato sta ricevendo
                 if (isImage) {
                     first = "image";
                 } else {
                     first = "dataPerson";
                 }
+                //inizializzo la lunghezza totale del dato per farla sapere al server
                 size = String.valueOf(data.length);
 
+                //invio prima il tipo di dato
                 byte[] first_convert = Utils.bytesFromString(first);
                 sended = sendPacket(first_convert, characteristic);
                 success = sended.get();
                 if (!success) {
-                    //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                    //se i pacchetti non vengono inviati si può gestire qui il tutto
                     return;
-                } else {
                 }
 
+                //successivamente invio la grandezza del dato
                 byte[] second_converted = Utils.bytesFromString(size);
                 sended = sendPacket(second_converted, characteristic);
                 success = sended.get();
                 if (!success) {
-                    //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                    //se i pacchetti non vengono inviati si può gestire qui il tutto
                     return;
-                } else {
                 }
 
+                //inizio a inviare tutti i dati
                 int n = 0;
                 while (n < data.length) {
-                    if (n + DEFAULT_BYTES_VIA_BLE >= data.length) {
+                    if (n + DEFAULT_BYTES_VIA_BLE >= data.length) { //se questa condizione è vera sono all'ultimo pacchetto
                         int i = 0;
                         byte[] lastPacket = new byte[data.length - n];
                         for (int j = n; j < data.length; j++) {
@@ -350,7 +345,7 @@ public class Client {
                         sended = sendPacket(lastPacket, characteristic);
                         success = sended.get();
                         if (!success) {
-                            //SI PUO GESTIRE QUA IL NON INVIO DEL PACCHETTO
+                            //se i pacchetti non vengono inviati si può gestire qui il tutto
                             return;
                         }
                     } else {
@@ -362,6 +357,7 @@ public class Client {
                         sended = sendPacket(first_middle, characteristic);
                         success = sended.get();
                         if (!success) {
+                            //se i pacchetti non vengono inviati si può gestire qui il tutto
                             return;
                         }
                     }

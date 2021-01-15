@@ -15,7 +15,7 @@ import com.example.lets_findus.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//activity per il checking delle responsabilità
 public class ResponsibilityActivity extends AppCompatActivity {
 
     @Override
@@ -33,6 +33,7 @@ public class ResponsibilityActivity extends AppCompatActivity {
         end.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //quando sul pulsante fine salvo nelle shared preferences il fatto che ho fatto il primo avvio
                 SharedPreferences pref = getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt("FIRST_BOOT", 1);
@@ -47,6 +48,7 @@ public class ResponsibilityActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if(allChecked(checkBoxes)){
+                        //se tutte le checkbox sono checked mostro il bottone
                         end.setVisibility(View.VISIBLE);
                     }
                     else{

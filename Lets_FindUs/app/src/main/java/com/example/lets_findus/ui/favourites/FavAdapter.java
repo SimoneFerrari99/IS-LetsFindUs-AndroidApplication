@@ -16,10 +16,10 @@ import com.example.lets_findus.utilities.MeetingPerson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
+//adapter per la recycleview della pagina dei preferiti
 public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
 
-    private List<MeetingPerson> dataSet;
+    private final List<MeetingPerson> dataSet;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -44,14 +44,13 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.MyViewHolder>{
     @NonNull
     @Override
     public FavAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.cards_layout, parent, false);
-
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.cards_layout, parent, false);
+        //click listener contenuto nel fragment dei preferiti
         view.setOnClickListener(FavouritesFragment.myOnClickListener);
 
         return new MyViewHolder(view);
     }
-
+    //visualizzo correttamente i dati
     @Override
     public void onBindViewHolder(@NonNull FavAdapter.MyViewHolder holder, int position) {
         TextView textViewNickname = holder.textViewNickname;

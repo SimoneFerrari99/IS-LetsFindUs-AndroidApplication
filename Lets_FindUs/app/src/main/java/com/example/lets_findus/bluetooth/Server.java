@@ -77,7 +77,7 @@ public class Server {
     private int n = 0;
     private byte[] packet;
     private String size;
-
+    //TODO tulio commenta
     public Server(Activity activity, MeetingDao md, PersonDao pd, BluetoothManager mBluetoothManager) {
         this.context = activity.getApplicationContext();
         this.activity = activity;
@@ -289,31 +289,27 @@ public class Server {
 
 
     public void mergePacket(byte[] value) throws InterruptedException {
-        mLogHandler.post(()->{
-            Log.d("Server", "sto ricevendo");
-        });
         if (!isImage && !data) {
             if (Utils.byteToString(value).equals("image")) {
                 isImage = true;
             } else if (Utils.byteToString(value).equals("dataPerson")) {
                 data = true;
             } else {
-                //ghemo da fare qualcosa
+                //si può gestire qui questo caso di errore
             }
             return;
         } else {
+            //se l'array non è inizializzato vuol dire che mi sta arrivando un nuovo dato
             if (!array_initialized) {
-                mLogHandler.post(()->{
-                    Log.d("Server", "inizializzo " + isImage);
-                });
                 size = Utils.byteToString(value);
                 packet = setSizeByteArray(Integer.parseInt(size));
                 array_initialized = true;
                 return;
             } else {
+                //altrimenti inserisco i byte che ricevo nell'array packet
                 for (byte b : value) {
                     if(n>=Integer.parseInt(size))
-                        break;
+                        break; //sono arrivato alla fine dell'array
                     packet[n] = b;
                     n++;
                 }
@@ -325,42 +321,34 @@ public class Server {
         if (n >= Integer.parseInt(size)) {
             //qua è quando finisce
             //l'array packet contiene i miei dati, dovrò salvarli subito perchè poi vengono distrutti
-            if (!isImage) {
-                mLogHandler.post(()->{
-                    Log.d("Server", "Ho finito la parola " + Utils.stringFromBytes(packet));
-                });
+            if (!isImage) { //gestisco il completamento della persona
                 lastSavedPerson = Person.getPersonFromString(Utils.stringFromBytes(packet));
                 personSaved = true;
                 mLogHandler.post(()->{
                     Log.d("Server", "ho salvato la person " + lastSavedPerson.nickname);
                 });
             }
-            if (isImage && personSaved) {
+            if (isImage && personSaved) { //se ho già salvato la persona e sono all'immagine devo salvare il meeting
                 try {
                     mLogHandler.post(()->{
                         Log.d("Server", "ho finito l'immagine");
                     });
-                    File imageFile = UtilFunction.createImageFile(context);
-                    lastSavedPerson.profilePath = Utils.saveImageFromByte(packet, imageFile);
-                    ListenableFuture<Long> saved = pd.insert(lastSavedPerson);
-                    saved.get();
-                    ListenableFuture<Person> savedPerson = pd.getLastPersonInserted();
+                    File imageFile = UtilFunction.createImageFile(context); //creo il file su cui salvare l'immagine
+                    lastSavedPerson.profilePath = Utils.saveImageFromByte(packet, imageFile); //salvo il file e ne assegno il path alla persona appena salvata
+                    ListenableFuture<Long> saved = pd.insert(lastSavedPerson); //inserisco la persona
+                    saved.get(); //aspetto che l'inserimento sia avvenuto con successo
+                    ListenableFuture<Person> savedPerson = pd.getLastPersonInserted(); //riprendo la persona appena inserita per ottenerne l'id che viene generato in fase di inserimento
                     Person justSaved = savedPerson.get();
-                    if (activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && activity.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){// && activity.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
+                    if (activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && activity.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                        // non ho i permessi della location, andrebbe gestito questo caso
                         return;
                     }
+                    //ottengo la posizione corrente
                     fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, null).addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
-                            Meeting m = new Meeting(justSaved.id, location.getLatitude(), location.getLongitude(), Calendar.getInstance().getTime());
-                            md.insert(m);
+                            Meeting m = new Meeting(justSaved.id, location.getLatitude(), location.getLongitude(), Calendar.getInstance().getTime()); //creo un nuovo meeting
+                            md.insert(m); //salvo il meeting
                         }
                     });
                 } catch (IOException | ExecutionException e) {
@@ -368,6 +356,7 @@ public class Server {
                 }
                 personSaved = false;
             }
+            //reinizializzo il tutto
             isImage = false;
             array_initialized = false;
             data = false;
