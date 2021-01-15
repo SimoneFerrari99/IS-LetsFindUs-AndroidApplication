@@ -57,7 +57,7 @@ public class MeetingDaoTest {
         Futures.addCallback(person, new FutureCallback<Person>() {
             @Override
             public void onSuccess(@NullableDecl Person result) {
-                Meeting m1 = new Meeting(result, 45.17, 11.59, Calendar.getInstance().getTime());
+                Meeting m1 = new Meeting(result.id, 45.17, 11.59, Calendar.getInstance().getTime());
                 ListenableFuture<Long> ins = md.insert(m1);
             }
 
@@ -78,7 +78,7 @@ public class MeetingDaoTest {
             @Override
             public void onSuccess(@NullableDecl List<Person> result) {
                 for(Person p : result) {
-                    Meeting m1 = new Meeting(p, 45.17, 11.59, Calendar.getInstance(Locale.ITALY).getTime());
+                    Meeting m1 = new Meeting(p.id, 45.17, 11.59, Calendar.getInstance(Locale.ITALY).getTime());
                     ListenableFuture<Long> ins = md.insert(m1);
                     Futures.addCallback(ins, new FutureCallback<Long>() {
                         @Override
