@@ -12,6 +12,8 @@ public class Meeting {
     @PrimaryKey(autoGenerate = true)
     public int id; 
     public int personId;
+    @Ignore
+    public Person data; 
     public double latitude;
     public double longitude;
     public Date date;
@@ -22,6 +24,14 @@ public class Meeting {
         this.latitude = latitude;
         this.longitude = longitude;
         this.date = date;
+    }
+
+    public Meeting(Person data, double latitude, double longitude, Date date) {
+        this.data = data;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.date = date;
+        this.personId = data.id;
     }
 
     public void setFavourite(boolean favourite) {
