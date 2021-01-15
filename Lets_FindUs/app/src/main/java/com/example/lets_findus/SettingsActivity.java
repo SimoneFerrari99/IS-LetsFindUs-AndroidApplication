@@ -33,8 +33,6 @@ public class SettingsActivity extends AppCompatActivity {
         deleteData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                //TODO: AGGIUNGI SI O NO
-
                 new AlertDialog.Builder(v.getContext())
                         .setTitle(R.string.delete_data_confirm_title)
                         .setMessage(R.string.delete_data_confirm_label)

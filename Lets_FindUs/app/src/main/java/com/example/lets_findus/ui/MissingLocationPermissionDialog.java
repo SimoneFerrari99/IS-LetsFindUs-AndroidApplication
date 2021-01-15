@@ -14,8 +14,7 @@ import com.example.lets_findus.R;
 
 import org.jetbrains.annotations.NotNull;
 //dialog per la mancanza dei permessi della localizzazione
-//TODO fare il refactoring del nome della classe chiamandola MissingLocationPermissionDialog
-public class MissingPermissionDialog extends DialogFragment {
+public class MissingLocationPermissionDialog extends DialogFragment {
 
     public interface NoticeDialogListener {
         public void onDialogPositiveClick(DialogFragment dialog);
@@ -36,14 +35,14 @@ public class MissingPermissionDialog extends DialogFragment {
                 .setPositiveButton(R.string.missing_permission_positive_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        listener.onDialogPositiveClick(MissingPermissionDialog.this);
+                        listener.onDialogPositiveClick(MissingLocationPermissionDialog.this);
                     }
                 })
                 //click listener nel caso l'utente scelga il negative button
                 .setNegativeButton(R.string.missing_permission_negative_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        listener.onDialogNegativeClick(MissingPermissionDialog.this);
+                        listener.onDialogNegativeClick(MissingLocationPermissionDialog.this);
                     }
                 });
         return builder.create();

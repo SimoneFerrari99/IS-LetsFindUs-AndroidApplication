@@ -165,27 +165,13 @@ public class Server {
         }
     }
 
-    //questa cosa è praticamente inutile
     private final AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            /*mLogHandler.post(() -> {
-                //la tv log non esiste, bisognerà capire cosa fare gg
-                //log.append("\nPeripheral advertising started");
-            });*/
-
         }
 
         @Override
         public void onStartFailure(int errorCode) {
-            //la tv log non esiste, bisognerà capire cosa fare gg
-            /*mLogHandler.post(() -> {
-                if (errorCode == 3) {
-                    //log.append("\nPeripheral advertising already initialized");
-                } else {
-                    //log.append("\nPeripheral advertising failed: " + errorCode);
-                }
-            });*/
         }
     };
 
@@ -250,7 +236,7 @@ public class Server {
 
     /* ------------------------------------------------------------------------------ */
 
-
+    // Metodo utilizzato per fare il "merge" dei pacchetti ricevuti
     public void mergePacket(byte[] value) throws InterruptedException {
         if (!isImage && !data) {
             if (Utils.byteToString(value).equals("image")) {

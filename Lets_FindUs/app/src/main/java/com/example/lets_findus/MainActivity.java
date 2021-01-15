@@ -42,10 +42,9 @@ import androidx.room.Room;
 import com.example.lets_findus.bluetooth.Client;
 import com.example.lets_findus.bluetooth.Server;
 import com.example.lets_findus.ui.MissingBluetoothDialog;
-import com.example.lets_findus.ui.MissingPermissionDialog;
+import com.example.lets_findus.ui.MissingLocationPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
 import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
-import com.example.lets_findus.ui.first_boot.ProfileCreationActivity;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
 import com.example.lets_findus.utilities.DeleteBroadcastReceiver;
@@ -69,7 +68,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class MainActivity extends AppCompatActivity implements MissingBluetoothDialog.NoticeDialogListener, MissingPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements MissingBluetoothDialog.NoticeDialogListener, MissingLocationPermissionDialog.NoticeDialogListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private MatchingFragment match_frag;
     private final FavouritesFragment fav_frag = new FavouritesFragment();
     private final ProfileFragment prof_frag = new ProfileFragment();
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                                 match_frag = new MatchingFragment();
                                 fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
                             } else {
-                                DialogFragment newFragment = new MissingPermissionDialog();
+                                DialogFragment newFragment = new MissingLocationPermissionDialog();
                                 newFragment.show(getSupportFragmentManager(), "Location permission");
                             }
                         }

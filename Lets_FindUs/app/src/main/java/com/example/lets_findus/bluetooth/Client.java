@@ -65,12 +65,12 @@ public class Client {
         this.mBluetoothAdapter = mBluetoothAdapter;
     }
 
-    //inizio della scansione dei dispositivi
+    // Inizio della scansione dei dispositivi
     public void startScan() {
         if (!hasPermissions() || mScanning) {
             return;
         }
-        //mi disconnetto qualora avessi altri dispositivi precedentemente connessi
+        // Mi disconnetto qualora avessi altri dispositivi precedentemente connessi
         disconnectGattServer();
         //String, BluetoothDevice
         mScanResults = new HashMap<>();
@@ -95,7 +95,7 @@ public class Client {
         mScanning = true;
     }
 
-    //fine della scansione dei dispositivi
+    // Fine della scansione dei dispositivi
     private void stopScan() {
         if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
             mBluetoothLeScanner.stopScan(scanCallback);
@@ -107,7 +107,7 @@ public class Client {
         mHandler = null;
     }
 
-    //una volta terminata la scansione mi connetto con tutti i dispositivi trovati
+    // Una volta terminata la scansione mi connetto con tutti i dispositivi trovati
     private void scanComplete() {
         if (!mScanResults.isEmpty()) {
             for (String deviceAddress : mScanResults.keySet()) {
@@ -151,19 +151,19 @@ public class Client {
 
     private void connectDevice(BluetoothDevice device) {
         mGatt = device.connectGatt(context, false, gattCallback);
-        //dopo 2 secondi sono sicuro di essermi connesso quindi inizio a inviare i dati
+        // Dopo 2 secondi sono sicuro di essermi connesso quindi inizio a inviare i dati
         try {
             Thread.sleep(3000);
-            //inizializzo tutti i dati da mandare
+            // Inizializzo tutti i dati da mandare
             Gson gson = new Gson();
             byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
-            //non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
+            // Non serve mandare il path, quindi lo rimuovo per alleggerire i dati da mandare
             myProfile.profilePath = " ";
             String personJson = gson.toJson(myProfile); //converto la Person in una stringa
             byte[] profileToSend = Utils.bytesFromString(personJson);
-            //prima mando la stringa
+            // Prima mando la stringa
             sendData(profileToSend, false);
-            //dopo 1 secondo invio anche l'immagine
+            // Dopo 1 secondo invio anche l'immagine
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
@@ -182,7 +182,7 @@ public class Client {
 
     ScanCallback scanCallback = new ScanCallback() {
 
-        //Inserisco i dispositivi trovati nella map
+        // Inserisco i dispositivi trovati nella map
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
@@ -208,21 +208,21 @@ public class Client {
 
     BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
 
-        //vari step di connessione
+        // Vari step di connessione
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 setConnected(true);
-                //quando mi connetto cambio la grandezza del pacchetto da inviare
+                // Quando mi connetto cambio la grandezza del pacchetto da inviare
                 gatt.requestMtu(517);
             } else {
                 disconnectGattServer();
             }
         }
 
-        //Callback invocata quando l'elenco di servizi remoti per il dispositivo remoto è stato aggiornato, ovvero quando nuovi servizi sono stati scoperti
+        // Callback invocata quando l'elenco di servizi remoti per il dispositivo remoto è stato aggiornato, ovvero quando nuovi servizi sono stati scoperti
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
@@ -278,17 +278,17 @@ public class Client {
     /* ------------------------------------------------------------------------------ */
 
     /* ----------------------------- INVIO DEL DATO ----------------------------- */
-    //ogni pacchetto è inviato tramite un executor per poter sleeppare ritornare una Future sulla quale aspettare prima di inviare il successivo
+    // Ogni pacchetto è inviato tramite un executor per poter sleeppare ritornare una Future sulla quale aspettare prima di inviare il successivo
     private Future<Boolean> sendPacket(byte[] packet, BluetoothGattCharacteristic characteristic){
         ExecutorService executor = Executors.newSingleThreadExecutor();
         return executor.submit(()->{
             characteristic.setValue(packet);
             boolean success = mGatt.writeCharacteristic(characteristic);
-            Thread.sleep(200);
+            Thread.sleep(300);
             return success;
         });
     }
-    //funzione principale per l'invio dei dati, tutto l'invio avviene in un thread a parte
+    // Funzione principale per l'invio dei dati, tutto l'invio avviene in un thread a parte
     public void sendData(byte[] data, boolean isImage){
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(()->{
@@ -304,25 +304,25 @@ public class Client {
                 String first;
                 String size;
 
-                //invio la stringa "image" o "dataPerson" per far si che il server capisca che dato sta ricevendo
+                // Invio la stringa "image" o "dataPerson" per far si che il server capisca che dato sta ricevendo
                 if (isImage) {
                     first = "image";
                 } else {
                     first = "dataPerson";
                 }
-                //inizializzo la lunghezza totale del dato per farla sapere al server
+                // Inizializzo la lunghezza totale del dato per farla sapere al server
                 size = String.valueOf(data.length);
 
-                //invio prima il tipo di dato
+                // Invio prima il tipo di dato
                 byte[] first_convert = Utils.bytesFromString(first);
                 sended = sendPacket(first_convert, characteristic);
                 success = sended.get();
                 if (!success) {
-                    //se i pacchetti non vengono inviati si può gestire qui il tutto
+                    // Se i pacchetti non vengono inviati si può gestire qui il tutto
                     return;
                 }
 
-                //successivamente invio la grandezza del dato
+                // Successivamente invio la grandezza del dato
                 byte[] second_converted = Utils.bytesFromString(size);
                 sended = sendPacket(second_converted, characteristic);
                 success = sended.get();
@@ -331,7 +331,7 @@ public class Client {
                     return;
                 }
 
-                //inizio a inviare tutti i dati
+                // Inizio a inviare tutti i dati
                 int n = 0;
                 while (n < data.length) {
                     if (n + DEFAULT_BYTES_VIA_BLE >= data.length) { //se questa condizione è vera sono all'ultimo pacchetto
@@ -345,7 +345,7 @@ public class Client {
                         sended = sendPacket(lastPacket, characteristic);
                         success = sended.get();
                         if (!success) {
-                            //se i pacchetti non vengono inviati si può gestire qui il tutto
+                            // Se i pacchetti non vengono inviati si può gestire qui il tutto
                             return;
                         }
                     } else {
@@ -357,7 +357,7 @@ public class Client {
                         sended = sendPacket(first_middle, characteristic);
                         success = sended.get();
                         if (!success) {
-                            //se i pacchetti non vengono inviati si può gestire qui il tutto
+                            // Se i pacchetti non vengono inviati si può gestire qui il tutto
                             return;
                         }
                     }

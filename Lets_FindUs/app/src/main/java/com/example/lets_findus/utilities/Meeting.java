@@ -1,6 +1,7 @@
 package com.example.lets_findus.utilities;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
