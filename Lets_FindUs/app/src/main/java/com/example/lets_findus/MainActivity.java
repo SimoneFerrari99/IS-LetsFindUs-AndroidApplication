@@ -44,6 +44,7 @@ import com.example.lets_findus.bluetooth.Server;
 import com.example.lets_findus.ui.MissingBluetoothDialog;
 import com.example.lets_findus.ui.MissingPermissionDialog;
 import com.example.lets_findus.ui.favourites.FavouritesFragment;
+import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
 import com.example.lets_findus.ui.first_boot.ProfileCreationActivity;
 import com.example.lets_findus.ui.matching.MatchingFragment;
 import com.example.lets_findus.ui.profile.ProfileFragment;
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
         int isFirstBoot = pref.getInt("FIRST_BOOT", 0); //0 è il valore di default nel caso non ci sia ls shared preference
         if(isFirstBoot == 0) { //se ho letto 0 faccio il primo avvio
-            Intent startFirstOpening = new Intent(this, ProfileCreationActivity.class);
+            Intent startFirstOpening = new Intent(this, FirstOpeningInformations.class);
             startActivity(startFirstOpening);
             finish();
         }
