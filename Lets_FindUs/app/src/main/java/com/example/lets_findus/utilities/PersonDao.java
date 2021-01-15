@@ -9,7 +9,8 @@ import androidx.room.Update;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
-
+//classe contenente tutte le query per le classi persona
+//DAO = Data Access Object
 @Dao
 public abstract class PersonDao {
     @Insert

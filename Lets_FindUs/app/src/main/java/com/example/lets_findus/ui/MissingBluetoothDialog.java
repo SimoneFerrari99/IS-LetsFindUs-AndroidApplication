@@ -13,7 +13,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.lets_findus.R;
 
 import org.jetbrains.annotations.NotNull;
-
+//dialog per la mancanza dei permessi del bluetooth
 public class MissingBluetoothDialog extends DialogFragment {
 
     public interface NoticeDialogListener {
@@ -31,12 +31,14 @@ public class MissingBluetoothDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setTitle(R.string.missing_permission_title)
                 .setMessage(R.string.missing_bluetooth_message)
+                //click listener nel caso l'utente scelga il positive button
                 .setPositiveButton(R.string.missing_activate_bluetooth_positive_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         listener.onDialogPositiveClick(MissingBluetoothDialog.this);
                     }
                 })
+                //click listener nel caso l'utente scelga il negative button
                 .setNegativeButton(R.string.missing_permission_negative_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

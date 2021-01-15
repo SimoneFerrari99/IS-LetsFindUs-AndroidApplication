@@ -23,17 +23,17 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
+//classe rappresentante una persona
 @Entity
 public class Person {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = true) //autoincrement dell'id della persona una volta salvata nel db
     public int id;
     public enum Sex{
         MALE,
         FEMALE,
         OTHER
     }
-    //these are all obligatory fields
+    //tutti i campi obbligatori
     @NotNull
     public String profilePath;
     @NotNull
@@ -42,7 +42,7 @@ public class Person {
     public Sex sex;
     @NotNull
     public Integer yearOfBirth;
-
+    //tutti i campi non obbligatori
     public String description;
     public String name;
     public String surname;
@@ -65,10 +65,10 @@ public class Person {
         this.yearOfBirth = yearOfBirth;
     }
 
-
+    //metodo per salvare in maniera asincrona una persona in un file di output
     public void storePersonAsync(final FileOutputStream fos){
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        final Gson gson = new Gson();
+        final Gson gson = new Gson(); //oggetto per convertire una classe in stringa (deserializzazione)
 
         executor.submit(new Runnable() {
             @Override
@@ -83,7 +83,7 @@ public class Person {
             }
         });
     }
-
+    //metodo per caricare in maniera asincrona una persona dato il file nella quale è contenuta
     public static Future<Person> loadPersonAsync(final FileInputStream fis){
         ExecutorService executor = Executors.newSingleThreadExecutor();
         final Gson gson = new Gson();
@@ -91,7 +91,7 @@ public class Person {
         return executor.submit(new Callable<Person>() {
             @Override
             public Person call() throws Exception {
-                Type personType = new TypeToken<Person>() {}.getType();
+                Type personType = new TypeToken<Person>() {}.getType(); //token per la serializzazione in maniera corretta della stringa nell'oggetto persona
                 InputStreamReader inputStreamReader = new InputStreamReader(fis);
                 StringBuilder stringBuilder = new StringBuilder();
                 String contents;
@@ -111,13 +111,13 @@ public class Person {
             }
         });
     }
-
+    //metodo per la serializzazione data una stringa 
     public static Person getPersonFromString(String personEncoding){
         Gson gson = new Gson();
         Type personType = new TypeToken<Person>() {}.getType();
         return gson.fromJson(personEncoding, personType);
     }
-
+    //metodo per effettuare il dumping dei campi della persona
     public Map<String, String> dumpToString(){
         Map<String, String> dumper = new HashMap<>();
         dumper.put("Nickname", nickname);

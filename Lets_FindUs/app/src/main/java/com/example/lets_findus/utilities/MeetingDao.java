@@ -11,13 +11,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Date;
 import java.util.List;
-
+//classe contenente tutte le query per i meeting
+//DAO = Data Access Object
 @Dao
 public abstract class MeetingDao {
     @Insert
     public abstract ListenableFuture<Long> insert(Meeting m);
 
-    // TODO: 23/12/2020 test
     @Insert
     public abstract ListenableFuture<Long[]> insertAll(Meeting... m);
 
@@ -33,7 +33,7 @@ public abstract class MeetingDao {
     @Transaction
     @Query("SELECT * FROM Meeting INNER JOIN Person ON Meeting.personId = Person.id WHERE (Meeting.latitude BETWEEN :latDown AND :latUp) AND (Meeting.longitude BETWEEN :longLeft AND :longRight)")
     public abstract ListenableFuture<List<MeetingPerson>> getMeetingsBetweenRegion(double latUp, double latDown, double longLeft, double longRight);
-
+    //wrapper per utilizzare la query getMeetingsBetweenRegion in maniera più comoda
     public ListenableFuture<List<MeetingPerson>> getMeetingsBetweenVisibleRegion(VisibleRegion vr){
         return getMeetingsBetweenRegion(vr.farLeft.latitude, vr.nearLeft.latitude, vr.farLeft.longitude, vr.farRight.longitude);
     }

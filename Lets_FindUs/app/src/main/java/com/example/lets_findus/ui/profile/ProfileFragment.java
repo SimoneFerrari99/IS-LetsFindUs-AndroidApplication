@@ -36,7 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import uk.co.onemandan.materialtextview.MaterialTextView;
-
+//fragment per la visualizzazione del proprio profilo
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private Future<Person> profile;
@@ -50,7 +50,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                              ViewGroup container, Bundle savedInstanceState) {
         Bundle formData = getArguments();
         root = inflater.inflate(R.layout.fragment_profile, container, false);
-
+        //caricamento del proprio profilo
         try {
             FileInputStream fis = requireContext().openFileInput(myProfileFilename);
             profile = Person.loadPersonAsync(fis);
@@ -60,7 +60,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         obbligatory = root.findViewById(R.id.obbligatory_data);
         other = root.findViewById(R.id.other_data);
-
+        //se formData != null significa che i dati sono stati modificati, quindi vanno salvati e visualizzati i dati aggiornati
         if(formData != null) {
             if(formData.containsKey("Nickname")){
                 ((TextView)root.findViewById(R.id.nickname_card)).setText(formData.getString("Nickname"));
@@ -87,7 +87,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         CardView cardView = root.findViewById(R.id.profile_card_view);
         cardView.setBackgroundResource(R.drawable.card_bottom_corner);
-
+        //quando clicco sulla mia foto avvio l'intent per la visualizzazione della foto
         final CircularImageView circularImageView = root.findViewById(R.id.circularImageView);
         circularImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,14 +96,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 i.putExtra("PIC_PATH", picPath);
                 View sharedView = circularImageView;
                 String transitionName = getString(R.string.image_transition);
-
+                //transizione per la shared view, ossia viene animato il passaggio dalla foto circolare piccola a quella quadrata grande
                 ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(), sharedView, transitionName);
                 startActivity(i, transitionActivityOptions.toBundle());
             }
         });
         return root;
     }
-
+    //metodo per sostituire la foto profilo, eliminando quella vecchia e salvando quella nuova
     private void substituteProfilePicture(String newProfilePicturePath){
         try {
             Person myProfile = profile.get();
@@ -119,7 +119,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
     }
-
+    //metodo per caricare la foto profilo sulla circular image view
     private void setProfilePicture(Future<Person> person){
         final Person myProfile;
         try {
@@ -130,7 +130,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
     }
-
+    //metodo per riempire i campi una volta che viene caricato il mio profilo, l'attesa del caricamento avviene in un altro thread 
+    //le modifiche alla ui sono poi postate sul main thread
     private void fillFieldsValueOnLoad(final ConstraintLayout container, final Future<Person> profile){
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -140,7 +141,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 Handler mainThreadHandler = new Handler(Looper.getMainLooper());
                 try {
                     final Person myProfile = profile.get();
-                    final Map<String, String> profileDump = myProfile.dumpToString();
+                    final Map<String, String> profileDump = myProfile.dumpToString(); //dumping dei campi del profilo in una map per accedervi più facilmente
 
                     mainThreadHandler.post(new Runnable() {
                         @Override
@@ -150,6 +151,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 final View v = container.getChildAt(i);
                                 if(v instanceof MaterialTextView){
                                     final String label = ((MaterialTextView) v).getLabelText().toString();
+                                    //per ogni textView ne prendo la label, se la stessa label non è presente nel dump del profilo allora nascondo la view
+                                    //altrimenti la riempio con i dati contenuti nel dump
                                     if(profileDump.get(label) == null){
                                         v.setVisibility(View.GONE);
                                     }
@@ -168,7 +171,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
-
+    //metodo per settare i campi dopo una modifica del profilo, vengono settati i campi e vengono salvate le modifiche sul file
     private void setFieldsValue(ConstraintLayout container, Bundle data){
         for(int i = 0; i < container.getChildCount(); i++){
             View v = container.getChildAt(i);
@@ -190,7 +193,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
     }
-
+    //metodo per inserire i dati nel giusto campo dell'oggetto Person
     private void storeModifiedData(int fieldId, String value){
         try {
             Person myProfile = profile.get();
@@ -266,7 +269,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
     }
-
+    //metodo che serve per ottenere un bundle di tutto il contenuto dei campi in modo da inviarlo all'activity per la modifica del profilo
     private Bundle getFieldValueBundle(ConstraintLayout container, Bundle data){
         Bundle out;
         if(data == null){
@@ -288,14 +291,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
         return out;
     }
-
+    //quando clicco sul pulsante di modifica viene avviato un intent che lancia l'activity della modifica del profilo
     @Override
     public void onClick(View v) {
         Intent intent = new Intent(getActivity(), EditProfileActivity.class);
         Bundle obbData = getFieldValueBundle(obbligatory, null);
         Bundle send = getFieldValueBundle(other, obbData);
         intent.putExtra("FIELD_VALUES", send);
-        //getActivity().finish();
         startActivity(intent);
     }
 }

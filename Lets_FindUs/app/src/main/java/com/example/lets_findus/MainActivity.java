@@ -102,18 +102,21 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
+        //inizializzazione dell'api places (non funzione)
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyAFjB2Yk9GGgLqzgVMGOBlxNvSDnDUKy5w");
         }
         placesClient = Places.createClient(this);
+        //leggo dalle shared preferences se è già stato fatto o meno il primo avvio, se non è già stato fatto il valore di default restituito è 0
         SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
-        int isFirstBoot = pref.getInt("FIRST_BOOT", 0);
-        if(isFirstBoot == 0) {
+        int isFirstBoot = pref.getInt("FIRST_BOOT", 0); //0 è il valore di default nel caso non ci sia ls shared preference
+        if(isFirstBoot == 0) { //se ho letto 0 faccio il primo avvio
             Intent startFirstOpening = new Intent(this, ProfileCreationActivity.class);
             startActivity(startFirstOpening);
             finish();
         }
         else {
+            //altrimenti mi avvio normalmente
             setContentView(R.layout.activity_main);
             BottomNavigationView navView = findViewById(R.id.nav_view);
             navView.setOnNavigationItemSelectedListener(this);
@@ -121,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             setTitle(R.string.title_matching);
 
             match_frag = new MatchingFragment();
-            active = match_frag;
-
+            active = match_frag; //fragment attivo al momento
+            //se come extra ho formData vuol dire che devo passare alla visualizzazione del profilo personale passandogli i relativi dati
             if(getIntent().hasExtra("FORM_DATA")){
                 Bundle data = getIntent().getBundleExtra("FORM_DATA");
                 if(getIntent().hasExtra("PROPIC_CHANGED")){
@@ -130,17 +133,18 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 }
                 prof_frag.setArguments(data);
             }
-
+            //aggiungo i fragment nell'hostfragment e tengo visualizzato solamente il fragment profile
             fm.beginTransaction().add(R.id.nav_host_fragment, prof_frag, "3").hide(prof_frag).commit();
             fm.beginTransaction().add(R.id.nav_host_fragment, fav_frag, "2").hide(fav_frag).commit();
             fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
-
+            //result listener per la richiesta dei permessi di localizzazione
             requestPermissionLauncher =
                     registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
                         @SuppressLint("MissingPermission")
                         @Override
                         public void onActivityResult(Boolean isGranted) {
                             if (isGranted) {
+                                //per refreshare la mappa devo rimuovere e riaggiungere il matching fragment
                                 fm.beginTransaction().remove(match_frag).commit();
                                 match_frag = new MatchingFragment();
                                 fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
@@ -150,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                             }
                         }
                     });
+            //richiedo di abilitare il bluetooth se non è già abilitato
             bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
             bluetoothAdapter = bluetoothManager.getAdapter();
             if (!bluetoothAdapter.isEnabled()) {
@@ -157,30 +162,33 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
             else{
+                //se il bluetooth è già abilitato richiedo la posizione
                 askLocationPermission();
             }
+            //richiesta della posizione in background (non la usiamo in quanto non funziona l'invio dei dati in background)
             if(!(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED)){
                 //requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
             }
 
             if(db == null){
+                //prendo un istanza del database se non la ho già
                 db = Room.databaseBuilder(this, AppDatabase.class, "meeting_db").build();
                 md = db.meetingDao();
                 pd = db.personDao();
             }
-
+            //se l'intent contiene isFromEdit mi sposto alla visualizzazione del profilo
             isFromEdit = getIntent().hasExtra("IS_FROM_EDIT");
             if (isFromEdit || getIntent().hasExtra("IS_FROM_PROFILE")){
                 navView.setSelectedItemId(R.id.navigation_profile);
             }
-
+            //se l'intent contiene isFromFav mi sposto alla visualizzazione dei preferiti
             if(getIntent().hasExtra("IS_FROM_FAV")){
                 navView.setSelectedItemId(R.id.navigation_favorites);
             }
-            scheduleDeleteMeeting();
+            scheduleDeleteMeeting(); //avvio lo scheduling dell'eliminazione dei meeting vecchi (la funzione viene già chiamata una volta qui)
 
-            bluetoothClient();
-            bluetoothServer();
+            bluetoothClient(); //avvio il client bluetooth
+            bluetoothServer(); //avvio il server bluetooth
         }
     }
 
@@ -208,20 +216,15 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
-
+    //metodo per avviare lo scheduling una volta al giorno dell'eliminazione dei meeting vecchi
     private void scheduleDeleteMeeting(){
-        // Construct an intent that will execute the AlarmReceiver
         Intent intent = new Intent(getApplicationContext(), DeleteBroadcastReceiver.class);
-        // Create a PendingIntent to be triggered when the alarm goes off
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, DeleteBroadcastReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        // Setup periodic alarm every every half hour from this point onwards
-        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        long firstMillis = System.currentTimeMillis(); //l'allarme viene settato da qui
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
-        // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
         alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis, AlarmManager.INTERVAL_DAY, pIntent);
     }
-
+    //metodo per la gestione del risultato dell'attivazione del bluetooth e della posizione
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -231,19 +234,20 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 newFragment.show(getSupportFragmentManager(), "Missing bluetooth");
             }
             else{
-                askLocationPermission();
+                askLocationPermission(); //se il bluetooth è stato acceso chiedo i permessi della localizzazione
             }
         }
         if(requestCode == ACCESS_LOCATION){
             askLocationPermission();
             if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ){
+                //refresho la mappa come sopra
                 fm.beginTransaction().remove(match_frag).commit();
                 match_frag = new MatchingFragment();
                 fm.beginTransaction().add(R.id.nav_host_fragment, match_frag, "1").commit();
             }
         }
     }
-
+    //gestione del positive click sia per il dialogo del bluetooth che per quello della location
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         Intent intent = new Intent();
@@ -258,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
             startActivityForResult(intent, ACCESS_LOCATION);
         }
     }
-
+    //gestione del negative click sia per il dialogo del bluetooth che per quello della location
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         Intent intent = new Intent();
@@ -267,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         intent.setData(uri);
         this.startActivity(intent);
     }
-
+    //gestione del menù e del titolo dell'appbar che vengono visualizzati a seconda del fragment selezionato dalla navbar
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -306,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         }
         return false;
     }
-
+    //gestione del menù dell'appbar che viene visualizzato a seconda del fragment attivo al momento
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
         MenuInflater inflater=getMenuInflater();
@@ -330,9 +334,10 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         }
         return super.onCreateOptionsMenu(menu);
     }
-
+    //gestione del click sul menu dell'appbar
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //tasto cerca
         if(item.getTitle().toString().compareTo("Cerca") == 0){
             try {
                 List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG);
@@ -344,17 +349,19 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
                 e.printStackTrace();
             }
         }
+        //tasto impostazioni
         if(item.getTitle().toString().compareTo("Impostazioni") == 0){
             Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(startSettingsActivity);
         }
+        //tasto filtri
         else if(item.getTitle().toString().compareTo("Filtri") == 0){
             showFilterPopup();
         }
 
         return super.onOptionsItemSelected(item);
     }
-
+    //metodo per la visualizzazione del popup dei filtri
     private void showFilterPopup(){
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final View popupView = inflater.inflate(R.layout.filter_popup_window, null);
@@ -365,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
         final Spinner date = popupView.findViewById(R.id.spinner_date);
         final Spinner hour = popupView.findViewById(R.id.spinner_hour);
         final Spinner sex = popupView.findViewById(R.id.spinner_sex);
-
+        //adapter per popolare gli spinner con le stringhe contenuto nelle risorse stringhe
         ArrayAdapter<CharSequence> ageAdapter = ArrayAdapter.createFromResource(this, R.array.age_spinner_options, android.R.layout.simple_spinner_item);
         ageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         age.setAdapter(ageAdapter);
@@ -409,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements MissingBluetoothD
 
         popupWindow.showAtLocation(new LinearLayout(this), Gravity.CENTER, 0, 0);
     }
-
+    //quando viene premuto il pulsante indietro di android viene terminata l'app
     @Override
     public void onBackPressed() {
         finishAffinity();

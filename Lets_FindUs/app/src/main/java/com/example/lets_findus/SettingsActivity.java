@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lets_findus.ui.first_boot.FirstOpeningInformations;
-
+//activity per i settings dell'app
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
@@ -67,17 +67,6 @@ public class SettingsActivity extends AppCompatActivity {
                 Uri uri = Uri.fromParts("package", getPackageName(), null);
                 intent.setData(uri);
                 startActivity(intent);
-                /*
-                new AlertDialog.Builder(v.getContext())
-                        .setTitle(R.string.clear_cache_confirm_title)
-                        .setMessage(R.string.clear_cache_confirm_label)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                deleteCache(v.getContext());
-
-                            }})
-                        .setNegativeButton(R.string.no, null).show();*/
             }
         });
 
@@ -92,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        // Apertura invio feedback
+        // Apertura invio feedback tramite un apposito form esterno
         TextView feedback = findViewById(R.id.feedback_label);
         feedback.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +91,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
-
+    //gestione del pulsante back
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Intent mIntent = new Intent(this, MainActivity.class);
@@ -112,30 +101,4 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(mIntent);
         return super.onOptionsItemSelected(item);
     }
-
-
-/*
-    public static void deleteCache(Context context) {
-        try {
-            File dir = context.getCacheDir();
-            deleteDir(dir);
-        } catch (Exception e) {}
-    }
-
-    public static boolean deleteDir(File dir) {
-        if (dir != null && dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
-            return dir.delete();
-        } else if(dir!= null && dir.isFile()) {
-            return dir.delete();
-        } else {
-            return false;
-        }
-    }*/
 }

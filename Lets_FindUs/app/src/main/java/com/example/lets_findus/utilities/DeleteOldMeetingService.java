@@ -5,7 +5,7 @@ import android.content.Intent;
 
 import androidx.annotation.Nullable;
 import androidx.room.Room;
-
+//IntentServire per l'eliminazione periodica dei meeting vecchi
 public class DeleteOldMeetingService extends IntentService {
 
     public DeleteOldMeetingService() {

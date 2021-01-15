@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 import uk.co.onemandan.materialtextview.MaterialTextView;
-
+//activity per la visualizzazione di una persona incontrata
 public class PersonProfileActivity extends AppCompatActivity {
 
     private static AppDatabase db;
@@ -56,13 +56,15 @@ public class PersonProfileActivity extends AppCompatActivity {
         final CircularImageView photo = findViewById(R.id.circularImageView);
         final TextView nickname = findViewById(R.id.nickname_card);
 
-
+        //devo avere l'id del meeting per poter visualizzare una persona
         if(getIntent().hasExtra("MEETING_ID")){
             final int meetingId = getIntent().getExtras().getInt("MEETING_ID");
             if(db == null){
+                //prendo un istanza del database se non è già stata ottenuta in precedenza
                 db = Room.databaseBuilder(this, AppDatabase.class, "meeting_db").build();
                 md = db.meetingDao();
             }
+            //al completamento di getMeetingFromId carico i campi con i relativi valori
             Futures.addCallback(md.getMeetingFromId(meetingId), new FutureCallback<MeetingPerson>() {
                 @Override
                 public void onSuccess(@NullableDecl final MeetingPerson result) {
@@ -74,6 +76,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             fillFields(result.person, nonObbData);
                             photo.setImageURI(Uri.parse(result.person.profilePath));
                             nickname.setText(result.person.nickname);
+                            //click listener per l'apertura della foto
                             photo.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -96,7 +99,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             }, Executors.newSingleThreadExecutor());
         }
     }
-
+    //creazione del menù, la stellina appare piena o vuota a seconda che l'incontro visualizzato sia stato salvato tra i preferiti o meno
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
@@ -112,7 +115,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         }
         return super.onCreateOptionsMenu(menu);
     }
-
+    //rimuovo o aggiungo dai preferiti il meeting a seconda che venga premuta la stellina piena o vuota
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.empty_star){
@@ -149,7 +152,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
+    //metodo per il riempimento dei campi
     private void fillFields(Person person, ConstraintLayout container){
         Map<String, String> profileDump = person.dumpToString();
         for(int i = 0; i < container.getChildCount(); i++){
@@ -162,6 +165,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                 else{
                     ((MaterialTextView) v).setContentText(profileDump.get(label), null);
                     final String content = profileDump.get(label);
+                    //quando viene cliccato un campo il suo valore viene copiato negli appunti del dispositivo
                     v.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {

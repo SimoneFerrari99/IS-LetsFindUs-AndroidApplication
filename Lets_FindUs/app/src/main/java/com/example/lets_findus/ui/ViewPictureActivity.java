@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lets_findus.R;
-
+//activity per la visualizzazione della foto profilo
 public class ViewPictureActivity extends AppCompatActivity {
 
     @Override
@@ -18,14 +18,14 @@ public class ViewPictureActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
+        //carico l'immagine sulla view
         if(getIntent().hasExtra("PIC_PATH")){
             String picPath = getIntent().getStringExtra("PIC_PATH");
             ImageView iv = findViewById(R.id.imageView2);
             iv.setImageURI(Uri.parse(picPath));
         }
     }
-
+    //quando clicco il pulsante indietro torno indietro nel backstack
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
