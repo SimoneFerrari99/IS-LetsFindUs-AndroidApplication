@@ -24,7 +24,7 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.concurrent.Executors;
-
+//classe adapter per la visualizzazione del popup al click del marker sulla mappa
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private Activity context;
@@ -33,7 +33,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private static MeetingDao md;
     private static PersonDao pd;
 
-    private String uri = "";
+    private String uri = ""; 
 
     public CustomInfoWindowAdapter(Activity context){
         this.context = context;
@@ -57,8 +57,10 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         final CircularImageView tvImage = (CircularImageView) view.findViewById(R.id.tv_image);
         tvTitle.setText(marker.getTitle());
 
-        if(uri.compareTo("") == 0) {
+        if(uri.compareTo("") == 0) { //non ho ancora ottenuto la foto da visualizzare 
+            //prendo la person associata all'intero salvato nello snippet del marker
             ListenableFuture<Person> person = pd.getPersonById(Integer.parseInt(marker.getSnippet()));
+            //quando terminerà questa query aggiorno l'uri della foto e richiamo showInfoWindow per ricaricare il marker
             Futures.addCallback(person, new FutureCallback<Person>() {
                 @Override
                 public void onSuccess(@NullableDecl final Person result) {

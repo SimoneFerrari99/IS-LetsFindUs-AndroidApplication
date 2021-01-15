@@ -28,14 +28,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class UtilFunction {
-
+    //funzione che restituisce una data di n giorni indietro rispetto a quella passata in input
     private static Date subtractDays(Date d, int numDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(d);
         calendar.add(Calendar.DAY_OF_MONTH, -numDays);
         return calendar.getTime();
     }
-
+    //funzione che restituisce true se la data è contenuta nel range di ore specificato, false altrimenti
+    //lowerBound e upperBound sono double che rappresentano un ora, ad esempio 15:30 equivalgono a 15,3
     private static boolean isInHourRange(Date d, double lowerBound, double upperBound){
         DateTime date = new DateTime(d);
         int hour = date.getHourOfDay();
@@ -43,7 +44,7 @@ public class UtilFunction {
         double hourAndMinutes = hour + (double)minutes/100;
         return (hourAndMinutes >= lowerBound && hourAndMinutes <= upperBound);
     }
-
+    //funzione che restituisce true se la data è contenuta nel range di anni specificato, false altrimenti
     private static boolean isInYearRange(int yearOfBirth, int lowerBound, int upperBound){
         int currentYear = LocalDate.now().getYear();
         if(upperBound == 0){
@@ -51,12 +52,14 @@ public class UtilFunction {
         }
         return (currentYear-yearOfBirth) >= lowerBound && (currentYear-yearOfBirth) <= upperBound;
     }
-
+    //funzione che filtra i meetings contenuti nella lista allMeeting andando a modificare il contenuto della lista meetingsToFilter secondo le relative filterOptions
     public static void filterItems(List<MeetingPerson> meetingsToFilter, List<MeetingPerson> allMeetings, Map<String, String> filterOptions) {
+        //riporto allo stato iniziale la lista di meetingsToFilter
         meetingsToFilter.clear();
-        meetingsToFilter.addAll(allMeetings);
+        meetingsToFilter.addAll(allMeetings); 
         boolean needsToRemove = false;
         Iterator<MeetingPerson> mpIterator = meetingsToFilter.iterator();
+        //per ogni elemento contenuto nella lista di meetings controllo se rispetta tutti i filtri altrimenti lo rimuovo dalla lista
         while (mpIterator.hasNext()) {
             needsToRemove = false;
             MeetingPerson elem = mpIterator.next();
@@ -160,14 +163,15 @@ public class UtilFunction {
                 mpIterator.remove();
         }
     }
-
+    //funzione per eliminare un'immagine(o un file qualunque) dato il suo path 
     private static void deletePicture(String path){
         File current = new File(Uri.parse(path).getPath());
         if(current.exists()){
             current.delete();
         }
     }
-
+    //funzione per eliminare tutti i meeting dal database più vecchi di n giorni 
+    //In questa funzione vengono anche eliminate le relative foto profilo delle persone incontrate
     public static void deleteMeetingsOlderThan(int nDays, MeetingDao md, PersonDao pd){
         Date start = subtractDays(Calendar.getInstance().getTime(), nDays);
         ListenableFuture<List<MeetingPerson>> meetingsToDelete = md.getMeetingBeforeDate(start);
@@ -187,7 +191,7 @@ public class UtilFunction {
             }
         }, Executors.newSingleThreadExecutor());
     }
-
+    //funzione per creare un nuovo file di immagine
     public static File createImageFile(Context context) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";

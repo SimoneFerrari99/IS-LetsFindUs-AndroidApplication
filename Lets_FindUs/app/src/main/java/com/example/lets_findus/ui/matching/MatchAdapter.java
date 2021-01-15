@@ -16,10 +16,10 @@ import com.example.lets_findus.utilities.MeetingPerson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
+//adapter per la recyclerView della lista dei meeting nel fragment meeting
 public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MyViewHolder>{
 
-    private List<MeetingPerson> dataSet;
+    private List<MeetingPerson> dataSet; //dataset contenente i meeting
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 

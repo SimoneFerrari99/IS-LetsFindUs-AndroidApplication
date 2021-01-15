@@ -1,7 +1,7 @@
 package com.example.lets_findus.utilities;
 
 import androidx.room.TypeConverter;
-
+//converter per l'enum Sex per salvarlo correttamente nel room database
 public class SexConverter {
     @TypeConverter
     public static Person.Sex fromString(String value) {
