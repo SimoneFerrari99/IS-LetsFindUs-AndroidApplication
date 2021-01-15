@@ -153,7 +153,7 @@ public class Client {
         mGatt = device.connectGatt(context, false, gattCallback);
         //dopo 2 secondi sono sicuro di essermi connesso quindi inizio a inviare i dati
         try {
-            Thread.sleep(2000);
+            Thread.sleep(3000);
             //inizializzo tutti i dati da mandare
             Gson gson = new Gson();
             byte[] imageToSend = Utils.imageToByte(myProfile.profilePath, context);
@@ -170,7 +170,7 @@ public class Client {
                 public void run() {
                     sendData(imageToSend, true);
                 }
-            }, 1000);
+            }, 2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
