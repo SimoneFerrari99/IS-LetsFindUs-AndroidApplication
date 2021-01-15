@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
-
+//fragment per la visualizzazione della mappa e degli incontri
 public class MatchingFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraMoveStartedListener {
 
     private SupportMapFragment mapFragment;
@@ -71,20 +71,21 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     private static AppDatabase db;
     private static MeetingDao md;
 
-    private static List<MeetingPerson> meetings;
-    private static final List<MeetingPerson> allMeetings = new ArrayList<>();
+    private static List<MeetingPerson> meetings; //lista degli incontri visualizzati al momento
+    private static final List<MeetingPerson> allMeetings = new ArrayList<>(); //lista contenente tutti gli incotri
     private List<Marker> visibleMarkers;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View root = inflater.inflate(R.layout.fragment_matching, container, false);
-
+        //pulsante per la visualizzazione degli incontri in una certa area
         show_match = root.findViewById(R.id.matching_button);
         show_match.setVisibility(View.GONE);
         show_match.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //aggiorno la camera sulla mappa in modo che non sia ruotata, questo per ottenere le giuste coordinate della visible area
                 CameraPosition cameraPosition = new CameraPosition.Builder()
                         .target(map.getCameraPosition().target)
                         .zoom(map.getCameraPosition().zoom)
@@ -93,7 +94,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                 map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
                     @Override
                     public void onFinish() {
-                        setupMarkers(map);
+                        setupMarkers(map); //quando la camera ha terminato di aggiornarsi chiamo il setup dei marker sulla mappa
                     }
 
                     @Override
@@ -101,7 +102,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
 
                     }
                 });
-                animateHide(v);
+                animateHide(v); //nascondo il pulsante
             }
         });
 
@@ -109,18 +110,19 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         }
         if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance(new GoogleMapOptions().minZoomPreference(0f));
-            mapFragment.getMapAsync(this);
+            mapFragment = SupportMapFragment.newInstance(new GoogleMapOptions().minZoomPreference(0f)); //ottengo un istanza della mappa
+            mapFragment.getMapAsync(this); //al caricamento della mappa chiamo la relativa callback
         }
 
-        // R.id.map is a FrameLayout, not a Fragment
+        //sostituisco il fragment visualizzato al momento con il fragment contenente la mappa caricata
         getChildFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
 
         if(db == null){
+            //ottengo un istanza del database se questo non è già stato inizializzato
             db = Room.databaseBuilder(getContext(), AppDatabase.class, "meeting_db").build();
             md = db.meetingDao();
         }
-
+        //sheetbehaviour per la lista che compare dal basse
         sheetBehavior = BottomSheetBehavior.from(root.findViewById(R.id.bs_card_view));
         sheetBehavior.setGestureInsetBottomIgnored(true);
 
@@ -143,30 +145,37 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
     }
 
     @SuppressLint("MissingPermission")
+    //lint suppressed in quanto questa funzione viene chiamata solo quando ho già i permessi, altrimenti non viene chiamata
     private void setupMap(final GoogleMap googleMap) {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.setMyLocationEnabled(true);
+            //richiedo la posizione GPS corrente
             fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, null).addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
+                    //quando la ottengo aggiorno la mappa spostandola zoommata nella posizione corretta
                     if (location != null) {
                         LatLng currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 17f));
                     }
+                    //setto i marker relativi agli incontri in quell'area sulla mappa
                     setupMarkers(googleMap);
                 }
             });
         }
     }
 
+    //callback invocata quando la mappa è stata caricata
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         map = googleMap;
         setupMap(map);
         map.setOnCameraMoveStartedListener(this);
+        //listener per gestire il tap su una info window (popup che si ottiene sul click di un marker)
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
+                //quando lo clicco avvio l'intent per visualizzare tutte le informazioni relative al meeting
                 Intent startPersonProfile = new Intent(getContext(), PersonProfileActivity.class);
                 startPersonProfile.putExtra("MEETING_ID", Integer.parseInt(marker.getSnippet()));
                 startActivity(startPersonProfile);
@@ -174,13 +183,13 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         });
         map.setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
     }
-
+    //quando la mappa viene spostata visualizzo il pulsante per renderizzare i meeting
     @Override
     public void onCameraMoveStarted(int i) {
         if(i == REASON_GESTURE && show_match.getVisibility() == View.GONE)
             animateShow(show_match);
     }
-
+    //click listener per gli elementi della recyclerView, on click viene avviato l'intent per la visualizzazione dell'incontro
     private class MyOnClickListener implements View.OnClickListener {
 
         private final Context context;
@@ -197,14 +206,15 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
             startActivity(startPersonProfile);
         }
     }
-
+    //funzione per ottenere una future contente la lista dei meeting nell'area di mappa visibile al momento
     private ListenableFuture<List<MeetingPerson>> loadVisibleMeeting(GoogleMap map){
         return md.getMeetingsBetweenVisibleRegion(map.getProjection().getVisibleRegion());
     }
-
+    //funzione per renderizzare i marker relativi agli incontri disponibili sull'area della mappa
     private List<Marker> setVisibleMeetingsMarker(List<MeetingPerson> meetings, GoogleMap map){
         List<Marker> markers = new ArrayList<>();
         for(MeetingPerson mp : meetings){
+            //per ogni meeting setto un marker con le relative informazioni
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(new LatLng(mp.meeting.latitude, mp.meeting.longitude))
                     .title(mp.person.nickname)
@@ -212,15 +222,15 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
             markers.add(marker);
         }
-        return markers;
+        return markers; //returno la lista dei marker per poterli eliminare in seguito
     }
-
+    //funzione per rimuovere tutti i marker visibili al momento sulla mappa
     private void removeVisibleMarker(List<Marker> markers){
         for(Marker m : markers){
             m.remove();
         }
     }
-
+    //funzione per settare i marker alla fine della query di caricamento dei meeting e inserire i meeting nel dataset della recycler view
     private void setupMarkers(final GoogleMap map){
         final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
         Futures.addCallback(loadVisibleMeeting(map), new FutureCallback<List<MeetingPerson>>() {
@@ -231,7 +241,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                     public void run() {
                         MatchingFragment.meetings.clear();
                         if(result.size() == 0){
-                            sheetBehavior.setPeekHeight(0);
+                            sheetBehavior.setPeekHeight(0); //se non ho meeting in quell'area nascondo il bottomsheet
                         }
                         else{
                             sheetBehavior.setPeekHeight(50);
@@ -252,7 +262,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
         }, Executors.newSingleThreadExecutor());
 
     }
-
+    
     private void animateShow(View v){
         v.setAlpha(0f);
         v.setVisibility(View.VISIBLE);
@@ -274,7 +284,7 @@ public class MatchingFragment extends Fragment implements OnMapReadyCallback, Go
                     }
                 });
     }
-
+    //funzione per il filtraggio dei meeting e l'aggiornamento dei marker e della lista
     public void filterItems(Map<String, String> filterOptions){
         UtilFunction.filterItems(meetings, allMeetings, filterOptions);
         if(meetings.size() == 0){
