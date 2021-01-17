@@ -42,6 +42,7 @@ public class FirstOpeningInformations extends AppIntro {
         int isFirstBoot = pref.getInt("FIRST_BOOT", 0); //0 è il valore di default nel caso non ci sia ls shared preference
         if(isFirstBoot == 0) {
             startActivity(new Intent(this, ProfileCreationActivity.class));
+            finish();
         }
         else{
             finish();
