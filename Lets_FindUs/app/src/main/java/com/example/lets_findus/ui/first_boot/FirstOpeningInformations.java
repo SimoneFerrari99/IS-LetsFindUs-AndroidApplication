@@ -1,6 +1,7 @@
 package com.example.lets_findus.ui.first_boot;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -37,6 +38,13 @@ public class FirstOpeningInformations extends AppIntro {
     @Override
     protected void onDonePressed(@Nullable Fragment currentFragment) {
         super.onDonePressed(currentFragment);
-        startActivity(new Intent(this, ProfileCreationActivity.class));
+        SharedPreferences pref = this.getSharedPreferences("com.example.lets_findus.FIRST_BOOT", MODE_PRIVATE);
+        int isFirstBoot = pref.getInt("FIRST_BOOT", 0); //0 è il valore di default nel caso non ci sia ls shared preference
+        if(isFirstBoot == 0) {
+            startActivity(new Intent(this, ProfileCreationActivity.class));
+        }
+        else{
+            finish();
+        }
     }
 }
